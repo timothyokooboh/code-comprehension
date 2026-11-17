@@ -1,0 +1,25 @@
+{
+  "name": "code-comprehension-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24.13.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter @code-comprehension/web build && node scripts/build-cli.mjs",
+    "typecheck": "tsc --noEmit && pnpm --filter @code-comprehension/web typecheck",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test": "pnpm build && pnpm test:unit && pnpm test:e2e",
+    "start": "node packages/cli/dist/index.js",
+    "pack:cli": "pnpm build && pnpm --dir packages/cli pack --out ../../artifacts/code-comprehension.tgz"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "^24.0.0",
+    "esbuild": "^0.28.0",
+    "typescript": "^5.9.0",
+    "vitest": "5.1.0"
+  }
+}
