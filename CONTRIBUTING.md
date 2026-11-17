@@ -14,10 +14,9 @@ to a cleanup ticket.
   messages and accessibility roles from that state; avoid redundant state flags.
 - Use `ref` for ordinary primitive state. Use `shallowRef` when shallow semantics
   are intentional, such as opaque instances or large immutable structures.
-- Keep browser-facing copy, including accessible labels and recovery guidance, in
-  the English message catalog. Protocol values, state identifiers, URLs, and
-  internal diagnostic messages are code, not translations. Additional locales and
-  generated-question language support require an explicit product decision.
+- Follow the user-facing text rules in `AGENTS.md` when adding or reviewing copy,
+  including HTML metadata and CLI output. Additional locales and generated-question
+  language support require an explicit product decision.
 - Own cancellation and cleanup beside the asynchronous workflow that creates it.
 - Test observable behaviour through the agreed public boundaries. Preserve the
   success and failure cases when restructuring implementation.

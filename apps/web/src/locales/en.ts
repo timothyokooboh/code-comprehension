@@ -1,3 +1,4 @@
+import { runtimeErrorCodes, type RuntimeErrorCode } from '../api/runtime-errors.ts';
 import { applicationName } from '@code-comprehension/quiz-contract';
 
 export const messages = {
@@ -9,7 +10,11 @@ export const messages = {
   connection: {
     connecting: 'Connecting locally…',
     connected: 'Connected locally',
-    unavailable: 'Unable to connect. Restart the CLI and reload this page.',
+    errors: {
+      [runtimeErrorCodes.unavailable]: 'Unable to connect. Restart the CLI and reload this page.',
+      [runtimeErrorCodes.invalidResponse]: 'The local server returned an invalid response. Restart the CLI and reload this page.',
+      [runtimeErrorCodes.notReady]: 'The local server is not ready. Restart the CLI and reload this page.',
+    } satisfies Record<RuntimeErrorCode, string>,
   },
   assessment: {
     label: 'Quiz session',

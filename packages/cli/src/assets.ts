@@ -1,5 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import { CliError, cliErrorCodes } from './errors.js';
 
 const contentTypes: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -27,9 +28,13 @@ export async function loadAssets(directory: string) {
     }
   }
 
-  await visit(directory, '');
+  try {
+    await visit(directory, '');
+  } catch (cause) {
+    throw new CliError(cliErrorCodes.uiMissing, { cause });
+  }
   const index = assets.get('/index.html');
-  if (!index) throw new Error('Built UI is missing. Run the application build first.');
+  if (!index) throw new CliError(cliErrorCodes.uiMissing);
   assets.set('/', index);
   return assets;
 }

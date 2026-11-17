@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 
@@ -41,4 +41,8 @@ export async function launchCli() {
     await exited;
     throw error;
   }
+}
+
+export function runCli(args: string[]) {
+  return spawnSync(process.execPath, [entry, ...args], { encoding: 'utf8', timeout: 5_000 });
 }
