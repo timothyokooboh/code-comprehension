@@ -29,6 +29,9 @@ Keep runtime responsibilities in focused modules. The shared contract has no
 Vue or Node dependencies. The production CLI bundles internal workspace code;
 its runtime dependencies and prebuilt web assets travel with the npm package.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for code-quality expectations. Browser copy
+lives in an English message catalog; this is not yet multi-language support.
+
 ## Checks
 
 ```sh
