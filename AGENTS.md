@@ -4,6 +4,12 @@ Before implementing or reviewing changes, read `CONTRIBUTING.md`. Apply code-qua
 standards within the current ticket, including lean components and named lifecycle
 operations; do not defer them to cleanup work.
 
+### Branch naming
+
+Use purpose-based branch prefixes such as `feat/`, `bugfix/`, `refactor/`,
+`docs/`, or `chore/`, followed by a short kebab-case description. Use `feat/`
+for new functionality. Do not prefix branch names with `codex/`.
+
 ### User-facing text
 
 - Keep all application-owned user-facing text in message catalogs. Use the existing
