@@ -16,6 +16,30 @@ const instruction = computed(() => messages.quiz.instructions[props.question.typ
 const correctAnswers = computed(() => props.question.options
   .filter((option) => props.question.correctOptionIds.includes(option.id)).map((option) => option.text));
 
+const options = computed(() => props.question.options.map((option) => {
+  const selected = props.selected.includes(option.id);
+  const correct = props.question.correctOptionIds.includes(option.id);
+  const incorrect = props.submitted && selected && !correct;
+  const highlighted = props.submitted ? correct : selected;
+  let feedback = '';
+  if (props.submitted && correct) {
+    feedback = selected ? messages.quiz.correctSelected : messages.quiz.correctMissed;
+  } else if (incorrect) {
+    feedback = messages.quiz.incorrectSelected;
+  }
+  return {
+    ...option,
+    selected,
+    feedback,
+    classes: {
+      'cursor-pointer': !props.submitted,
+      'border-slate-200': !highlighted && !incorrect,
+      'border-emerald-700 bg-emerald-50': highlighted,
+      'border-red-700 bg-red-50': incorrect,
+    },
+  };
+}));
+
 function select(optionId: string) {
   if (props.submitted) return;
   const selection = props.question.type === questionTypes.single ? [optionId]
@@ -30,13 +54,16 @@ function select(optionId: string) {
     <legend class="px-2 text-lg font-semibold">{{ messages.quiz.question(number, question.prompt) }}</legend>
     <p :id="`${inputName}-hint`" class="mb-4 text-sm text-slate-600">{{ instruction }}</p>
     <div class="space-y-3">
-      <label v-for="option in question.options" :key="option.id" class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-3 has-checked:border-emerald-700 has-checked:bg-emerald-50">
+      <label v-for="option in options" :key="option.id" :class="option.classes" class="flex items-start gap-3 rounded-lg border p-3">
         <input
           :type="inputType" :name="inputName" :value="option.id"
-          :checked="selected.includes(option.id)" class="mt-1 accent-emerald-700"
+          :checked="option.selected" class="mt-1 accent-emerald-700"
           @change="select(option.id)"
         />
-        <span>{{ option.text }}</span>
+        <span>
+          <span class="block">{{ option.text }}</span>
+          <span v-if="option.feedback" class="mt-1 block text-sm font-semibold">{{ option.feedback }}</span>
+        </span>
       </label>
     </div>
     <p v-if="submitted" class="mt-4 font-medium text-emerald-800">{{ messages.quiz.correctAnswers(correctAnswers) }}</p>

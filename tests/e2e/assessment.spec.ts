@@ -44,3 +44,30 @@ test('answer both question types, review score, and retake to a perfect score', 
     await app.stop();
   }
 });
+
+test('submission distinguishes incorrect selections and missed correct answers', async ({ page }) => {
+  const app = await launchCli(['--quiz', quizFile]);
+  try {
+    await page.goto(app.url);
+    await page.getByRole('radio').first().check();
+    await page.getByRole('checkbox', { name: 'Reuse the idempotency key' }).check();
+    await page.getByRole('checkbox', { name: 'Create a duplicate payment' }).check();
+    await page.getByRole('button', { name: 'Submit answers' }).click();
+    const incorrect = page.locator('label').filter({ hasText: 'Create a duplicate payment' });
+    const missed = page.locator('label').filter({ hasText: 'Record the provider response' });
+    const correct = page.locator('label').filter({ hasText: 'Reuse the idempotency key' });
+    await expect(incorrect).toContainText('Incorrect — your selection');
+    await expect(missed).toContainText('Correct — not selected');
+    await expect(correct).toContainText('Correct — your selection');
+    const background = (element: HTMLElement | SVGElement) => getComputedStyle(element).backgroundColor;
+    expect(await incorrect.evaluate(background)).not.toBe(await correct.evaluate(background));
+    await expect(incorrect.getByRole('checkbox')).toBeChecked();
+    await expect(missed.getByRole('checkbox')).not.toBeChecked();
+    await page.getByRole('button', { name: 'Retake quiz' }).click();
+    await expect(page.getByText('Incorrect — your selection')).toHaveCount(0);
+    await expect(page.getByText('Correct — not selected')).toHaveCount(0);
+    expect(await incorrect.evaluate(background)).toBe(await correct.evaluate(background));
+  } finally {
+    await app.stop();
+  }
+});
