@@ -37,8 +37,9 @@ Optional Mermaid diagrams render locally on demand; invalid diagrams show recove
 and inspectable source without blocking the explanation. Retaking resets explanation
 controls to concise mode.
 The [PR quiz skill and runtime workflow](docs/pr-quiz.md) now support agent-generated
-PR assessments. Product generation and published runtime bootstrapping remain in
-subsequent tickets.
+PR assessments. The [product quiz workflow](docs/product-quiz.md) supports first-run
+setup and single-module or general assessments. Cache freshness/reuse, combined
+scopes, and published runtime bootstrapping remain in subsequent tickets.
 
 See the [UI SDK evaluation](docs/ui-sdk-evaluation.md) for the native-control decision.
 
