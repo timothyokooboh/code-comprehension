@@ -29,8 +29,12 @@ correct answers and an exact-match score, or retake with cleared selections. The
 Only one current attempt is retained, with no score history. Changed quiz content starts
 a fresh attempt. Storage belongs to the local URL (including its port), so restarting
 the CLI on another port starts fresh. If browser storage is unavailable, the quiz
-continues in memory. Explanations, references, and optional
-Mermaid diagrams are accepted as assessment data; their display arrives in ticket #4.
+continues in memory. After submission, each question shows its concise explanation with a keyboard-accessible
+control for the detailed version. Supporting code locations are selectable repository-relative
+paths, with line numbers when supplied, for opening in your editor.
+Optional Mermaid diagrams render locally on demand; invalid diagrams show recovery copy
+and inspectable source without blocking the explanation. Retaking resets explanation
+controls to concise mode.
 Quiz generation and installable agent skills arrive in subsequent tickets.
 
 See the [UI SDK evaluation](docs/ui-sdk-evaluation.md) for the native-control decision.

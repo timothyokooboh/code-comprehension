@@ -1,3 +1,4 @@
+import { diagramErrorCodes, type DiagramErrorCode } from '../diagrams/render-diagram.ts';
 import { quizLoadErrorCodes, type QuizLoadErrorCode } from '../api/quiz-errors.ts';
 import { questionTypes } from '@code-comprehension/quiz-contract';
 import { runtimeErrorCodes, type RuntimeErrorCode } from '../api/runtime-errors.ts';
@@ -6,7 +7,7 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 export const messages = {
   app: {
     title: applicationName,
-    tagline: 'Understand what you ship',
+    tagline: 'Local quiz workspace',
     introduction: 'A space to understand your changes and the systems you build.',
   },
   connection: {
@@ -41,6 +42,38 @@ export const messages = {
       [quizLoadErrorCodes.unavailable]: 'Unable to load the assessment. Restart the CLI and reload this page.',
       [quizLoadErrorCodes.invalidResponse]: 'The assessment data is invalid. Ask your agent to validate it and restart the quiz.',
     } satisfies Record<QuizLoadErrorCode, string>,
+  },
+  workspace: {
+    navigation: 'Question index',
+    jumpTo: (number: number, prompt: string) => `Go to question ${number}: ${prompt}`,
+    assessmentMode: 'Assessment',
+    reviewMode: 'Results',
+    progress: 'Your progress',
+    answeredCount: (answered: number, total: number) => `${answered} / ${total}`,
+    questionCount: (total: number) => total === 1 ? '1 question' : `${total} questions`,
+    prompt: 'Questions',
+    evidence: 'Answers / Evidence',
+    answered: 'Answered',
+    unanswered: 'Not answered',
+    correct: 'Correct',
+    review: 'Needs review',
+  },
+  diagram: {
+    title: 'Supporting diagram',
+    loading: 'Rendering diagram…',
+    source: 'Diagram source',
+    errors: {
+      [diagramErrorCodes.renderFailed]: 'Unable to render this diagram. You can inspect its source below.',
+    } satisfies Record<DiagramErrorCode, string>,
+  },
+  explanation: {
+    label: (number: number) => `Explanation for question ${number}`,
+    heading: 'Why this answer is correct',
+    showConcise: 'Show concise explanation',
+    showDetailed: 'Show detailed explanation',
+    references: 'Supporting code',
+    referenceHint: 'Locations are relative to the repository root. Open them in your editor to inspect the evidence.',
+    location: (path: string, line?: number) => line === undefined ? path : `${path}:${line}`,
   },
   assessment: {
     label: 'Quiz session',
