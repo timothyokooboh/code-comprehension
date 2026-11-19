@@ -62,7 +62,11 @@ importers:
         specifier: workspace:*
         version: link:../quiz-contract
 
-  packages/quiz-contract: {}
+  packages/quiz-contract:
+    dependencies:
+      zod:
+        specifier: 4.6.0
+        version: 4.6.0
 
 packages:
 
@@ -952,6 +956,9 @@ packages:
     resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
     engines: {node: '>=18'}
 
+  zod@4.6.0:
+    resolution: {integrity: sha512-iIvwyDnebKYpww2ta0DjaNOL8RnVLmPMhgWyOzlW9y0EIIxv5gl+H6Y0ONpt83HqjGqkk78uWp6xWtpxzZdPbw==}
+
 snapshots:
 
   '@babel/helper-string-parser@7.29.14': {}
@@ -1634,3 +1641,5 @@ snapshots:
   wsl-utils@0.1.0:
     dependencies:
       is-wsl: 3.1.1
+
+  zod@4.6.0: {}

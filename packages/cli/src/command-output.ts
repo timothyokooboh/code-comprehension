@@ -1,6 +1,8 @@
 import { CommanderError, type Command, type Help } from 'commander';
 import { CliError, cliErrorCodes } from './errors.js';
 import { messages } from './locales/en.js';
+import { QuizValidationError } from './load-quiz.js';
+import { formatQuizIssues } from './quiz-diagnostics.js';
 import { maximumPort } from './options.js';
 
 const commanderErrorCodes = {
@@ -20,7 +22,7 @@ function commandErrorMessage(error: CommanderError) {
     case commanderErrorCodes.invalidArgument:
       return messages.invalidPort(maximumPort);
     case commanderErrorCodes.missingOptionArgument:
-      return messages.missingPort;
+      return messages.missingOptionValue;
     default:
       return messages.invalidArguments;
   }
@@ -32,5 +34,6 @@ export function reportFailure(error: unknown) {
     ? commandErrorMessage(error)
     : messages.errors[error instanceof CliError ? error.code : cliErrorCodes.startupFailed];
   console.error(message);
+  if (error instanceof QuizValidationError) console.error(formatQuizIssues(error.issues));
   process.exitCode = 1;
 }

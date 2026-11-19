@@ -10,7 +10,8 @@
     "noUncheckedIndexedAccess": true,
     "types": [
       "node"
-    ]
+    ],
+    "allowImportingTsExtensions": true
   },
   "include": [
     "packages/*/src/**/*.ts",

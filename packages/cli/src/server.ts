@@ -2,14 +2,14 @@ import { createServer } from 'node:http';
 import { constants as httpStatus } from 'node:http2';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
-import { applicationName, runtimeStatusPath, runtimeReadyStatus, type RuntimeStatus } from '@code-comprehension/quiz-contract';
+import { applicationName, runtimeStatusPath, runtimeReadyStatus, type RuntimeStatus, quizPath, type Quiz } from '@code-comprehension/quiz-contract';
 import { loadAssets } from './assets.js';
 import { CliError, cliErrorCodes } from './errors.js';
 import { messages } from './locales/en.js';
 
 const loopbackHost = '127.0.0.1';
 
-export async function startServer(port: number) {
+export async function startServer(port: number, quiz: Quiz | null = null) {
   const assets = await loadAssets(fileURLToPath(new URL('./web/', import.meta.url)));
   const status: RuntimeStatus = { name: applicationName, status: runtimeReadyStatus };
   const server = createServer((request, response) => {
@@ -18,9 +18,9 @@ export async function startServer(port: number) {
       return;
     }
     const pathname = (request.url ?? '/').split('?')[0];
-    if (pathname === runtimeStatusPath) {
+    if (pathname === runtimeStatusPath || pathname === quizPath) {
       response.writeHead(httpStatus.HTTP_STATUS_OK, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      response.end(request.method === 'HEAD' ? undefined : JSON.stringify(status));
+      response.end(request.method === 'HEAD' ? undefined : JSON.stringify(pathname === quizPath ? quiz : status));
       return;
     }
     const asset = assets.get(pathname ?? '/');
