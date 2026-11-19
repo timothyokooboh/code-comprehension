@@ -29,7 +29,7 @@ async function restart() {
       />
       <template v-if="!result">
         <p class="text-sm text-slate-600">{{ messages.quiz.submitHint }}</p>
-        <button :disabled="!canSubmit" type="submit" class="rounded-lg bg-emerald-800 px-5 py-3 font-semibold text-white disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-4">
+        <button :disabled="!canSubmit" type="submit" class="rounded-lg bg-emerald-800 enabled:cursor-pointer enabled:hover:bg-emerald-900 disabled:cursor-not-allowed px-5 py-3 font-semibold text-white disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-4">
           {{ messages.quiz.submit }}
         </button>
       </template>
