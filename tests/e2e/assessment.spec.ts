@@ -18,6 +18,8 @@ test('answer both question types, review score, and retake to a perfect score', 
     await expect(page.getByRole('radio', { name: 'Create a new payment key' })).toBeChecked();
     await page.keyboard.press('ArrowUp');
     const key = page.getByRole('checkbox', { name: 'Reuse the idempotency key' });
+    await page.reload();
+    await expect(radio).toBeChecked();
     await key.focus();
     await page.keyboard.press('Space');
     await page.getByRole('checkbox', { name: 'Record the provider response' }).check();
@@ -38,8 +40,12 @@ test('answer both question types, review score, and retake to a perfect score', 
     await page.getByRole('button', { name: 'Submit answers' }).click();
     await expect(page.getByRole('heading', { name: 'Score: 2 of 2 (100%)' })).toBeVisible();
     await page.reload();
-    await expect(page.getByRole('heading', { name: /Score:/ })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Score: 2 of 2 (100%)' })).toBeVisible();
+    await expect(radio).toBeChecked();
+    await page.getByRole('button', { name: 'Retake quiz' }).click();
+    await page.reload();
     await expect(radio).not.toBeChecked();
+    await expect(page.getByRole('heading', { name: /Score:/ })).toHaveCount(0);
   } finally {
     await app.stop();
   }
@@ -67,6 +73,33 @@ test('submission distinguishes incorrect selections and missed correct answers',
     await expect(page.getByText('Incorrect — your selection')).toHaveCount(0);
     await expect(page.getByText('Correct — not selected')).toHaveCount(0);
     expect(await incorrect.evaluate(background)).toBe(await correct.evaluate(background));
+  } finally {
+    await app.stop();
+  }
+});
+
+test('changed quiz content and corrupt saved data start a usable fresh attempt', async ({ page }) => {
+  const app = await launchCli(['--quiz', quizFile]);
+  try {
+    await page.goto(app.url);
+    const radio = page.getByRole('radio').first();
+    await radio.check();
+    await page.route('**/api/quiz', async (route) => {
+      const response = await route.fetch();
+      const quiz = await response.json();
+      quiz.questions[0].prompt = 'A changed question';
+      await route.fulfill({ json: quiz });
+    });
+    await page.reload();
+    await expect(radio).not.toBeChecked();
+    await radio.check();
+    await page.evaluate(() => {
+      for (const key of Object.keys(localStorage)) localStorage.setItem(key, '{invalid');
+    });
+    await page.reload();
+    await expect(radio).not.toBeChecked();
+    await radio.check();
+    await expect(radio).toBeChecked();
   } finally {
     await app.stop();
   }

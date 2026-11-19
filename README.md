@@ -25,8 +25,11 @@ pnpm start --quiz tests/fixtures/quiz.json
 The fixture illustrates the [versioned quiz contract](packages/quiz-contract/src/quiz.ts).
 Its payment scenario and source references are examples, not descriptions of this repository.
 Invalid files produce field-specific errors before the server starts. Submit to see
-correct answers and an exact-match score, or retake with cleared selections. Reloading
-also clears the attempt; scores are never saved. Explanations, references, and optional
+correct answers and an exact-match score, or retake with cleared selections. The current attempt survives reloads using browser local storage; retaking clears it.
+Only one current attempt is retained, with no score history. Changed quiz content starts
+a fresh attempt. Storage belongs to the local URL (including its port), so restarting
+the CLI on another port starts fresh. If browser storage is unavailable, the quiz
+continues in memory. Explanations, references, and optional
 Mermaid diagrams are accepted as assessment data; their display arrives in ticket #4.
 Quiz generation and installable agent skills arrive in subsequent tickets.
 
