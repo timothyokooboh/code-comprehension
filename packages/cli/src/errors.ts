@@ -1,4 +1,12 @@
 export const cliErrorCodes = {
+  sessionWriteFailed: 'session_write_failed',
+  sessionCleanupFailed: 'session_cleanup_failed',
+  prChanged: 'pr_changed',
+  prQuizRequired: 'pr_quiz_required',
+  gitFailed: 'git_failed',
+  baselineRequired: 'baseline_required',
+  sessionInvalid: 'session_invalid',
+  prOptionsInvalid: 'pr_options_invalid',
   quizInvalid: 'quiz_invalid',
   quizUnreadable: 'quiz_unreadable',
   quizJsonInvalid: 'quiz_json_invalid',

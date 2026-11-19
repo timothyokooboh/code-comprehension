@@ -4,6 +4,7 @@ import type { Answers, Quiz, QuizResult as AssessmentResult } from '@code-compre
 import { messages } from '../locales/en';
 import QuizResult from './QuizResult.vue';
 import QuizNavigator from './QuizNavigator.vue';
+import PrComparison from './PrComparison.vue';
 
 const props = defineProps<{
   quiz: Quiz;
@@ -34,6 +35,7 @@ async function restart() {
       <p class="eyebrow">{{ result ? messages.workspace.reviewMode : messages.workspace.assessmentMode }}</p>
       <h2 ref="heading" tabindex="-1" class="mt-3 break-words text-3xl font-semibold leading-tight tracking-tight">{{ quiz.title }}</h2>
       <p class="mt-3 text-sm text-slate-600">{{ messages.quiz.scope(quiz.scope) }}</p>
+      <PrComparison v-if="quiz.comparison" :comparison="quiz.comparison" />
       <div v-if="!result" class="my-7">
         <div class="mb-2 flex justify-between gap-2 text-xs font-semibold">
           <span>{{ messages.workspace.progress }}</span>

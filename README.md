@@ -25,7 +25,8 @@ pnpm start --quiz tests/fixtures/quiz.json
 The fixture illustrates the [versioned quiz contract](packages/quiz-contract/src/quiz.ts).
 Its payment scenario and source references are examples, not descriptions of this repository.
 Invalid files produce field-specific errors before the server starts. Submit to see
-correct answers and an exact-match score, or retake with cleared selections. The current attempt survives reloads using browser local storage; retaking clears it.
+correct answers and an exact-match score, or retake with cleared selections. The current attempt survives reloads using browser storage; retaking clears it.
+Product quizzes use local storage; PR quizzes use tab-session storage.
 Only one current attempt is retained, with no score history. Changed quiz content starts
 a fresh attempt. Storage belongs to the local URL (including its port), so restarting
 the CLI on another port starts fresh. If browser storage is unavailable, the quiz
@@ -35,7 +36,9 @@ paths, with line numbers when supplied, for opening in your editor.
 Optional Mermaid diagrams render locally on demand; invalid diagrams show recovery copy
 and inspectable source without blocking the explanation. Retaking resets explanation
 controls to concise mode.
-Quiz generation and installable agent skills arrive in subsequent tickets.
+The [PR quiz skill and runtime workflow](docs/pr-quiz.md) now support agent-generated
+PR assessments. Product generation and published runtime bootstrapping remain in
+subsequent tickets.
 
 See the [UI SDK evaluation](docs/ui-sdk-evaluation.md) for the native-control decision.
 

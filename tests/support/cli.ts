@@ -43,6 +43,6 @@ export async function launchCli(args: string[] = []) {
   }
 }
 
-export function runCli(args: string[]) {
-  return spawnSync(process.execPath, [entry, ...args], { encoding: 'utf8', timeout: 5_000 });
+export function runCli(args: string[], env: NodeJS.ProcessEnv = process.env) {
+  return spawnSync(process.execPath, [entry, ...args], { encoding: 'utf8', timeout: 5_000, env });
 }
