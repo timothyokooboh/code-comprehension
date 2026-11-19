@@ -26,10 +26,10 @@ defineProps<{
 </template>
 
 <style scoped>
-.question-link { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem; border-radius: .5rem; }
-.question-index { display: grid; place-items: center; flex: 0 0 1.75rem; height: 1.75rem; border: 1px solid #ccd5cf; border-radius: 50%; font-size: .75rem; font-variant-numeric: tabular-nums; }
-.is-answered { background: #174f42; color: white; border-color: #174f42; }
-@media (hover: hover) and (pointer: fine) { .question-link:hover { background: #e7ede7; } }
+.question-link { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem; border-radius: .25rem; }
+.question-index { display: grid; place-items: center; flex: 0 0 1.75rem; height: 1.75rem; border: 1px solid var(--line); border-radius: .25rem; font-size: .75rem; font-variant-numeric: tabular-nums; }
+.is-answered { background: var(--accent); color: var(--ink); border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+@media (hover: hover) and (pointer: fine) { .question-link:hover { background: var(--accent-soft); } }
 @media (max-width: 1023px) {
   ol { display: flex; gap: .25rem; overflow-x: auto; margin-top: .5rem; }
   .question-link { padding: .5rem; }

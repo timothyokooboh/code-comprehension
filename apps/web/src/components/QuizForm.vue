@@ -79,16 +79,16 @@ async function restart() {
 
 <style scoped>
 .quiz-workspace { display: grid; grid-template-columns: minmax(0, 1fr); }
-.workspace-sidebar { background: #eff2ec; border-bottom: 1px solid #d8dfd7; padding: 2rem 1.5rem; }
+.workspace-sidebar { background: var(--surface); border-bottom: 1px solid var(--line); padding: 2rem 1.5rem; }
 .workspace-content { min-width: 0; padding: 1.5rem; }
-.workspace-caption { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid #d8dfd7; }
-.quiz-progress { display: block; width: 100%; height: 4px; appearance: none; border: none; background: #d7dfd5; color: #174f42; }
-.quiz-progress::-webkit-progress-bar { background: #d7dfd5; }
-.quiz-progress::-webkit-progress-value { background: #174f42; }
-.quiz-progress::-moz-progress-bar { background: #174f42; }
+.workspace-caption { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
+.quiz-progress { display: block; width: 100%; height: 4px; appearance: none; border: none; background: var(--line); color: var(--ink); }
+.quiz-progress::-webkit-progress-bar { background: var(--line); }
+.quiz-progress::-webkit-progress-value { background: var(--ink); }
+.quiz-progress::-moz-progress-bar { background: var(--ink); }
 @media (min-width: 1024px) {
   .quiz-workspace { grid-template-columns: 270px minmax(0, 1fr); min-height: calc(100vh - 89px); }
-  .workspace-sidebar { border-bottom: 0; border-right: 1px solid #d8dfd7; }
+  .workspace-sidebar { border-bottom: 0; border-right: 1px solid var(--line); }
   .sidebar-content { position: sticky; top: 2rem; max-height: calc(100vh - 4rem); overflow-y: auto; padding: .25rem; }
   .workspace-content { padding: 2rem clamp(1.5rem, 3vw, 4rem); }
 }

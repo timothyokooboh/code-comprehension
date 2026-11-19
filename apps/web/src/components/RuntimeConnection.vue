@@ -11,5 +11,5 @@ const role = computed(() => state.value.status === connectionStates.failed ? 'al
 </script>
 
 <template>
-  <p class="text-xs font-medium text-emerald-800" :role="role">{{ message }}</p>
+  <p class="font-mono text-xs text-zinc-500" :role="role">{{ message }}</p>
 </template>

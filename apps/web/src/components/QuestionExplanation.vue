@@ -23,7 +23,7 @@ function toggleExplanation() {
     <p :id="explanationId" class="mt-4 whitespace-pre-wrap text-base leading-7 text-slate-700">{{ explanation }}</p>
     <button
       type="button" :aria-controls="explanationId" :aria-pressed="detailed"
-      class="mt-3 cursor-pointer rounded-lg border border-emerald-800 px-4 py-2 font-semibold text-emerald-900 pointer-fine:hover:bg-emerald-50 transition-[background-color] duration-150 ease-[ease] motion-reduce:duration-100 focus-visible:outline-2 focus-visible:outline-offset-4"
+      class="mt-3 cursor-pointer rounded border border-zinc-400 px-4 py-2 font-semibold text-zinc-900 pointer-fine:hover:bg-zinc-100 transition-[background-color] duration-150 ease-[ease] motion-reduce:duration-100 focus-visible:outline-2 focus-visible:outline-offset-4"
       @click="toggleExplanation"
     >{{ toggleLabel }}</button>
     <h4 class="mt-7 text-sm font-semibold">{{ messages.explanation.references }}</h4>
@@ -38,6 +38,6 @@ function toggleExplanation() {
 </template>
 
 <style scoped>
-.explanation-panel { margin-top: 2rem; padding: 1.5rem 0 0 1.5rem; border-left: 2px solid #c6d3bd; }
+.explanation-panel { margin-top: 2rem; padding: 1.5rem 0 0 1.5rem; border-left: 2px solid var(--line); }
 @media (min-width: 1280px) { .explanation-panel { margin-top: 0; padding-top: 0; } }
 </style>

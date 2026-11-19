@@ -35,7 +35,8 @@ const options = computed(() => props.question.options.map((option) => {
     classes: {
       'cursor-pointer': !props.submitted,
       'border-slate-200': !highlighted && !incorrect,
-      'border-emerald-700 bg-emerald-50': highlighted,
+      'option-selected': !props.submitted && selected,
+      'border-emerald-700 bg-emerald-50': props.submitted && correct,
       'border-red-700 bg-red-50': incorrect,
     },
   };
@@ -54,12 +55,12 @@ function select(optionId: string) {
   <div tabindex="-1" class="question-row" :class="{ 'is-review': submitted }">
     <fieldset :style="{ viewTransitionName: `quiz-answers-${inputName}` }" class="min-w-0" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
       <legend class="mb-4 text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</legend>
-      <p :id="`${inputName}-hint`" class="mb-6 text-xs font-semibold uppercase tracking-wider text-slate-500">{{ instruction }}</p>
+      <p :id="`${inputName}-hint`" class="mb-6 font-mono text-xs text-zinc-500">{{ instruction }}</p>
       <div class="answer-options">
-        <label v-for="option in options" :key="option.id" :class="option.classes" class="answer-option flex items-start gap-3 rounded-lg border p-4">
+        <label v-for="option in options" :key="option.id" :class="option.classes" class="answer-option flex items-start gap-3 rounded border p-4">
           <input
             :type="inputType" :name="inputName" :value="option.id"
-            :checked="option.selected" class="mt-1 accent-emerald-700"
+            :checked="option.selected" class="mt-1 accent-zinc-900"
             @change="select(option.id)"
           />
           <span>
@@ -75,10 +76,11 @@ function select(optionId: string) {
 </template>
 
 <style scoped>
-.question-row { display: grid; grid-template-columns: minmax(0, 1fr); padding: 2rem 0; border-bottom: 1px solid #d8dfd7; scroll-margin-top: 2rem; }
+.question-row { display: grid; grid-template-columns: minmax(0, 1fr); padding: 2rem 0; border-bottom: 1px solid var(--line); scroll-margin-top: 2rem; }
 .answer-options { display: grid; gap: .75rem; }
 .answer-option { min-width: 0; }
-@media (hover: hover) and (pointer: fine) { fieldset:not(:disabled) .answer-option:hover { border-color: #174f42; } }
+.option-selected { border-color: var(--ink); background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--ink); }
+@media (hover: hover) and (pointer: fine) { fieldset:not(:disabled) .answer-option:hover { border-color: var(--ink); } }
 @media (min-width: 1280px) {
   .is-review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; }
   .is-review .answer-options { grid-template-columns: minmax(0, 1fr); }

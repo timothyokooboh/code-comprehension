@@ -7,7 +7,7 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 export const messages = {
   app: {
     title: applicationName,
-    tagline: 'Understand what you ship',
+    tagline: 'Local quiz workspace',
     introduction: 'A space to understand your changes and the systems you build.',
   },
   connection: {
@@ -46,15 +46,15 @@ export const messages = {
   workspace: {
     navigation: 'Question index',
     jumpTo: (number: number, prompt: string) => `Go to question ${number}: ${prompt}`,
-    assessmentMode: 'Knowledge check',
-    reviewMode: 'Review your thinking',
+    assessmentMode: 'Assessment',
+    reviewMode: 'Results',
     progress: 'Your progress',
     answeredCount: (answered: number, total: number) => `${answered} / ${total}`,
     questionCount: (total: number) => total === 1 ? '1 question' : `${total} questions`,
-    prompt: 'Think it through',
-    evidence: 'Your answers & the evidence',
+    prompt: 'Questions',
+    evidence: 'Answers / Evidence',
     answered: 'Answered',
-    unanswered: 'To explore',
+    unanswered: 'Not answered',
     correct: 'Correct',
     review: 'Needs review',
   },
