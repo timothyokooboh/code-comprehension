@@ -51,12 +51,12 @@ function select(optionId: string) {
 </script>
 
 <template>
-  <div>
-    <fieldset class="rounded-2xl border border-slate-200 bg-white p-6" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
-      <legend class="px-2 text-lg font-semibold">{{ messages.quiz.question(number, question.prompt) }}</legend>
-      <p :id="`${inputName}-hint`" class="mb-4 text-sm text-slate-600">{{ instruction }}</p>
-      <div class="space-y-3">
-        <label v-for="option in options" :key="option.id" :class="option.classes" class="flex items-start gap-3 rounded-lg border p-3">
+  <div tabindex="-1" class="question-row" :class="{ 'is-review': submitted }">
+    <fieldset class="min-w-0" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
+      <legend class="mb-4 text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</legend>
+      <p :id="`${inputName}-hint`" class="mb-6 text-xs font-semibold uppercase tracking-wider text-slate-500">{{ instruction }}</p>
+      <div class="answer-options">
+        <label v-for="option in options" :key="option.id" :class="option.classes" class="answer-option flex items-start gap-3 rounded-lg border p-4">
           <input
             :type="inputType" :name="inputName" :value="option.id"
             :checked="option.selected" class="mt-1 accent-emerald-700"
@@ -73,3 +73,15 @@ function select(optionId: string) {
     <QuestionExplanation v-if="submitted" :key="question.id" :question="question" :number="number" />
   </div>
 </template>
+
+<style scoped>
+.question-row { padding: 2rem 0; border-bottom: 1px solid #d8dfd7; scroll-margin-top: 2rem; }
+.answer-options { display: grid; gap: .75rem; }
+.answer-option { min-width: 0; }
+@media (hover: hover) and (pointer: fine) { fieldset:not(:disabled) .answer-option:hover { border-color: #174f42; } }
+@media (min-width: 768px) { .answer-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1280px) {
+  .is-review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; }
+  .is-review .answer-options { grid-template-columns: minmax(0, 1fr); }
+}
+</style>

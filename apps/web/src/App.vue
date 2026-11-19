@@ -5,11 +5,17 @@ import { messages } from './locales/en';
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-16">
-    <p class="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{{ messages.app.tagline }}</p>
-    <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">{{ messages.app.title }}</h1>
-    <p class="mt-6 max-w-xl text-lg leading-8 text-slate-600">{{ messages.app.introduction }}</p>
-    <RuntimeConnection />
+  <main class="mx-auto min-h-screen max-w-[1800px]">
+    <header class="flex flex-wrap items-center justify-between gap-4 border-b border-emerald-950/15 bg-white px-6 py-5 lg:px-9">
+      <div class="flex items-center gap-3">
+        <span aria-hidden="true" class="grid size-10 place-items-center rounded-lg bg-emerald-950 font-mono text-lg text-lime-200">{ }</span>
+        <div>
+          <h1 class="text-lg font-semibold tracking-tight">{{ messages.app.title }}</h1>
+          <p class="text-xs text-slate-500">{{ messages.app.tagline }}</p>
+        </div>
+      </div>
+      <RuntimeConnection />
+    </header>
     <QuizSession />
   </main>
 </template>

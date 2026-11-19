@@ -6,7 +6,7 @@
 
 body {
   margin: 0;
-  background: #f7f8f5;
+  background: #fafbf8;
   color: #172b27;
 }
 
@@ -17,3 +17,11 @@ body {
   visibility: hidden;
   pointer-events: none;
 }
+
+.eyebrow { font-size: .65rem; font-weight: 700; line-height: 1.5; text-transform: uppercase; letter-spacing: .15em; color: #526457; }
+.primary-button { display: inline-flex; align-items: center; justify-content: space-between; gap: 1rem; border-radius: .5rem; background: #174f42; color: white; padding: .85rem 1.1rem; font-size: .875rem; font-weight: 600; transition: background-color 150ms ease; }
+.primary-button:enabled { cursor: pointer; }
+.primary-button:disabled { cursor: not-allowed; opacity: .45; }
+:where(a, button, summary):focus-visible { outline: 2px solid #176b52; outline-offset: 4px; }
+@media (hover: hover) and (pointer: fine) { .primary-button:enabled:hover { background: #0c372e; } }
+@media (prefers-reduced-motion: reduce) { .primary-button { transition-duration: 100ms; } }

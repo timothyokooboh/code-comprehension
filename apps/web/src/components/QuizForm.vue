@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import { nextTick, useTemplateRef } from 'vue';
+import { computed, nextTick, useId, useTemplateRef } from 'vue';
 import type { Quiz } from '@code-comprehension/quiz-contract';
 import { useQuizAttempt } from '../composables/useQuizAttempt';
 import { messages } from '../locales/en';
 import QuizQuestion from './QuizQuestion.vue';
 import QuizResult from './QuizResult.vue';
+import QuizNavigator from './QuizNavigator.vue';
 
 const props = defineProps<{ quiz: Quiz }>();
 const { answers, result, canSubmit, answer, submit, retake } = useQuizAttempt(props.quiz);
 const heading = useTemplateRef('heading');
+const formId = useId();
+const entries = computed(() => props.quiz.questions.map((question) => ({
+  anchor: `${formId}-${question.id}`,
+  prompt: question.prompt,
+  answered: (answers.value.get(question.id)?.length ?? 0) > 0,
+  correct: result.value?.questions.find(({ questionId }) => questionId === question.id)?.correct,
+})));
+const answeredCount = computed(() => entries.value.filter(({ answered }) => answered).length);
 
 async function restart() {
   retake();
@@ -18,24 +27,56 @@ async function restart() {
 </script>
 
 <template>
-  <section :aria-label="messages.assessment.label" class="mt-10">
-    <h2 ref="heading" tabindex="-1" class="text-2xl font-semibold">{{ quiz.title }}</h2>
-    <p class="mt-2 text-slate-600">{{ messages.quiz.scope(quiz.scope) }}</p>
-    <form class="mt-6 space-y-6" @submit.prevent="submit">
-      <QuizQuestion
-        v-for="(question, index) in quiz.questions" :key="question.id"
-        :question="question" :number="index + 1" :selected="answers.get(question.id) ?? []"
-        :submitted="result !== null" @answer="answer(question.id, $event)"
-      />
-      <template v-if="!result">
-        <p class="text-sm text-slate-600">{{ messages.quiz.submitHint }}</p>
-        <button :disabled="!canSubmit" type="submit" class="rounded-lg bg-emerald-800 enabled:cursor-pointer pointer-fine:enabled:hover:bg-emerald-900 transition-[background-color] duration-150 ease-[ease] motion-reduce:duration-100 disabled:cursor-not-allowed px-5 py-3 font-semibold text-white disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-4">
-          {{ messages.quiz.submit }}
-        </button>
-      </template>
-    </form>
-    <div v-if="result" class="mt-6">
-      <QuizResult :correct="result.correct" :total="result.total" :percentage="result.percentage" @retake="restart" />
+  <section :aria-label="messages.assessment.label" class="quiz-workspace">
+    <aside class="workspace-sidebar">
+      <div class="sidebar-content">
+        <p class="eyebrow">{{ result ? messages.workspace.reviewMode : messages.workspace.assessmentMode }}</p>
+        <h2 ref="heading" tabindex="-1" class="mt-3 break-words text-3xl font-semibold leading-tight tracking-tight">{{ quiz.title }}</h2>
+        <p class="mt-3 text-sm text-slate-600">{{ messages.quiz.scope(quiz.scope) }}</p>
+        <div v-if="!result" class="my-7">
+          <div class="mb-2 flex justify-between gap-2 text-xs font-semibold">
+            <span>{{ messages.workspace.progress }}</span>
+            <span>{{ messages.workspace.answeredCount(answeredCount, quiz.questions.length) }}</span>
+          </div>
+          <progress :value="answeredCount" :max="quiz.questions.length" :aria-label="messages.workspace.progress" class="quiz-progress" />
+        </div>
+        <QuizResult v-if="result" :correct="result.correct" :total="result.total" :percentage="result.percentage" @retake="restart" />
+        <QuizNavigator :entries="entries" class="mt-8" />
+        <div v-if="!result" class="mt-8 border-t border-emerald-950/15 pt-5">
+          <button :form="formId" :disabled="!canSubmit" type="submit" class="primary-button w-full">{{ messages.quiz.submit }}<span aria-hidden="true">↗</span></button>
+          <p class="mt-3 text-xs leading-5 text-slate-500">{{ messages.quiz.submitHint }}</p>
+        </div>
+      </div>
+    </aside>
+    <div class="workspace-content">
+      <div class="workspace-caption">
+        <span class="eyebrow">{{ result ? messages.workspace.evidence : messages.workspace.prompt }}</span>
+        <span class="text-xs text-slate-500">{{ messages.workspace.questionCount(quiz.questions.length) }}</span>
+      </div>
+      <form :id="formId" @submit.prevent="submit">
+        <QuizQuestion
+          v-for="(question, index) in quiz.questions" :id="`${formId}-${question.id}`" :key="question.id"
+          :question="question" :number="index + 1" :selected="answers.get(question.id) ?? []"
+          :submitted="result !== null" @answer="answer(question.id, $event)"
+        />
+      </form>
     </div>
   </section>
 </template>
+
+<style scoped>
+.quiz-workspace { display: grid; grid-template-columns: minmax(0, 1fr); }
+.workspace-sidebar { background: #eff2ec; border-bottom: 1px solid #d8dfd7; padding: 2rem 1.5rem; }
+.workspace-content { min-width: 0; padding: 1.5rem; }
+.workspace-caption { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid #d8dfd7; }
+.quiz-progress { display: block; width: 100%; height: 4px; appearance: none; border: none; background: #d7dfd5; color: #174f42; }
+.quiz-progress::-webkit-progress-bar { background: #d7dfd5; }
+.quiz-progress::-webkit-progress-value { background: #174f42; }
+.quiz-progress::-moz-progress-bar { background: #174f42; }
+@media (min-width: 1024px) {
+  .quiz-workspace { grid-template-columns: 270px minmax(0, 1fr); min-height: calc(100vh - 89px); }
+  .workspace-sidebar { border-bottom: 0; border-right: 1px solid #d8dfd7; }
+  .sidebar-content { position: sticky; top: 2rem; max-height: calc(100vh - 4rem); overflow-y: auto; padding: .25rem; }
+  .workspace-content { padding: 2rem clamp(1.5rem, 3vw, 4rem); }
+}
+</style>
