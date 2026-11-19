@@ -17,3 +17,10 @@ The full Mermaid distribution adds optional chunks to the packaged UI, including
 layout engines. Those chunks are loaded on demand; the default layout is Dagre.
 
 Implementation follows the [Mermaid usage API](https://mermaid.js.org/config/usage.html).
+
+Rendered diagrams have an expand icon opening a native modal dialog, with a close
+icon and Escape dismissal. The viewer reuses the same safe image URL, restores focus
+to the trigger, and restores page scrolling when closed or removed. Pointer opening
+and closing use the existing 240ms View Transition timing; keyboard activation,
+reduced motion, and browsers without that API update directly. The dialog remains
+usable without animation and fits the viewport.

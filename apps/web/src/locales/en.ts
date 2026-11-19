@@ -65,6 +65,8 @@ export const messages = {
     review: 'Needs review',
   },
   diagram: {
+    expand: 'Expand diagram',
+    close: 'Close diagram',
     title: 'Supporting diagram',
     loading: 'Rendering diagram…',
     source: 'Diagram source',
