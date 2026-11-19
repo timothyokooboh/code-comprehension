@@ -1,17 +1,18 @@
 import open from 'open';
+import type { Quiz } from '@code-comprehension/quiz-contract';
 import { loadQuiz } from './load-quiz.js';
 import { startServer } from './server.js';
 import { messages } from './locales/en.js';
-import { cliErrorCodes } from './errors.js';
+import { CliError, cliErrorCodes } from './errors.js';
 
 type LocalApplication = Awaited<ReturnType<typeof startServer>>;
 
-function registerShutdown(app: LocalApplication) {
+function registerShutdown(app: LocalApplication, cleanup: () => Promise<void>) {
   const stop = () => {
     process.removeListener('SIGINT', stop);
     process.removeListener('SIGTERM', stop);
-    void app.close().catch(() => {
-      console.error(messages.errors[cliErrorCodes.shutdownFailed]);
+    void app.close().finally(cleanup).catch((error: unknown) => {
+      console.error(messages.errors[error instanceof CliError ? error.code : cliErrorCodes.shutdownFailed]);
       process.exitCode = 1;
     });
   };
@@ -29,8 +30,15 @@ async function openBrowser(url: string) {
 
 export async function launch(options: { port: number; open: boolean; quiz?: string }) {
   const quiz = options.quiz ? await loadQuiz(options.quiz) : null;
+  await launchAssessment(options, quiz);
+}
+
+export async function launchAssessment(
+  options: { port: number; open: boolean }, quiz: Quiz | null,
+  cleanup: () => Promise<void> = async () => {},
+) {
   const app = await startServer(options.port, quiz);
-  registerShutdown(app);
+  registerShutdown(app, cleanup);
   console.log(messages.started(app.url));
   console.log(messages.stopHint);
   if (options.open) await openBrowser(app.url);

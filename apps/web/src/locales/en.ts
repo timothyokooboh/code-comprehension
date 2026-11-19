@@ -43,6 +43,12 @@ export const messages = {
       [quizLoadErrorCodes.invalidResponse]: 'The assessment data is invalid. Ask your agent to validate it and restart the quiz.',
     } satisfies Record<QuizLoadErrorCode, string>,
   },
+  prComparison: {
+    label: 'PR comparison', target: 'Target', baseline: 'Baseline commit',
+    uncommitted: 'Uncommitted changes',
+    included: 'Included (staged, unstaged, and untracked files)',
+    none: 'None at preparation',
+  },
   workspace: {
     navigation: 'Question index',
     jumpTo: (number: number, prompt: string) => `Go to question ${number}: ${prompt}`,

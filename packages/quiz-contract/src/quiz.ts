@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { prComparisonSchema } from './pr.ts';
 
 export const quizSchemaVersion = 1;
 export const quizPath = '/api/quiz';
@@ -51,6 +52,7 @@ export const quizSchema = z.strictObject({
   type: z.enum(assessmentTypes),
   title: text,
   scope: z.array(text).min(1),
+  comparison: prComparisonSchema.optional(),
   questions: z.array(questionSchema).min(1),
 }).superRefine((quiz, context) => {
   const seen = new Set<string>();

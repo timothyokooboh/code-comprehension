@@ -1,4 +1,4 @@
-import { questionTypes, type Quiz, type Answers } from '@code-comprehension/quiz-contract';
+import { assessmentTypes, questionTypes, type Quiz, type Answers } from '@code-comprehension/quiz-contract';
 
 const storageKey = 'code-comprehension:current-attempt:v1';
 type Attempt = { answers: Map<string, string[]>; submitted: boolean };
@@ -21,10 +21,11 @@ function parseAnswers(value: unknown, quiz: Quiz): Map<string, string[]> | null 
 
 export function createAttemptStorage(quiz: Quiz) {
   const identity = JSON.stringify(quiz);
+  const storage = () => quiz.type === assessmentTypes.pr ? sessionStorage : localStorage;
 
   function read(): Attempt | null {
     try {
-      const data = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
+      const data = JSON.parse(storage().getItem(storageKey) ?? 'null');
       if (!data || data.identity !== identity || typeof data.submitted !== 'boolean') return null;
       const answers = parseAnswers(data.answers, quiz);
       if (!answers) return null;
@@ -37,7 +38,7 @@ export function createAttemptStorage(quiz: Quiz) {
 
   function write(answers: Answers, submitted: boolean) {
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ identity, answers: [...answers], submitted }));
+      storage().setItem(storageKey, JSON.stringify({ identity, answers: [...answers], submitted }));
     } catch {
       // Storage can be blocked or full; the in-memory assessment remains usable.
     }
@@ -45,7 +46,7 @@ export function createAttemptStorage(quiz: Quiz) {
 
   function clear() {
     try {
-      localStorage.removeItem(storageKey);
+      storage().removeItem(storageKey);
     } catch {
       // Retaking still resets the current in-memory attempt.
     }
