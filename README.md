@@ -16,8 +16,21 @@ The CLI opens the built UI on a free loopback port. Stop it with Ctrl+C.
 For a headless session, use `pnpm start --no-open`; the URL is printed in the terminal.
 Use `--port <number>` to choose a port, or omit it to avoid port conflicts.
 
-This first milestone provides the local application foundation. Quiz generation,
-answering, and installable product skills arrive in subsequent tickets.
+Load a quiz JSON file to answer single- and multiple-answer questions:
+
+```sh
+pnpm start --quiz tests/fixtures/quiz.json
+```
+
+The fixture illustrates the [versioned quiz contract](packages/quiz-contract/src/quiz.ts).
+Its payment scenario and source references are examples, not descriptions of this repository.
+Invalid files produce field-specific errors before the server starts. Submit to see
+correct answers and an exact-match score, or retake with cleared selections. Reloading
+also clears the attempt; scores are never saved. Explanations, references, and optional
+Mermaid diagrams are accepted as assessment data; their display arrives in ticket #4.
+Quiz generation and installable agent skills arrive in subsequent tickets.
+
+See the [UI SDK evaluation](docs/ui-sdk-evaluation.md) for the native-control decision.
 
 ## Workspace
 

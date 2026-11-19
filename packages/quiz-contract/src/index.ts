@@ -6,3 +6,6 @@ export interface RuntimeStatus {
   name: string;
   status: typeof runtimeReadyStatus;
 }
+
+export * from './quiz.ts';
+export * from './scoring.ts';

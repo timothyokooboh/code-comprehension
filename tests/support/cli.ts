@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const entry = fileURLToPath(new URL('../../packages/cli/dist/index.js', import.meta.url));
 
-export async function launchCli() {
-  const child = spawn(process.execPath, [entry, '--no-open'], {
+export async function launchCli(args: string[] = []) {
+  const child = spawn(process.execPath, [entry, '--no-open', ...args], {
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   const exited = once(child, 'exit');

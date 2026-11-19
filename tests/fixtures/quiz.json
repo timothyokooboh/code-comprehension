@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "payment-retries",
+  "type": "product",
+  "title": "Payment retries",
+  "scope": ["Payments"],
+  "questions": [
+    {
+      "id": "retry",
+      "type": "single",
+      "prompt": "What happens when the provider times out?",
+      "options": [
+        { "id": "retry", "text": "Retry with the same payment key" },
+        { "id": "new", "text": "Create a new payment key" }
+      ],
+      "correctOptionIds": ["retry"],
+      "explanation": { "concise": "The key prevents duplicate payments.", "detailed": "Retrying the same request reuses the idempotency key." },
+      "references": [{ "path": "src/payments.ts", "line": 12 }]
+    },
+    {
+      "id": "guarantees",
+      "type": "multiple",
+      "prompt": "Which actions preserve retry safety?",
+      "options": [
+        { "id": "key", "text": "Reuse the idempotency key" },
+        { "id": "record", "text": "Record the provider response" },
+        { "id": "duplicate", "text": "Create a duplicate payment" }
+      ],
+      "correctOptionIds": ["key", "record"],
+      "explanation": { "concise": "Keep identity and results consistent.", "detailed": "A stable key prevents duplication and a stored response supports reconciliation." },
+      "references": [{ "path": "src/payments.ts", "line": 20 }]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import open from 'open';
+import { loadQuiz } from './load-quiz.js';
 import { startServer } from './server.js';
 import { messages } from './locales/en.js';
 import { cliErrorCodes } from './errors.js';
@@ -26,8 +27,9 @@ async function openBrowser(url: string) {
   }
 }
 
-export async function launch(options: { port: number; open: boolean }) {
-  const app = await startServer(options.port);
+export async function launch(options: { port: number; open: boolean; quiz?: string }) {
+  const quiz = options.quiz ? await loadQuiz(options.quiz) : null;
+  const app = await startServer(options.port, quiz);
   registerShutdown(app);
   console.log(messages.started(app.url));
   console.log(messages.stopHint);
