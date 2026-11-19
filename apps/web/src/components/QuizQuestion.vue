@@ -2,6 +2,7 @@
 import { computed, useId } from 'vue';
 import { questionTypes, type Question } from '@code-comprehension/quiz-contract';
 import { messages } from '../locales/en';
+import QuestionExplanation from './QuestionExplanation.vue';
 
 const props = defineProps<{
   question: Question;
@@ -50,22 +51,25 @@ function select(optionId: string) {
 </script>
 
 <template>
-  <fieldset class="rounded-2xl border border-slate-200 bg-white p-6" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
-    <legend class="px-2 text-lg font-semibold">{{ messages.quiz.question(number, question.prompt) }}</legend>
-    <p :id="`${inputName}-hint`" class="mb-4 text-sm text-slate-600">{{ instruction }}</p>
-    <div class="space-y-3">
-      <label v-for="option in options" :key="option.id" :class="option.classes" class="flex items-start gap-3 rounded-lg border p-3">
-        <input
-          :type="inputType" :name="inputName" :value="option.id"
-          :checked="option.selected" class="mt-1 accent-emerald-700"
-          @change="select(option.id)"
-        />
-        <span>
-          <span class="block">{{ option.text }}</span>
-          <span v-if="option.feedback" class="mt-1 block text-sm font-semibold">{{ option.feedback }}</span>
-        </span>
-      </label>
-    </div>
-    <p v-if="submitted" class="mt-4 font-medium text-emerald-800">{{ messages.quiz.correctAnswers(correctAnswers) }}</p>
-  </fieldset>
+  <div>
+    <fieldset class="rounded-2xl border border-slate-200 bg-white p-6" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
+      <legend class="px-2 text-lg font-semibold">{{ messages.quiz.question(number, question.prompt) }}</legend>
+      <p :id="`${inputName}-hint`" class="mb-4 text-sm text-slate-600">{{ instruction }}</p>
+      <div class="space-y-3">
+        <label v-for="option in options" :key="option.id" :class="option.classes" class="flex items-start gap-3 rounded-lg border p-3">
+          <input
+            :type="inputType" :name="inputName" :value="option.id"
+            :checked="option.selected" class="mt-1 accent-emerald-700"
+            @change="select(option.id)"
+          />
+          <span>
+            <span class="block">{{ option.text }}</span>
+            <span v-if="option.feedback" class="mt-1 block text-sm font-semibold">{{ option.feedback }}</span>
+          </span>
+        </label>
+      </div>
+      <p v-if="submitted" class="mt-4 font-medium text-emerald-800">{{ messages.quiz.correctAnswers(correctAnswers) }}</p>
+    </fieldset>
+    <QuestionExplanation v-if="submitted" :key="question.id" :question="question" :number="number" />
+  </div>
 </template>

@@ -1,3 +1,4 @@
+import { diagramErrorCodes, type DiagramErrorCode } from '../diagrams/render-diagram.ts';
 import { quizLoadErrorCodes, type QuizLoadErrorCode } from '../api/quiz-errors.ts';
 import { questionTypes } from '@code-comprehension/quiz-contract';
 import { runtimeErrorCodes, type RuntimeErrorCode } from '../api/runtime-errors.ts';
@@ -41,6 +42,23 @@ export const messages = {
       [quizLoadErrorCodes.unavailable]: 'Unable to load the assessment. Restart the CLI and reload this page.',
       [quizLoadErrorCodes.invalidResponse]: 'The assessment data is invalid. Ask your agent to validate it and restart the quiz.',
     } satisfies Record<QuizLoadErrorCode, string>,
+  },
+  diagram: {
+    title: 'Supporting diagram',
+    loading: 'Rendering diagram…',
+    source: 'Diagram source',
+    errors: {
+      [diagramErrorCodes.renderFailed]: 'Unable to render this diagram. You can inspect its source below.',
+    } satisfies Record<DiagramErrorCode, string>,
+  },
+  explanation: {
+    label: (number: number) => `Explanation for question ${number}`,
+    heading: 'Why this answer is correct',
+    showConcise: 'Show concise explanation',
+    showDetailed: 'Show detailed explanation',
+    references: 'Supporting code',
+    referenceHint: 'Locations are relative to the repository root. Open them in your editor to inspect the evidence.',
+    location: (path: string, line?: number) => line === undefined ? path : `${path}:${line}`,
   },
   assessment: {
     label: 'Quiz session',
