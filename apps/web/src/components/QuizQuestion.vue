@@ -52,7 +52,7 @@ function select(optionId: string) {
 
 <template>
   <div tabindex="-1" class="question-row" :class="{ 'is-review': submitted }">
-    <fieldset class="min-w-0" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
+    <fieldset :style="{ viewTransitionName: `quiz-answers-${inputName}` }" class="min-w-0" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
       <legend class="mb-4 text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</legend>
       <p :id="`${inputName}-hint`" class="mb-6 text-xs font-semibold uppercase tracking-wider text-slate-500">{{ instruction }}</p>
       <div class="answer-options">
@@ -75,11 +75,10 @@ function select(optionId: string) {
 </template>
 
 <style scoped>
-.question-row { padding: 2rem 0; border-bottom: 1px solid #d8dfd7; scroll-margin-top: 2rem; }
+.question-row { display: grid; grid-template-columns: minmax(0, 1fr); padding: 2rem 0; border-bottom: 1px solid #d8dfd7; scroll-margin-top: 2rem; }
 .answer-options { display: grid; gap: .75rem; }
 .answer-option { min-width: 0; }
 @media (hover: hover) and (pointer: fine) { fieldset:not(:disabled) .answer-option:hover { border-color: #174f42; } }
-@media (min-width: 768px) { .answer-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1280px) {
   .is-review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; }
   .is-review .answer-options { grid-template-columns: minmax(0, 1fr); }

@@ -18,7 +18,7 @@ function toggleExplanation() {
 </script>
 
 <template>
-  <section :aria-label="messages.explanation.label(number)" class="explanation-panel">
+  <section :style="{ viewTransitionName: `quiz-evidence-${explanationId}` }" :aria-label="messages.explanation.label(number)" class="explanation-panel">
     <h3 class="eyebrow">{{ messages.explanation.heading }}</h3>
     <p :id="explanationId" class="mt-4 whitespace-pre-wrap text-base leading-7 text-slate-700">{{ explanation }}</p>
     <button

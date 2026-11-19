@@ -6,11 +6,14 @@ import { messages } from '../locales/en';
 import QuizQuestion from './QuizQuestion.vue';
 import QuizResult from './QuizResult.vue';
 import QuizNavigator from './QuizNavigator.vue';
+import { useReviewTransition } from '../composables/useReviewTransition';
 
 const props = defineProps<{ quiz: Quiz }>();
 const { answers, result, canSubmit, answer, submit, retake } = useQuizAttempt(props.quiz);
 const heading = useTemplateRef('heading');
 const formId = useId();
+const { updateReview } = useReviewTransition();
+let pointerSubmission = false;
 const entries = computed(() => props.quiz.questions.map((question) => ({
   anchor: `${formId}-${question.id}`,
   prompt: question.prompt,
@@ -18,6 +21,13 @@ const entries = computed(() => props.quiz.questions.map((question) => ({
   correct: result.value?.questions.find(({ questionId }) => questionId === question.id)?.correct,
 })));
 const answeredCount = computed(() => entries.value.filter(({ answered }) => answered).length);
+
+async function submitReview() {
+  const animate = pointerSubmission;
+  pointerSubmission = false;
+  if (!canSubmit.value) return;
+  await updateReview(submit, animate);
+}
 
 async function restart() {
   retake();
@@ -42,10 +52,7 @@ async function restart() {
         </div>
         <QuizResult v-if="result" :correct="result.correct" :total="result.total" :percentage="result.percentage" @retake="restart" />
         <QuizNavigator :entries="entries" class="mt-8" />
-        <div v-if="!result" class="mt-8 border-t border-emerald-950/15 pt-5">
-          <button :form="formId" :disabled="!canSubmit" type="submit" class="primary-button w-full">{{ messages.quiz.submit }}<span aria-hidden="true">↗</span></button>
-          <p class="mt-3 text-xs leading-5 text-slate-500">{{ messages.quiz.submitHint }}</p>
-        </div>
+
       </div>
     </aside>
     <div class="workspace-content">
@@ -53,12 +60,18 @@ async function restart() {
         <span class="eyebrow">{{ result ? messages.workspace.evidence : messages.workspace.prompt }}</span>
         <span class="text-xs text-slate-500">{{ messages.workspace.questionCount(quiz.questions.length) }}</span>
       </div>
-      <form :id="formId" @submit.prevent="submit">
+      <form :id="formId" @submit.prevent="submitReview">
         <QuizQuestion
           v-for="(question, index) in quiz.questions" :id="`${formId}-${question.id}`" :key="question.id"
           :question="question" :number="index + 1" :selected="answers.get(question.id) ?? []"
           :submitted="result !== null" @answer="answer(question.id, $event)"
         />
+        <div v-if="!result" class="py-7">
+          <p class="mb-4 text-sm text-slate-500">{{ messages.quiz.submitHint }}</p>
+          <button :disabled="!canSubmit" type="submit" class="primary-button" @click="pointerSubmission = $event.detail > 0">
+            {{ messages.quiz.submit }}<span aria-hidden="true">↗</span>
+          </button>
+        </div>
       </form>
     </div>
   </section>

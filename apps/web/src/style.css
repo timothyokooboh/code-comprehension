@@ -25,3 +25,14 @@ body {
 :where(a, button, summary):focus-visible { outline: 2px solid #176b52; outline-offset: 4px; }
 @media (hover: hover) and (pointer: fine) { .primary-button:enabled:hover { background: #0c372e; } }
 @media (prefers-reduced-motion: reduce) { .primary-button { transition-duration: 100ms; } }
+
+/* Snapshot the answer/evidence panels; keep the surrounding application stationary. */
+::view-transition-group(*) {
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+::view-transition-old(root) { display: none; }
+::view-transition-new(root) { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) { animation-duration: 0s; }
+}
