@@ -20,6 +20,7 @@ export const messages = {
     root: 'quiz',
     atPath: (path: string, detail: string) => `${path}: ${detail}`,
     duplicateId: 'Use unique identifiers within this list.',
+    invalidSelectionGroup: 'Each selection group must contain unique question IDs from this assessment.',
     unknownAnswer: 'Every correct answer must reference an option in this question.',
     answerCount: 'Single-answer questions need exactly one correct option; multiple-answer questions need at least two.',
     expectedType: (type: string) => `Provide a value of type ${type}.`,
@@ -34,7 +35,8 @@ export const messages = {
     refresh: 'request generation even if the product bank is valid (with --check-product)',
     validate: 'validate a generated product bank without saving or launching',
     save: 'validate and save a product bank in the configured project',
-    start: 'launch a saved product bank by identifier',
+    start: 'launch one or more saved product banks by identifier',
+    combinedTitle: (names: string[]) => names.join(' · '),
     conflicts: {
       config_ignored: 'Project configuration is ignored by an existing rule. Adjust that rule to keep .comprehension/config.json trackable.',
       cache_ignored: 'Product banks are ignored by an existing rule. Adjust that rule before committing banks.',
@@ -53,6 +55,7 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.productScopesInvalid]: 'Select one or more module banks, or launch a general overview bank on its own.',
     [cliErrorCodes.productReviewInvalid]: 'Provide a review receipt with bankId, the current reviewToken, confirmed: true, and a references array of valid questionId, referenceIndex, and line corrections within the source file. Do not confirm until every question, answer, explanation, and reference has been checked.',
     [cliErrorCodes.productReviewChanged]: 'The bank or source inputs no longer match this review. Run --check-product and review the current inputs before confirming again.',
     [cliErrorCodes.productReviewRequired]: 'The product bank needs agent review before reuse. Run --check-product, review changed inputs against the questions and references, then explicitly retain or regenerate the bank.',

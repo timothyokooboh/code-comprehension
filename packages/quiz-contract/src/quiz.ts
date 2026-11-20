@@ -8,6 +8,7 @@ export const assessmentTypes = { pr: 'pr', product: 'product' } as const;
 export const quizIssueCodes = {
   duplicateId: 'duplicate_id',
   unknownAnswer: 'unknown_answer',
+  invalidSelectionGroup: 'invalid_selection_group',
   answerCount: 'answer_count',
 } as const;
 
@@ -53,9 +54,15 @@ export const quizSchema = z.strictObject({
   title: text,
   scope: z.array(text).min(1),
   comparison: prComparisonSchema.optional(),
+  selectionGroups: z.array(z.array(identifier).min(1)).min(1).optional(),
   selectionSize: z.number().int().positive().optional(),
   questions: z.array(questionSchema).min(1),
 }).superRefine((quiz, context) => {
+  for (const [index, group] of (quiz.selectionGroups ?? []).entries()) {
+    if (new Set(group).size !== group.length || group.some((id) => !quiz.questions.some((question) => question.id === id))) {
+      context.addIssue({ code: 'custom', path: ['selectionGroups', index], params: { reason: quizIssueCodes.invalidSelectionGroup } });
+    }
+  }
   const seen = new Set<string>();
   quiz.questions.forEach((question, index) => {
     if (seen.has(question.id)) {

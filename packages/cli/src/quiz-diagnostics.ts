@@ -5,6 +5,7 @@ function describeIssue(issue: QuizValidationIssue) {
   if (issue.code === 'custom') {
     switch (issue.params?.reason) {
       case quizIssueCodes.duplicateId: return messages.quizValidation.duplicateId;
+      case quizIssueCodes.invalidSelectionGroup: return messages.quizValidation.invalidSelectionGroup;
       case quizIssueCodes.unknownAnswer: return messages.quizValidation.unknownAnswer;
       case quizIssueCodes.answerCount: return messages.quizValidation.answerCount;
     }

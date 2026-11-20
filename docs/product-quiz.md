@@ -1,7 +1,7 @@
 # Product quiz workflow
 
 The [product-quiz skill](../skills/product-quiz/SKILL.md) asks the existing coding agent
-to generate a quiz about one product area or a general system overview. A module is
+to generate a quiz about one or more product areas or a general system overview. A module is
 coherent behaviour and can span directories. Discovery and selection happen in chat;
 the shared browser handles answers, feedback, and retakes.
 
@@ -44,4 +44,15 @@ confirmation to both bank and source content, and launch checks again. Explicit
 refresh always takes the generation path. See the
 [source review workflow](../skills/product-quiz/references/source-review.md).
 
-Combined multiple scopes and published runtime bootstrapping remain separate tickets.
+Multiple module banks are checked and maintained independently, then composed with
+`--product-bank payments cart`. General overview is an alternative launched alone.
+Each sitting covers every selected bank; the usual eight-question limit grows when
+more banks are selected. Stable namespaced question IDs prevent collisions, and exact
+prompt/option/answer duplicates appear once, contributing to both scopes' coverage.
+Retakes prioritise fresh questions within the coverage requirement.
+
+Interaction questions use a separate module bank only when code demonstrates the
+relationship. Its scope includes the connecting code and supporting inputs from the
+participating modules, so changes trigger the same review flow. Combined assessments
+are built in memory; no combined cache or score history is stored.
+Published runtime bootstrapping remains a separate ticket.

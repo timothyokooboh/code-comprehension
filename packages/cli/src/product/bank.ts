@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { defaultProductQuestionCount } from '@code-comprehension/quiz-contract';
+import { composeProductBanks } from './composition.js';
 import { QuizValidationError, readQuizData } from '../load-quiz.js';
 import { CliError, cliErrorCodes } from '../errors.js';
 import { bankSchema, cacheFormatVersion, isProductQuiz } from './bank-contract.js';
@@ -31,9 +31,13 @@ export async function saveProductBank(repo: string, input: string) {
   return { status: productStatuses.saved, path: relative, conflicts: await inspectTracking(project.root, project.config, relative) };
 }
 
-export async function productAssessment(repo: string, id: string) {
-  const result = await inspectProductCache(repo, id);
-  if (result.status === cacheStatuses.reviewRequired) throw new CliError(cliErrorCodes.productReviewRequired);
-  if (result.status !== cacheStatuses.reusable) throw new CliError(cliErrorCodes.productGenerationRequired);
-  return { ...result.bank.quiz, selectionSize: defaultProductQuestionCount, scope: [result.bank.scope.name] };
+export async function productAssessment(repo: string, ids: string[]) {
+  const banks = [];
+  for (const id of [...new Set(ids)].sort()) {
+    const result = await inspectProductCache(repo, id);
+    if (result.status === cacheStatuses.reviewRequired) throw new CliError(cliErrorCodes.productReviewRequired);
+    if (result.status !== cacheStatuses.reusable) throw new CliError(cliErrorCodes.productGenerationRequired);
+    banks.push(result.bank);
+  }
+  return composeProductBanks(banks);
 }

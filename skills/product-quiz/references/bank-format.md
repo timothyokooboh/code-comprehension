@@ -33,4 +33,8 @@ copy fingerprints yourself. Old version-1 caches must be regenerated through sav
 All cited files must exist within the project; their content is automatically included
 alongside scoped and supporting inputs. Runtime assessments add `selectionSize: 8` to
 the shared quiz contract, retaining the full question pool for browser retakes.
+For combined assessments, the runtime adds `selectionGroups` (arrays of question IDs)
+to ensure every bank contributes to each sitting and prefixes question IDs with stable
+bank identity. These are runtime fields; generate ordinary independent banks without
+authored selection groups. Identical prompt/options/answers are presented once.
 No machine-specific paths or timestamps are used in saved cache identity.

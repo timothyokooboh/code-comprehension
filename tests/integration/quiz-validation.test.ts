@@ -8,6 +8,8 @@ import { runCli } from '../support/cli.js';
 const fixture: Quiz = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
 
 test.each([
+  ['unknown selection question', (quiz: Quiz) => { quiz.selectionGroups = [['missing']]; }, 'selectionGroups.0'],
+  ['duplicate selection question', (quiz: Quiz) => { quiz.selectionGroups = [['retry', 'retry']]; }, 'selectionGroups.0'],
   ['unsupported version', (quiz: Quiz) => { Object.assign(quiz, { schemaVersion: 99 }); }, 'schemaVersion'],
   ['duplicate questions', (quiz: Quiz) => { quiz.questions[1]!.id = 'retry'; }, 'questions.1.id'],
   ['duplicate options', (quiz: Quiz) => { quiz.questions[0]!.options[1]!.id = 'retry'; }, 'questions.0.options'],

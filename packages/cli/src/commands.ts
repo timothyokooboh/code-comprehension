@@ -12,7 +12,7 @@ import { productStatuses } from './product/contract.js';
 type CommandOptions = {
   port: number; open: boolean; quiz?: string;
   retainProduct?: string; checkProduct?: string; refresh?: boolean; productStatus?: boolean; configureProduct?: string;
-  validateProduct?: string; saveProduct?: string; productBank?: string;
+  validateProduct?: string; saveProduct?: string; productBank?: string[];
   preparePr?: boolean; target?: string; baseline?: string; repo?: string;
   discardPr?: string; validatePr?: string; prSession?: string;
 };
