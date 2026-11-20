@@ -27,5 +27,10 @@ and nonempty `questions`. Each question contains:
 All identifiers accept letters, numbers, underscores, and hyphens. Objects reject
 unknown fields, including scores and attempts. Keep IDs stable during validation
 repairs. The browser uses the resolved bank scope name as its assessment scope label.
-No machine-specific paths or timestamps are needed. Source fingerprints are added
-by the later cache-validity workflow; do not invent those fields in version 1.
+Keep agent-generated input at version 1. On saving, the runtime writes cache version 2
+with `sources: [{path, hash}]`, using SHA-256 content fingerprints. Do not author or
+copy fingerprints yourself. Old version-1 caches must be regenerated through saving.
+All cited files must exist within the project; their content is automatically included
+alongside scoped and supporting inputs. Runtime assessments add `selectionSize: 8` to
+the shared quiz contract, retaining the full question pool for browser retakes.
+No machine-specific paths or timestamps are used in saved cache identity.

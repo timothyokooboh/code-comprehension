@@ -23,6 +23,7 @@ test('invalid replacement banks leave the saved bank intact and cannot escape th
   const repo = createRepository();
   try {
     const quiz = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
+    for (const question of quiz.questions) question.references = [{ path: 'payment.ts' }];
     const bank = { version: 1, id: 'payments', scope: { kind: 'module', name: 'Payments', description: 'Retry behaviour', sourcePatterns: ['payment.ts'], supportingFiles: [] }, quiz: { ...quiz, type: 'product' } };
     repo.write('generated.json', JSON.stringify(bank));
     expect(runCli(['--configure-product', 'git', '--repo', repo.path]).status).toBe(0);

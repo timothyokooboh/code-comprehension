@@ -22,6 +22,19 @@ configuration, validation, saving, and launching. The
 and questions, never scores or answers. Banks remain after the server stops.
 The browser retains its existing current-attempt reload behaviour independently.
 
-This milestone generates fresh questions per invocation. Deterministic source
-freshness checks/reuse, combined multiple scopes, and published runtime bootstrapping
-are separate tickets. Saved banks are not yet a freshness guarantee.
+The runtime saves cache version 2 with a repository-relative source inventory and
+SHA-256 content fingerprints. `--check-product` reports reusable banks or asks for
+generation; `--refresh` explicitly bypasses reuse. Launch checks again. Source content,
+additions/deletions, and supporting inputs matter; timestamps and checkout location
+do not. Version-1 banks require regeneration. The runtime excludes cache and common
+generated directories; see the runtime contract for exact scope and exclusion rules.
+
+A bank can contain more questions than one sitting. The browser selects up to eight,
+and product retakes prioritise questions outside the previous subset before shuffling.
+Small banks reuse available questions. Reload preserves the current subset, answers,
+and submission state. No past-attempt or topic history is stored, and PR retakes retain
+their session questions. Active sessions do not watch source changes. Fingerprints are captured when saving;
+the agent must verify its inputs have not changed while generating questions.
+
+Changed inputs currently require regeneration. Agent review of cosmetic changes,
+combined multiple scopes, and published runtime bootstrapping remain separate tickets.

@@ -5,6 +5,7 @@ import { createRepository } from '../support/repository.js';
 import { runCli, launchCli } from '../support/cli.js';
 
 const quiz = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
+    for (const question of quiz.questions) question.references = [{ path: 'payment.ts' }];
 
 test('validates and saves a scoped product bank before serving it through the shared runtime', async () => {
   const repo = createRepository();
@@ -28,7 +29,8 @@ test('validates and saves a scoped product bank before serving it through the sh
     expect(saved.status, saved.stderr).toBe(0);
     expect(JSON.parse(saved.stdout).status).toBe('saved');
     const stored = JSON.parse(readFileSync(join(repo.path, '.comprehension/cache/payments.json'), 'utf8'));
-    expect(stored).toEqual(bank);
+    expect(stored).toMatchObject({ ...bank, version: 2 });
+    expect(stored.sources).toEqual([{ path: 'payment.ts', hash: expect.stringMatching(/^[a-f0-9]{64}$/) }]);
     const app = await launchCli(['--product-bank', 'payments', '--repo', repo.path]);
     try {
       const served = await (await fetch(`${app.url}/api/quiz`)).json();

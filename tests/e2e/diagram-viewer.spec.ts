@@ -12,10 +12,11 @@ for (const mode of ['animated', 'reduced-motion', 'without-view-transitions'] as
     }
     if (mode === 'animated') {
       await page.addInitScript(() => {
-        const state = Object.assign(window, { diagramTransitions: [] as string[] });
+        const state = Object.assign(window, { diagramTransitions: [] as string[], diagramTransitionFinishes: [] as Promise<void>[] });
         const start = document.startViewTransition.bind(document);
         document.startViewTransition = (update) => {
           const transition = start(update);
+          state.diagramTransitionFinishes.push(transition.finished);
           void transition.ready.then(() => state.diagramTransitions.push('ready'), () => state.diagramTransitions.push('skipped'));
           return transition;
         };
@@ -52,6 +53,9 @@ for (const mode of ['animated', 'reduced-motion', 'without-view-transitions'] as
       await close.click();
       await expect(dialog).not.toBeVisible();
       await expect(expand).toBeFocused();
+      if (mode === 'animated') {
+        await page.evaluate(() => Promise.all(Reflect.get(window, 'diagramTransitionFinishes') as Promise<void>[]));
+      }
       await page.keyboard.press('Enter');
       await expect(dialog).toBeVisible();
       await page.keyboard.press('Escape');

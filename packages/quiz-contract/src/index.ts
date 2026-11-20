@@ -11,3 +11,5 @@ export * from './quiz.ts';
 export * from './scoring.ts';
 
 export * from './pr.ts';
+
+export * from './selection.ts';

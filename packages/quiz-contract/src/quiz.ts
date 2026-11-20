@@ -53,6 +53,7 @@ export const quizSchema = z.strictObject({
   title: text,
   scope: z.array(text).min(1),
   comparison: prComparisonSchema.optional(),
+  selectionSize: z.number().int().positive().optional(),
   questions: z.array(questionSchema).min(1),
 }).superRefine((quiz, context) => {
   const seen = new Set<string>();

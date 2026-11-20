@@ -8,7 +8,7 @@ import QuizSidebar from './QuizSidebar.vue';
 import { useReviewTransition } from '../composables/useReviewTransition';
 
 const props = defineProps<{ quiz: Quiz }>();
-const { answers, result, canSubmit, answer, submit, retake } = useQuizAttempt(props.quiz);
+const { assessment, answers, result, canSubmit, answer, submit, retake } = useQuizAttempt(props.quiz);
 const formId = useId();
 const { updateReview } = useReviewTransition();
 let pointerSubmission = false;
@@ -24,15 +24,15 @@ async function submitReview() {
 
 <template>
   <section :aria-label="messages.assessment.label" class="quiz-workspace">
-    <QuizSidebar :quiz="quiz" :answers="answers" :result="result" :anchor-prefix="formId" @retake="retake" />
+    <QuizSidebar :quiz="assessment" :answers="answers" :result="result" :anchor-prefix="formId" @retake="retake" />
     <div class="workspace-content">
       <div class="workspace-caption">
         <span class="eyebrow">{{ result ? messages.workspace.evidence : messages.workspace.prompt }}</span>
-        <span class="text-xs text-slate-500">{{ messages.workspace.questionCount(quiz.questions.length) }}</span>
+        <span class="text-xs text-slate-500">{{ messages.workspace.questionCount(assessment.questions.length) }}</span>
       </div>
       <form :id="formId" @submit.prevent="submitReview">
         <QuizQuestion
-          v-for="(question, index) in quiz.questions" :id="`${formId}-${question.id}`" :key="question.id"
+          v-for="(question, index) in assessment.questions" :id="`${formId}-${question.id}`" :key="question.id"
           :question="question" :number="index + 1" :selected="answers.get(question.id) ?? []"
           :submitted="result !== null" @answer="answer(question.id, $event)"
         />

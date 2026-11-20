@@ -29,6 +29,8 @@ export const messages = {
     invalidFormat: 'Check the value format; identifiers accept letters, numbers, underscores, and hyphens.',
   },
   product: {
+    check: 'check whether a saved product bank matches current source content',
+    refresh: 'request generation even if the product bank is valid (with --check-product)',
     validate: 'validate a generated product bank without saving or launching',
     save: 'validate and save a product bank in the configured project',
     start: 'launch a saved product bank by identifier',
@@ -50,6 +52,8 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.productSourcesUnavailable]: 'Cannot fingerprint the product sources. Check source patterns, supporting files, and references; use existing regular project files outside generated output.',
+    [cliErrorCodes.productGenerationRequired]: 'This product bank requires generation. Run --check-product to inspect the reason, then regenerate from current code and save before launching.',
     [cliErrorCodes.productSetupRequired]: 'Run product setup first: ask whether banks should be committed, then use --configure-product git or local.',
     [cliErrorCodes.productBankInvalid]: 'Use a product quiz without PR comparison data, repository-relative references, and a bank identifier containing only letters, numbers, underscores, or hyphens.',
     [cliErrorCodes.productStorageFailed]: 'Unable to access project product data. Check .comprehension permissions and available disk space.',
@@ -61,7 +65,7 @@ export const messages = {
     [cliErrorCodes.gitFailed]: 'Unable to read the Git comparison. Check the repository and refs, fetch missing refs, and resolve conflicts before retrying.',
     [cliErrorCodes.baselineRequired]: 'The checkout is on the target branch or target commit. Ask the engineer which earlier baseline to assess, then supply --baseline. Do not guess HEAD~1.',
     [cliErrorCodes.sessionInvalid]: 'Invalid or unavailable PR session. Prepare a new session with --prepare-pr.',
-    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions.',
+    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product.',
 
     [cliErrorCodes.quizInvalid]: 'Quiz validation failed. Fix the following fields before launching:',
     [cliErrorCodes.quizUnreadable]: 'Unable to read the quiz file. Check the path and file permissions.',
