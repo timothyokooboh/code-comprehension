@@ -9,6 +9,12 @@ Use the existing agent to read code and generate questions. The runtime validate
 stores, and presents them without calling a model. Keep scope selection and feedback
 in this chat; the browser is for answering and reviewing the assessment.
 
+For a challenge or scope/difficulty refinement of an active quiz, read the shared
+[revision workflow](../pr-quiz/references/revisions.md). If that sibling is not installed,
+read `skills/pr-quiz/references/revisions.md` from the runtime checkout resolved below.
+Follow it before creating a new assessment: it resolves displayed numbers against the
+actual current draw and validates replacements while preserving the working attempt.
+
 ## 1. Resolve runtime and project setup
 
 Read [runtime.md](references/runtime.md) before invoking commands. Resolve the consuming
@@ -112,7 +118,5 @@ repeat their available questions.
 Reload restores the active subset and answers, not a new draw. No topic history is kept. Browser
 reload persistence uses the existing local-storage attempt mechanism, not bank data.
 
-If the engineer challenges a numbered question or refines scope, inspect the active
-bank and supporting code in chat. Generate and validate a replacement, then launch
-it as a new assessment; never mutate questions inside a running attempt. A perfect
+Use the shared revision workflow above for feedback on an active assessment. A perfect
 score is practice feedback, not proof of production readiness.

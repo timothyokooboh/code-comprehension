@@ -1,4 +1,9 @@
 export const cliErrorCodes = {
+  assessmentInvalid: 'assessment_invalid',
+  assessmentStale: 'assessment_stale',
+  assessmentUnavailable: 'assessment_unavailable',
+  assessmentSourceInvalid: 'assessment_source_invalid',
+
   productScopesInvalid: 'product_scopes_invalid',
   productReviewInvalid: 'product_review_invalid',
   productReviewChanged: 'product_review_changed',

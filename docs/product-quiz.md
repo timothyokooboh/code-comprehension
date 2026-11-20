@@ -56,3 +56,18 @@ relationship. Its scope includes the connecting code and supporting inputs from 
 participating modules, so changes trigger the same review flow. Combined assessments
 are built in memory; no combined cache or score history is stored.
 Published runtime bootstrapping remains a separate ticket.
+
+## Refinement through agent chat
+
+An engineer can challenge a displayed question or request a scope/difficulty change
+in their existing agent chat. The runtime exposes the current question pool and
+browser-reported numbering through `--active-assessment URL`, without selections
+or scores. The agent checks code evidence and follows the
+[revision workflow](../skills/pr-quiz/references/revisions.md).
+
+`--revise-assessment RECEIPT --runtime URL` validates the replacement and rejects
+stale revisions or display mappings. The open form stays unchanged; after success,
+the engineer reloads to begin a new attempt with cleared answers and score. Failed
+revisions leave the old attempt usable. PR revisions recheck their comparison and
+retain managed temporary cleanup; product revisions load independently validated
+saved banks under the existing tracking preference. No score history is created.

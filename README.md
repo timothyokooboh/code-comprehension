@@ -81,3 +81,8 @@ This produces `artifacts/code-comprehension.tgz`, containing the executable and
 compiled UI. A consuming project does not need Vue, Vite, or a frontend build.
 The package remains private until the distribution milestone establishes its
 published name and release process.
+
+Active quizzes support question challenges and scope/difficulty refinements through
+the existing agent chat. The agent can inspect displayed question IDs and validate a
+replacement; the engineer reloads to start the revised attempt. See the
+[revision workflow](skills/pr-quiz/references/revisions.md).

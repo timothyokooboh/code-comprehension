@@ -49,6 +49,8 @@ const questionSchema = z.strictObject({
 
 export const quizSchema = z.strictObject({
   schemaVersion: z.literal(quizSchemaVersion),
+  runtimeRevision: z.uuid().optional(),
+  attemptRevision: z.uuid().optional(),
   id: identifier,
   type: z.enum(assessmentTypes),
   title: text,

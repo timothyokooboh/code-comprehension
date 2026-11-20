@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useId } from 'vue';
+import { useAssessmentDisplay } from '../composables/useAssessmentDisplay';
 import type { Quiz } from '@code-comprehension/quiz-contract';
 import { useQuizAttempt } from '../composables/useQuizAttempt';
 import { messages } from '../locales/en';
@@ -9,6 +10,7 @@ import { useReviewTransition } from '../composables/useReviewTransition';
 
 const props = defineProps<{ quiz: Quiz }>();
 const { assessment, answers, result, canSubmit, answer, submit, retake } = useQuizAttempt(props.quiz);
+const { unavailable: displayUnavailable } = useAssessmentDisplay(assessment);
 const formId = useId();
 const { updateReview } = useReviewTransition();
 let pointerSubmission = false;
@@ -26,6 +28,7 @@ async function submitReview() {
   <section :aria-label="messages.assessment.label" class="quiz-workspace">
     <QuizSidebar :quiz="assessment" :answers="answers" :result="result" :anchor-prefix="formId" @retake="retake" />
     <div class="workspace-content">
+      <p v-if="displayUnavailable" role="status" class="mb-4 text-sm">{{ messages.quiz.displayUnavailable }}</p>
       <div class="workspace-caption">
         <span class="eyebrow">{{ result ? messages.workspace.evidence : messages.workspace.prompt }}</span>
         <span class="text-xs text-slate-500">{{ messages.workspace.questionCount(assessment.questions.length) }}</span>

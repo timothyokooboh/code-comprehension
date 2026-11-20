@@ -1,4 +1,7 @@
-import { prSessionStatuses } from '@code-comprehension/quiz-contract';
+import { resolve } from 'node:path';
+import { projectRoot } from './product/project.js';
+import { readActiveAssessment, reviseAssessment } from './assessment/client.js';
+import { assessmentSourceKinds, prSessionStatuses } from '@code-comprehension/quiz-contract';
 import { launch, launchAssessment } from './launch.js';
 import { preparePr, discardPr } from './pr/session.js';
 import { loadPrAssessment } from './pr/assessment.js';
@@ -11,6 +14,7 @@ import { productStatuses } from './product/contract.js';
 
 type CommandOptions = {
   port: number; open: boolean; quiz?: string;
+  activeAssessment?: string; reviseAssessment?: string; runtime?: string;
   retainProduct?: string; checkProduct?: string; refresh?: boolean; productStatus?: boolean; configureProduct?: string;
   validateProduct?: string; saveProduct?: string; productBank?: string[];
   preparePr?: boolean; target?: string; baseline?: string; repo?: string;
@@ -19,12 +23,12 @@ type CommandOptions = {
 
 function validateOptions(options: CommandOptions) {
   const modes = [
-    options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
+    options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
     options.retainProduct, options.checkProduct, options.productStatus, options.configureProduct, options.validateProduct, options.saveProduct, options.productBank,
   ].filter((value) => value !== undefined && value !== false);
   const hasComparisonOptions = options.target !== undefined || options.baseline !== undefined;
   const acceptsRepo = options.retainProduct || options.checkProduct || options.preparePr || options.productStatus || options.configureProduct || options.saveProduct || options.productBank;
-  if ((options.refresh && !options.checkProduct) || modes.length > 1 || (hasComparisonOptions && !options.preparePr) ||
+  if ((Boolean(options.runtime) !== Boolean(options.reviseAssessment)) || (options.refresh && !options.checkProduct) || modes.length > 1 || (hasComparisonOptions && !options.preparePr) ||
     (options.preparePr && !options.target) || (options.repo !== undefined && !acceptsRepo)) {
     throw new CliError(cliErrorCodes.prOptionsInvalid);
   }
@@ -32,7 +36,11 @@ function validateOptions(options: CommandOptions) {
 
 export async function runCommand(options: CommandOptions) {
   validateOptions(options);
-  if (options.retainProduct) {
+  if (options.activeAssessment) {
+    console.log(JSON.stringify(await readActiveAssessment(options.activeAssessment)));
+  } else if (options.reviseAssessment && options.runtime) {
+    console.log(await reviseAssessment(options.runtime, options.reviseAssessment));
+  } else if (options.retainProduct) {
     console.log(JSON.stringify(await retainProductBank(options.repo ?? process.cwd(), options.retainProduct)));
   } else if (options.checkProduct) {
     const result = await inspectProductCache(options.repo ?? process.cwd(), options.checkProduct, options.refresh);
@@ -48,7 +56,9 @@ export async function runCommand(options: CommandOptions) {
   } else if (options.saveProduct) {
     console.log(JSON.stringify(await saveProductBank(options.repo ?? process.cwd(), options.saveProduct)));
   } else if (options.productBank) {
-    await launchAssessment(options, await productAssessment(options.repo ?? process.cwd(), options.productBank));
+    const repo = await projectRoot(options.repo ?? process.cwd());
+    await launchAssessment(options, await productAssessment(repo, options.productBank), undefined,
+      { kind: assessmentSourceKinds.product, repo, bankIds: options.productBank });
   } else if (options.productStatus) {
     console.log(JSON.stringify(await reconcileProductSetup(options.repo ?? process.cwd())));
   } else if (options.configureProduct) {
@@ -61,8 +71,8 @@ export async function runCommand(options: CommandOptions) {
     await loadPrAssessment(options.validatePr);
     console.log(JSON.stringify({ status: prSessionStatuses.valid }));
   } else if (options.prSession) {
-    const directory = options.prSession;
+    const directory = resolve(options.prSession);
     const quiz = await loadPrAssessment(directory);
-    await launchAssessment(options, quiz, () => discardPr(directory));
+    await launchAssessment(options, quiz, () => discardPr(directory), { kind: assessmentSourceKinds.pr, directory });
   } else await launch(options);
 }

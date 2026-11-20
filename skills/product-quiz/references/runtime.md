@@ -60,3 +60,15 @@ and references must be existing regular files within the project and outside tho
 directories; add relevant ignored configuration explicitly as supporting files.
 Keep temporary generation input outside the source scope (prefer the OS temp directory).
 This is scoped file validation, not a transitive dependency graph.
+
+## Active assessment revisions
+
+- `--active-assessment LOCAL_URL`: read the current pool, source context, revision,
+  and the browser's latest displayed-number-to-ID mapping, without answers or scores.
+- `--revise-assessment RECEIPT --runtime LOCAL_URL`: validate a proposed replacement
+  against the current revision/display token and workflow. On success, tell the
+  engineer to reload to start a new attempt; invalid/stale proposals leave it usable.
+
+Use the shared PR skill's `references/revisions.md` for receipt shape, grounding,
+per-workflow preparation, and temporary-file cleanup. URLs must be the running
+`http://127.0.0.1:PORT` origin, without paths, credentials, queries, or fragments.
