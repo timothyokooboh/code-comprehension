@@ -1,4 +1,7 @@
 export const cliErrorCodes = {
+  productReviewInvalid: 'product_review_invalid',
+  productReviewChanged: 'product_review_changed',
+  productReviewRequired: 'product_review_required',
   productSourcesUnavailable: 'product_sources_unavailable',
   productGenerationRequired: 'product_generation_required',
   productSetupRequired: 'product_setup_required',

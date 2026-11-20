@@ -33,6 +33,7 @@ export async function saveProductBank(repo: string, input: string) {
 
 export async function productAssessment(repo: string, id: string) {
   const result = await inspectProductCache(repo, id);
+  if (result.status === cacheStatuses.reviewRequired) throw new CliError(cliErrorCodes.productReviewRequired);
   if (result.status !== cacheStatuses.reusable) throw new CliError(cliErrorCodes.productGenerationRequired);
   return { ...result.bank.quiz, selectionSize: defaultProductQuestionCount, scope: [result.bank.scope.name] };
 }

@@ -15,10 +15,16 @@ Quote paths and identifiers. Use one action per invocation:
 - `--configure-product git|local --repo PATH`: saves the explicit preference in
   `.comprehension/config.json`, reconciles the managed cache rule, and reports conflicts.
 - `--check-product BANK_ID --repo PATH [--refresh]`: returns `reusable` and scope
-  metadata when source content matches, otherwise `generation_required` with a reason
-  (`missing`, `incompatible`, `changed`, `sources_unavailable`, or `refresh`) and changed
-  paths where available. Explicit refresh always requests generation without deleting
+  metadata when source content matches, or `review_required` with changed input paths and a review token. Missing/incompatible
+  data, unavailable inputs, or explicit refresh return `generation_required` with a reason
+  (`missing`, `incompatible`, `sources_unavailable`, or `refresh`). Changed inputs
+  retain their stored fingerprints pending a review decision. Explicit refresh always requests generation without deleting
   the old bank. Unknown/old cache formats require regeneration.
+- `--retain-product RECEIPT --repo PATH`: explicitly confirm a reviewed bank using
+  the JSON contract in [source-review.md](source-review.md). Updates only reference
+  line corrections and fingerprints, returning `retained`. Missing confirmation,
+  stale tokens, unknown questions/references, and out-of-range lines fail without
+  replacing the bank. `--refresh` cannot be combined with this action.
 - `--validate-product INPUT`: validates a bank without saving or launching; success
   returns `{"status":"valid"}`. Errors identify fields for repair.
 - `--save-product INPUT --repo PATH`: requires configured project; validates and saves

@@ -1,3 +1,4 @@
+import { createReviewToken } from './review-token.js';
 import { join } from 'node:path';
 import { CliError, cliErrorCodes } from '../errors.js';
 import { reconcileProductSetup } from './config.js';
@@ -5,7 +6,7 @@ import { bankIdentifier, cachedBankSchema, isProductQuiz, type ProductBank } fro
 import { productPaths, readOptional } from './project.js';
 import { captureSources } from './sources.js';
 
-export const cacheStatuses = { reusable: 'reusable', generationRequired: 'generation_required' } as const;
+export const cacheStatuses = { reviewRequired: 'review_required', reusable: 'reusable', generationRequired: 'generation_required' } as const;
 export const cacheReasons = { missing: 'missing', incompatible: 'incompatible', changed: 'changed', refresh: 'refresh', unavailable: 'sources_unavailable' } as const;
 
 export async function configuredProject(repo: string) {
@@ -37,6 +38,6 @@ export async function inspectProductCache(repo: string, id: string, refresh = fa
   const previous = new Map(bank.sources.map(({ path, hash }) => [path, hash]));
   const next = new Map(current.map(({ path, hash }) => [path, hash]));
   const changedFiles = [...new Set([...previous.keys(), ...next.keys()])].filter((path) => previous.get(path) !== next.get(path));
-  if (changedFiles.length) return required(cacheReasons.changed, changedFiles);
+  if (changedFiles.length) return { status: cacheStatuses.reviewRequired, reason: cacheReasons.changed, changedFiles, reviewToken: createReviewToken(bank, current), bank, current, conflicts: project.conflicts } as const;
   return { status: cacheStatuses.reusable, bank, conflicts: project.conflicts } as const;
 }

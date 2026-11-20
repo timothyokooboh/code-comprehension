@@ -58,11 +58,13 @@ scope and avoid overwriting an unrelated bank.
 
 Run `RUNTIME --check-product BANK_ID --repo PROJECT`, adding `--refresh` when explicitly
 requested. A `reusable` result permits launching without model generation. Go straight
-to step 5. `generation_required` reports missing/incompatible data, changed source
-paths, unavailable inputs, or explicit refresh. Read current code and generate a new
-bank in step 4. Do not hand-edit stored fingerprints or reuse changed banks unchecked;
-agent approval of cosmetic changes arrives in the next ticket. Fix unreadable or
-missing supporting evidence before saving a replacement. Surface tracking conflicts.
+to step 5. For `review_required`, read [source-review.md](references/source-review.md)
+and check the bank against changed inputs. Retain only after explicitly confirming
+all content remains valid and correcting shifted references; otherwise regenerate in
+step 4. `generation_required` reports missing/incompatible data, unavailable inputs,
+or explicit refresh: generate in step 4, without retention. Never hand-edit stored
+fingerprints. Fix missing evidence before saving a replacement and surface tracking
+conflicts. Explicit refresh bypasses retention even if a prior review token exists.
 
 ## 4. Generate and validate a bank
 
