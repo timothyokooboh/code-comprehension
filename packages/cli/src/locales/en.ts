@@ -29,6 +29,7 @@ export const messages = {
     invalidFormat: 'Check the value format; identifiers accept letters, numbers, underscores, and hyphens.',
   },
   product: {
+    retain: 'retain a bank after explicit agent review using a review JSON receipt',
     check: 'check whether a saved product bank matches current source content',
     refresh: 'request generation even if the product bank is valid (with --check-product)',
     validate: 'validate a generated product bank without saving or launching',
@@ -52,6 +53,9 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.productReviewInvalid]: 'Provide a review receipt with bankId, the current reviewToken, confirmed: true, and a references array of valid questionId, referenceIndex, and line corrections within the source file. Do not confirm until every question, answer, explanation, and reference has been checked.',
+    [cliErrorCodes.productReviewChanged]: 'The bank or source inputs no longer match this review. Run --check-product and review the current inputs before confirming again.',
+    [cliErrorCodes.productReviewRequired]: 'The product bank needs agent review before reuse. Run --check-product, review changed inputs against the questions and references, then explicitly retain or regenerate the bank.',
     [cliErrorCodes.productSourcesUnavailable]: 'Cannot fingerprint the product sources. Check source patterns, supporting files, and references; use existing regular project files outside generated output.',
     [cliErrorCodes.productGenerationRequired]: 'This product bank requires generation. Run --check-product to inspect the reason, then regenerate from current code and save before launching.',
     [cliErrorCodes.productSetupRequired]: 'Run product setup first: ask whether banks should be committed, then use --configure-product git or local.',

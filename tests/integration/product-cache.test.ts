@@ -44,7 +44,7 @@ test('source edits, additions, deletions, and supporting changes block launch wi
     expect(runCli(['--save-product', join(repo.path, 'generated.json'), '--repo', repo.path]).status).toBe(0);
     const original = readFileSync(join(repo.path, '.comprehension/cache/payments.json'), 'utf8');
     repo.write('payment.ts', 'export const retries = 9;\n');
-    expect(check(repo.path)).toMatchObject({ status: 'generation_required', reason: 'changed', changedFiles: ['payment.ts'] });
+    expect(check(repo.path)).toMatchObject({ status: 'review_required', reason: 'changed', changedFiles: ['payment.ts'] });
     expect(runCli(['--product-bank', 'payments', '--repo', repo.path, '--no-open']).status).toBe(1);
     repo.write('payment.ts', 'export const retries = 0;\n');
     repo.write('new.ts', 'export const enabled = true;');

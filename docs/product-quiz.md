@@ -23,7 +23,7 @@ and questions, never scores or answers. Banks remain after the server stops.
 The browser retains its existing current-attempt reload behaviour independently.
 
 The runtime saves cache version 2 with a repository-relative source inventory and
-SHA-256 content fingerprints. `--check-product` reports reusable banks or asks for
+SHA-256 content fingerprints. `--check-product` reports reusable banks, changed inputs requiring review, or a need for
 generation; `--refresh` explicitly bypasses reuse. Launch checks again. Source content,
 additions/deletions, and supporting inputs matter; timestamps and checkout location
 do not. Version-1 banks require regeneration. The runtime excludes cache and common
@@ -36,5 +36,12 @@ and submission state. No past-attempt or topic history is stored, and PR retakes
 their session questions. Active sessions do not watch source changes. Fingerprints are captured when saving;
 the agent must verify its inputs have not changed while generating questions.
 
-Changed inputs currently require regeneration. Agent review of cosmetic changes,
-combined multiple scopes, and published runtime bootstrapping remain separate tickets.
+Changed inputs require agent review while stored fingerprints remain unchanged.
+The agent checks all question content and evidence. Valid banks can be retained using
+an explicit review receipt, correcting shifted reference lines; changed behaviour,
+uncertainty, or moved source paths require regeneration. Review tokens bind the
+confirmation to both bank and source content, and launch checks again. Explicit
+refresh always takes the generation path. See the
+[source review workflow](../skills/product-quiz/references/source-review.md).
+
+Combined multiple scopes and published runtime bootstrapping remain separate tickets.
