@@ -1,4 +1,5 @@
 export const cliErrorCodes = {
+  productScopesInvalid: 'product_scopes_invalid',
   productReviewInvalid: 'product_review_invalid',
   productReviewChanged: 'product_review_changed',
   productReviewRequired: 'product_review_required',

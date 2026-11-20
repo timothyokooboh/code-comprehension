@@ -38,8 +38,7 @@ and inspectable source without blocking the explanation. Retaking resets explana
 controls to concise mode.
 The [PR quiz skill and runtime workflow](docs/pr-quiz.md) now support agent-generated
 PR assessments. The [product quiz workflow](docs/product-quiz.md) supports first-run
-setup and single-module or general assessments. Content-based cache reuse and varied product retakes are supported. Changed sources require agent review before retention or regeneration. Combined
-scopes and published runtime bootstrapping remain in subsequent tickets.
+setup and single-module, combined-module, or general assessments. Content-based cache reuse and varied product retakes are supported. Changed sources require agent review before retention or regeneration. Published runtime bootstrapping remains in a subsequent ticket.
 
 See the [UI SDK evaluation](docs/ui-sdk-evaluation.md) for the native-control decision.
 

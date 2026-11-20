@@ -30,9 +30,13 @@ Quote paths and identifiers. Use one action per invocation:
 - `--save-product INPUT --repo PATH`: requires configured project; validates and saves
   `.comprehension/cache/BANK_ID.json`, replacing the same bank ID. Returns `saved`,
   its project-relative path, and tracking conflicts.
-- `--product-bank BANK_ID --repo PATH [--no-open] [--port NUMBER]`: rechecks source fingerprints, then loads a valid saved bank
-  into the shared local browser. Its scope label is the resolved bank scope name. The browser selects
-  up to eight questions, redraws on product retakes, and preserves the current draw
+- `--product-bank BANK_ID [OTHER_BANK_IDS...] --repo PATH [--no-open] [--port NUMBER]`: rechecks source fingerprints, then composes valid saved banks
+  into one shared local assessment. Any bank requiring review or generation blocks
+  launch. Each bank is checked independently with `--check-product`; a failure never
+  changes the others. Repeated IDs are ignored and ID order does not change identity.
+  General overview must be launched alone. Scope labels use resolved bank names.
+  The browser targets eight questions, increasing to the bank count when needed to
+  cover every bank. It redraws on product retakes and preserves the current draw
   and answers on reload. PR retakes retain their questions.
 
 `--repo` resolves to the Git project root, including from subdirectories. Both local
