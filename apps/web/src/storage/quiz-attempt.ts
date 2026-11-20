@@ -1,7 +1,7 @@
-import { assessmentTypes, questionTypes, type Quiz, type Answers } from '@code-comprehension/quiz-contract';
+import { assessmentQuestionCount, assessmentTypes, questionTypes, type Quiz, type Answers } from '@code-comprehension/quiz-contract';
 
 const storageKey = 'code-comprehension:current-attempt:v1';
-type Attempt = { answers: Map<string, string[]>; submitted: boolean };
+type Attempt = { questionIds: string[]; answers: Map<string, string[]>; submitted: boolean };
 
 function parseAnswers(value: unknown, quiz: Quiz): Map<string, string[]> | null {
   if (!Array.isArray(value)) return null;
@@ -27,18 +27,23 @@ export function createAttemptStorage(quiz: Quiz) {
     try {
       const data = JSON.parse(storage().getItem(storageKey) ?? 'null');
       if (!data || data.identity !== identity || typeof data.submitted !== 'boolean') return null;
-      const answers = parseAnswers(data.answers, quiz);
+      const questionIds: unknown = data.questionIds ?? (quiz.selectionSize === undefined ? quiz.questions.map(({ id }) => id) : null);
+      if (!Array.isArray(questionIds) || questionIds.length !== assessmentQuestionCount(quiz) ||
+        questionIds.some((id) => typeof id !== 'string' || !quiz.questions.some((question) => question.id === id)) ||
+        new Set(questionIds).size !== questionIds.length) return null;
+      const selectedQuiz = { ...quiz, questions: questionIds.map((id) => quiz.questions.find((question) => question.id === id)!) };
+      const answers = parseAnswers(data.answers, selectedQuiz);
       if (!answers) return null;
-      if (data.submitted && quiz.questions.some(({ id }) => !answers.get(id)?.length)) return null;
-      return { answers, submitted: data.submitted };
+      if (data.submitted && selectedQuiz.questions.some(({ id }) => !answers.get(id)?.length)) return null;
+      return { questionIds, answers, submitted: data.submitted };
     } catch {
       return null;
     }
   }
 
-  function write(answers: Answers, submitted: boolean) {
+  function write(answers: Answers, submitted: boolean, questionIds: readonly string[]) {
     try {
-      storage().setItem(storageKey, JSON.stringify({ identity, answers: [...answers], submitted }));
+      storage().setItem(storageKey, JSON.stringify({ identity, questionIds, answers: [...answers], submitted }));
     } catch {
       // Storage can be blocked or full; the in-memory assessment remains usable.
     }

@@ -1,4 +1,6 @@
 export const cliErrorCodes = {
+  productSourcesUnavailable: 'product_sources_unavailable',
+  productGenerationRequired: 'product_generation_required',
   productSetupRequired: 'product_setup_required',
   productBankInvalid: 'product_bank_invalid',
   productStorageFailed: 'product_storage_failed',

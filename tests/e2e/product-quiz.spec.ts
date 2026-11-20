@@ -8,6 +8,7 @@ for (const kind of ['module', 'general'] as const) {
   test(`takes a ${kind} product assessment from its saved project bank`, async ({ page }) => {
     const repo = createRepository();
     const quiz = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
+    for (const question of quiz.questions) question.references = [{ path: 'payment.ts' }];
     const name = kind === 'module' ? 'Payment retries' : 'System overview';
     try {
       repo.write('generated.json', JSON.stringify({
@@ -28,11 +29,17 @@ for (const kind of ['module', 'general'] as const) {
         await page.getByRole('checkbox', { name: 'Record the provider response' }).check();
         await page.getByRole('button', { name: 'Submit answers' }).click();
         await expect(page.getByRole('heading', { name: 'Score: 2 of 2 (100%)' })).toBeVisible();
+        const previousQuestions = await page.locator('legend').allTextContents();
         await page.getByRole('button', { name: 'Retake quiz' }).click();
+        await expect(page.locator('fieldset')).toHaveCount(2);
+        const repeatedQuestions = await page.locator('legend').allTextContents();
+        const prompts = (items: string[]) => items.map((value) => value.replace(/^\d+\. /, '')).sort();
+        expect(prompts(repeatedQuestions)).toEqual(prompts(previousQuestions));
+        expect(repeatedQuestions).not.toEqual(previousQuestions);
         await expect(page.getByRole('radio').first()).not.toBeChecked();
       } finally { await app.stop(); }
       const bank = JSON.parse(readFileSync(join(repo.path, `.comprehension/cache/${kind}.json`), 'utf8'));
-      expect(Object.keys(bank).sort()).toEqual(['id', 'quiz', 'scope', 'version']);
+      expect(Object.keys(bank).sort()).toEqual(['id', 'quiz', 'scope', 'sources', 'version']);
     } finally { repo.dispose(); }
   });
 }
