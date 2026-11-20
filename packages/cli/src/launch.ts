@@ -1,5 +1,5 @@
 import open from 'open';
-import type { Quiz } from '@code-comprehension/quiz-contract';
+import { assessmentSourceKinds, type Quiz, type AssessmentSource } from '@code-comprehension/quiz-contract';
 import { loadQuiz } from './load-quiz.js';
 import { startServer } from './server.js';
 import { messages } from './locales/en.js';
@@ -36,8 +36,9 @@ export async function launch(options: { port: number; open: boolean; quiz?: stri
 export async function launchAssessment(
   options: { port: number; open: boolean }, quiz: Quiz | null,
   cleanup: () => Promise<void> = async () => {},
+  source: AssessmentSource = { kind: assessmentSourceKinds.file },
 ) {
-  const app = await startServer(options.port, quiz);
+  const app = await startServer(options.port, quiz, source);
   registerShutdown(app, cleanup);
   console.log(messages.started(app.url));
   console.log(messages.stopHint);

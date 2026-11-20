@@ -29,6 +29,12 @@ export const messages = {
     unknownFields: (keys: string) => `Remove unrecognised fields: ${keys}.`,
     invalidFormat: 'Check the value format; identifiers accept letters, numbers, underscores, and hyphens.',
   },
+  assessment: {
+    active: 'read the current assessment and displayed question mapping from a local runtime URL',
+    revise: 'validate and replace an assessment using a revision receipt JSON file',
+    runtime: 'local runtime URL for --revise-assessment',
+    revised: 'Replacement validated. Reload the browser to begin a new attempt with cleared selections and score.',
+  },
   product: {
     retain: 'retain a bank after explicit agent review using a review JSON receipt',
     check: 'check whether a saved product bank matches current source content',
@@ -55,6 +61,11 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.assessmentInvalid]: 'Invalid assessment request. Use the current revision and displayToken with a valid input; displayed question IDs must match the current assessment.',
+    [cliErrorCodes.assessmentStale]: 'The assessment or displayed question order changed. Read --active-assessment again and review the current questions before revising.',
+    [cliErrorCodes.assessmentUnavailable]: 'Unable to reach the local assessment. Use its running http://127.0.0.1:PORT URL and retry.',
+    [cliErrorCodes.assessmentSourceInvalid]: 'Keep the same quiz workflow. Product revisions use saved bankIds in the current project; PR and file revisions use quizPath. Start a new session for a different workflow.',
+
     [cliErrorCodes.productScopesInvalid]: 'Select one or more module banks, or launch a general overview bank on its own.',
     [cliErrorCodes.productReviewInvalid]: 'Provide a review receipt with bankId, the current reviewToken, confirmed: true, and a references array of valid questionId, referenceIndex, and line corrections within the source file. Do not confirm until every question, answer, explanation, and reference has been checked.',
     [cliErrorCodes.productReviewChanged]: 'The bank or source inputs no longer match this review. Run --check-product and review the current inputs before confirming again.',
@@ -62,7 +73,7 @@ export const messages = {
     [cliErrorCodes.productSourcesUnavailable]: 'Cannot fingerprint the product sources. Check source patterns, supporting files, and references; use existing regular project files outside generated output.',
     [cliErrorCodes.productGenerationRequired]: 'This product bank requires generation. Run --check-product to inspect the reason, then regenerate from current code and save before launching.',
     [cliErrorCodes.productSetupRequired]: 'Run product setup first: ask whether banks should be committed, then use --configure-product git or local.',
-    [cliErrorCodes.productBankInvalid]: 'Use a product quiz without PR comparison data, repository-relative references, and a bank identifier containing only letters, numbers, underscores, or hyphens.',
+    [cliErrorCodes.productBankInvalid]: 'Use a product quiz without PR comparison data or runtime revision metadata, repository-relative references, and a bank identifier containing only letters, numbers, underscores, or hyphens.',
     [cliErrorCodes.productStorageFailed]: 'Unable to access project product data. Check .comprehension permissions and available disk space.',
     [cliErrorCodes.productConfigInvalid]: 'Invalid product configuration. Use bankTracking git or local and configuration version 1. Repair .comprehension/config.json before continuing.',
     [cliErrorCodes.sessionWriteFailed]: 'Unable to create or write the temporary PR session. Check temporary-directory permissions and available disk space, then retry.',
@@ -72,7 +83,7 @@ export const messages = {
     [cliErrorCodes.gitFailed]: 'Unable to read the Git comparison. Check the repository and refs, fetch missing refs, and resolve conflicts before retrying.',
     [cliErrorCodes.baselineRequired]: 'The checkout is on the target branch or target commit. Ask the engineer which earlier baseline to assess, then supply --baseline. Do not guess HEAD~1.',
     [cliErrorCodes.sessionInvalid]: 'Invalid or unavailable PR session. Prepare a new session with --prepare-pr.',
-    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product.',
+    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product. Use --runtime only with --revise-assessment, which requires it.',
 
     [cliErrorCodes.quizInvalid]: 'Quiz validation failed. Fix the following fields before launching:',
     [cliErrorCodes.quizUnreadable]: 'Unable to read the quiz file. Check the path and file permissions.',

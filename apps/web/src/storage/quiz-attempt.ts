@@ -20,7 +20,9 @@ function parseAnswers(value: unknown, quiz: Quiz): Map<string, string[]> | null 
 }
 
 export function createAttemptStorage(quiz: Quiz) {
-  const identity = JSON.stringify(quiz);
+  // Transport revisions protect agent requests; only a deliberate replacement resets an attempt.
+  const { runtimeRevision: _runtimeRevision, ...persistentQuiz } = quiz;
+  const identity = JSON.stringify(persistentQuiz);
   const storage = () => quiz.type === assessmentTypes.pr ? sessionStorage : localStorage;
 
   function read(): Attempt | null {

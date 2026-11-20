@@ -21,6 +21,7 @@ export const messages = {
   },
   quiz: {
     loading: 'Loading assessment…',
+    displayUnavailable: 'Question numbering could not be shared with your agent. Reload this page before asking about a numbered question.',
     scope: (scopes: readonly string[]) => `Scope: ${scopes.join(', ')}`,
     question: (number: number, prompt: string) => `${number}. ${prompt}`,
     instructions: {

@@ -36,7 +36,11 @@ test('combines independently valid banks with stable identities and removes dupl
       expect(first.selectionGroups!.map((group: string[]) => group.length)).toEqual([2, 2]);
     } finally { await app.stop(); }
     const reversed = await launchCli(['--product-bank', 'cart', 'payments', '--repo', repo.path]);
-    try { expect(await (await fetch(`${reversed.url}/api/quiz`)).json()).toEqual(first); }
+    try {
+      const { runtimeRevision: _revision, ...reordered } = await (await fetch(`${reversed.url}/api/quiz`)).json();
+      const { runtimeRevision: _firstRevision, ...original } = first;
+      expect(reordered).toEqual(original);
+    }
     finally { await reversed.stop(); }
   } finally { repo.dispose(); }
 });

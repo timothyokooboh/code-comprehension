@@ -27,3 +27,15 @@ Comparisons use the merge base of HEAD and TARGET unless BASELINE is supplied, i
 which case that exact commit is used. Staged and unstaged versions are collapsed into
 the final working-tree state. Untracked non-ignored files are included. No index or
 working-tree changes are made. Resolve merge conflicts before preparing a quiz.
+
+## Active assessment revisions
+
+- `--active-assessment LOCAL_URL`: read the current pool, source context, revision,
+  and the browser's latest displayed-number-to-ID mapping, without answers or scores.
+- `--revise-assessment RECEIPT --runtime LOCAL_URL`: validate a proposed replacement
+  against the current revision/display token and workflow. On success, tell the
+  engineer to reload to start a new attempt; invalid/stale proposals leave it usable.
+
+Use the shared PR skill's `references/revisions.md` for receipt shape, grounding,
+per-workflow preparation, and temporary-file cleanup. URLs must be the running
+`http://127.0.0.1:PORT` origin, without paths, credentials, queries, or fragments.

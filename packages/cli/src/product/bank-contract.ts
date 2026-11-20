@@ -22,6 +22,6 @@ export const cachedBankSchema = bankSchema.extend({
 
 
 export function isProductQuiz(quiz: Quiz) {
-  return quiz.type === assessmentTypes.product && !quiz.comparison &&
+  return quiz.type === assessmentTypes.product && !quiz.comparison && !quiz.runtimeRevision && !quiz.attemptRevision &&
     quiz.questions.every((question) => question.references.every(({ path }) => relativeSourcePath.safeParse(path).success));
 }

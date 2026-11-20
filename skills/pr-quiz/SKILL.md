@@ -1,6 +1,6 @@
 ---
 name: pr-quiz
-description: Generate and launch a code-grounded MCQ assessment of proposed PR changes, including committed and uncommitted work. Use when an engineer requests a PR comprehension quiz; not for general product knowledge or opening a PR.
+description: Generate and launch a code-grounded MCQ assessment of proposed PR changes, including committed and uncommitted work. Use when an engineer requests a PR comprehension quiz or challenges/refines an active one; not for general product knowledge or opening a PR.
 ---
 
 # PR comprehension quiz
@@ -8,6 +8,11 @@ description: Generate and launch a code-grounded MCQ assessment of proposed PR c
 Use the engineer's existing agent to generate questions. The runtime validates and
 presents them; it never calls a model. Do not open a PR, impose a merge gate, or
 claim that a perfect score proves production readiness.
+
+For a challenge or scope/difficulty refinement of an active quiz, read
+[revisions.md](references/revisions.md) and follow that workflow instead of preparing
+a new session immediately. It maps displayed numbers to stable IDs and preserves the
+current attempt if generation or validation fails.
 
 ## 1. Locate the runtime and comparison
 
