@@ -4,3 +4,7 @@ dist/
 artifacts/
 playwright-report/
 test-results/
+
+# code-comprehension managed cache
+/.comprehension/cache/
+# end code-comprehension managed cache
