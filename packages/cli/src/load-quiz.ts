@@ -8,7 +8,7 @@ export class QuizValidationError extends CliError {
   }
 }
 
-async function readQuizData(path: string): Promise<unknown> {
+export async function readQuizData(path: string): Promise<unknown> {
   let content: string;
   try {
     content = await readFile(path, 'utf8');

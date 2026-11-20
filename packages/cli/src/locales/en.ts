@@ -28,6 +28,18 @@ export const messages = {
     unknownFields: (keys: string) => `Remove unrecognised fields: ${keys}.`,
     invalidFormat: 'Check the value format; identifiers accept letters, numbers, underscores, and hyphens.',
   },
+  product: {
+    validate: 'validate a generated product bank without saving or launching',
+    save: 'validate and save a product bank in the configured project',
+    start: 'launch a saved product bank by identifier',
+    conflicts: {
+      config_ignored: 'Project configuration is ignored by an existing rule. Adjust that rule to keep .comprehension/config.json trackable.',
+      cache_ignored: 'Product banks are ignored by an existing rule. Adjust that rule before committing banks.',
+      cache_tracked: 'Some product banks are already tracked. Ignore rules do not untrack files; review them before choosing whether to remove them from Git tracking.',
+    },
+    status: 'inspect product setup for the project',
+    configure: 'save product bank tracking preference (git or local)',
+  },
   pr: {
     validate: 'validate generated questions and check the prepared code has not changed',
     start: 'launch a validated temporary PR session',
@@ -38,6 +50,10 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.productSetupRequired]: 'Run product setup first: ask whether banks should be committed, then use --configure-product git or local.',
+    [cliErrorCodes.productBankInvalid]: 'Use a product quiz without PR comparison data, repository-relative references, and a bank identifier containing only letters, numbers, underscores, or hyphens.',
+    [cliErrorCodes.productStorageFailed]: 'Unable to access project product data. Check .comprehension permissions and available disk space.',
+    [cliErrorCodes.productConfigInvalid]: 'Invalid product configuration. Use bankTracking git or local and configuration version 1. Repair .comprehension/config.json before continuing.',
     [cliErrorCodes.sessionWriteFailed]: 'Unable to create or write the temporary PR session. Check temporary-directory permissions and available disk space, then retry.',
     [cliErrorCodes.sessionCleanupFailed]: 'Unable to remove the temporary PR session. Check its directory permissions and retry --discard-pr with the recorded session path.',
     [cliErrorCodes.prChanged]: 'The code or comparison changed since preparation. Prepare a new PR session and regenerate questions before launching.',
@@ -45,7 +61,7 @@ export const messages = {
     [cliErrorCodes.gitFailed]: 'Unable to read the Git comparison. Check the repository and refs, fetch missing refs, and resolve conflicts before retrying.',
     [cliErrorCodes.baselineRequired]: 'The checkout is on the target branch or target commit. Ask the engineer which earlier baseline to assess, then supply --baseline. Do not guess HEAD~1.',
     [cliErrorCodes.sessionInvalid]: 'Invalid or unavailable PR session. Prepare a new session with --prepare-pr.',
-    [cliErrorCodes.prOptionsInvalid]: 'Choose one action: --prepare-pr with --target, --validate-pr, --pr-session, --discard-pr, or --quiz. Comparison options only apply to --prepare-pr.',
+    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions.',
 
     [cliErrorCodes.quizInvalid]: 'Quiz validation failed. Fix the following fields before launching:',
     [cliErrorCodes.quizUnreadable]: 'Unable to read the quiz file. Check the path and file permissions.',

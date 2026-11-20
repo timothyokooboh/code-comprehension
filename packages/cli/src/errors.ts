@@ -1,4 +1,8 @@
 export const cliErrorCodes = {
+  productSetupRequired: 'product_setup_required',
+  productBankInvalid: 'product_bank_invalid',
+  productStorageFailed: 'product_storage_failed',
+  productConfigInvalid: 'product_config_invalid',
   sessionWriteFailed: 'session_write_failed',
   sessionCleanupFailed: 'session_cleanup_failed',
   prChanged: 'pr_changed',
