@@ -1,6 +1,6 @@
 import { assessmentTypes, type Quiz, type Question } from './quiz.ts';
 
-export const defaultProductQuestionCount = 8;
+export const defaultProductQuestionCount = 10;
 
 function shuffle<T>(items: readonly T[]): T[] {
   const result = [...items];
@@ -13,7 +13,7 @@ function shuffle<T>(items: readonly T[]): T[] {
 
 export function assessmentQuestionCount(quiz: Quiz) {
   return quiz.type === assessmentTypes.product && quiz.selectionSize !== undefined
-    ? Math.min(Math.max(quiz.selectionSize, quiz.selectionGroups?.length ?? 0), quiz.questions.length) : quiz.questions.length;
+    ? Math.min(quiz.selectionSize, quiz.questions.length) : quiz.questions.length;
 }
 
 export function selectQuestions(quiz: Quiz, previousIds: readonly string[] = []): Question[] {
@@ -24,7 +24,11 @@ export function selectQuestions(quiz: Quiz, previousIds: readonly string[] = [])
   const repeated = shuffle(quiz.questions.filter(({ id }) => previous.has(id)));
   const priority = [...fresh, ...repeated];
   const reserved = new Set<string>();
-  for (const group of quiz.selectionGroups ?? []) {
+  const groups = shuffle(quiz.selectionGroups ?? []);
+  const hasFreshQuestion = (group: string[]) => group.some((id) => !previous.has(id));
+  groups.sort((a, b) => Number(hasFreshQuestion(b)) - Number(hasFreshQuestion(a)));
+  for (const group of groups) {
+    if (reserved.size === count) break;
     if (group.some((id) => reserved.has(id))) continue;
     const question = priority.find(({ id }) => group.includes(id));
     if (question) reserved.add(question.id);

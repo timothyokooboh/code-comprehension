@@ -36,6 +36,8 @@ export const messages = {
     revised: 'Replacement validated. Reload the browser to begin a new attempt with cleared selections and score.',
   },
   product: {
+    limitedCoverage: (count: number) => `This sitting is limited to ${count} questions; some selected areas may not appear. Retake to explore more of the question pool.`,
+    questions: 'questions per product sitting (overrides the project default for this session)',
     retain: 'retain a bank after explicit agent review using a review JSON receipt',
     check: 'check whether a saved product bank matches current source content',
     refresh: 'request generation even if the product bank is valid (with --check-product)',
@@ -61,6 +63,7 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.questionCountInvalid]: 'Use a positive whole number of questions with --product-bank.',
     [cliErrorCodes.assessmentInvalid]: 'Invalid assessment request. Use the current revision and displayToken with a valid input; displayed question IDs must match the current assessment.',
     [cliErrorCodes.assessmentStale]: 'The assessment or displayed question order changed. Read --active-assessment again and review the current questions before revising.',
     [cliErrorCodes.assessmentUnavailable]: 'Unable to reach the local assessment. Use its running http://127.0.0.1:PORT URL and retry.',
@@ -75,7 +78,7 @@ export const messages = {
     [cliErrorCodes.productSetupRequired]: 'Run product setup first: ask whether banks should be committed, then use --configure-product git or local.',
     [cliErrorCodes.productBankInvalid]: 'Use a product quiz without PR comparison data or runtime revision metadata, repository-relative references, and a bank identifier containing only letters, numbers, underscores, or hyphens.',
     [cliErrorCodes.productStorageFailed]: 'Unable to access project product data. Check .comprehension permissions and available disk space.',
-    [cliErrorCodes.productConfigInvalid]: 'Invalid product configuration. Use bankTracking git or local and configuration version 1. Repair .comprehension/config.json before continuing.',
+    [cliErrorCodes.productConfigInvalid]: 'Invalid product configuration. Use bankTracking git or local, configuration version 1, and an optional positive whole-number questionsPerSession. Repair .comprehension/config.json before continuing.',
     [cliErrorCodes.sessionWriteFailed]: 'Unable to create or write the temporary PR session. Check temporary-directory permissions and available disk space, then retry.',
     [cliErrorCodes.sessionCleanupFailed]: 'Unable to remove the temporary PR session. Check its directory permissions and retry --discard-pr with the recorded session path.',
     [cliErrorCodes.prChanged]: 'The code or comparison changed since preparation. Prepare a new PR session and regenerate questions before launching.',
@@ -83,7 +86,7 @@ export const messages = {
     [cliErrorCodes.gitFailed]: 'Unable to read the Git comparison. Check the repository and refs, fetch missing refs, and resolve conflicts before retrying.',
     [cliErrorCodes.baselineRequired]: 'The checkout is on the target branch or target commit. Ask the engineer which earlier baseline to assess, then supply --baseline. Do not guess HEAD~1.',
     [cliErrorCodes.sessionInvalid]: 'Invalid or unavailable PR session. Prepare a new session with --prepare-pr.',
-    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product. Use --runtime only with --revise-assessment, which requires it.',
+    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product. Use --questions only with --product-bank. Use --runtime only with --revise-assessment, which requires it.',
 
     [cliErrorCodes.quizInvalid]: 'Quiz validation failed. Fix the following fields before launching:',
     [cliErrorCodes.quizUnreadable]: 'Unable to read the quiz file. Check the path and file permissions.',

@@ -1,5 +1,5 @@
 import open from 'open';
-import { assessmentSourceKinds, type Quiz, type AssessmentSource } from '@code-comprehension/quiz-contract';
+import { assessmentTypes, assessmentSourceKinds, type Quiz, type AssessmentSource } from '@code-comprehension/quiz-contract';
 import { loadQuiz } from './load-quiz.js';
 import { startServer } from './server.js';
 import { messages } from './locales/en.js';
@@ -41,6 +41,9 @@ export async function launchAssessment(
   const app = await startServer(options.port, quiz, source);
   registerShutdown(app, cleanup);
   console.log(messages.started(app.url));
+  if (quiz?.type === assessmentTypes.product && quiz.selectionSize !== undefined && (quiz.selectionGroups?.length ?? 0) > quiz.selectionSize) {
+    console.log(messages.product.limitedCoverage(quiz.selectionSize));
+  }
   console.log(messages.stopHint);
   if (options.open) await openBrowser(app.url);
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { runCommand } from './commands.js';
-import { automaticPort, parsePort } from './options.js';
+import { automaticPort, parsePort, parseQuestionCount } from './options.js';
 import { formatHelp, reportFailure } from './command-output.js';
 import { messages } from './locales/en.js';
 
@@ -20,6 +20,7 @@ await new Command()
   .option('--refresh', messages.product.refresh)
   .option('--validate-product <path>', messages.product.validate)
   .option('--save-product <path>', messages.product.save)
+  .option('--questions <count>', messages.product.questions, parseQuestionCount)
   .option('--product-bank <ids...>', messages.product.start)
   .option('--product-status', messages.product.status)
   .option('--configure-product <tracking>', messages.product.configure)

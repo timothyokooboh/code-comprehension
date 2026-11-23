@@ -24,7 +24,7 @@ test('cached product retakes draw new questions while reload preserves the activ
     const app = await launchCli(['--product-bank', 'overview', '--repo', repo.path]);
     try {
       await page.goto(app.url);
-      await expect(page.locator('fieldset')).toHaveCount(8);
+      await expect(page.locator('fieldset')).toHaveCount(10);
       const initial = await page.locator('legend').allTextContents();
       await page.getByRole('radio').first().check();
       await page.reload();
@@ -32,7 +32,7 @@ test('cached product retakes draw new questions while reload preserves the activ
       expect(await page.locator('legend').allTextContents()).toEqual(initial);
       await answerScenarios(page);
       await page.getByRole('button', { name: 'Submit answers' }).click();
-      await expect(page.getByRole('heading', { name: 'Score: 8 of 8 (100%)' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Score: 10 of 10 (100%)' })).toBeVisible();
       await page.getByRole('button', { name: 'Show detailed explanation' }).first().click();
       await page.getByRole('button', { name: 'Retake quiz' }).click();
       const next = await page.locator('legend').allTextContents();
@@ -40,11 +40,11 @@ test('cached product retakes draw new questions while reload preserves the activ
       expect(prompts(next).some((prompt) => !prompts(initial).includes(prompt))).toBe(true);
       expect(await page.locator('input:checked').count()).toBe(0);
       await page.reload();
-      await expect(page.locator('fieldset')).toHaveCount(8);
+      await expect(page.locator('fieldset')).toHaveCount(10);
       expect(await page.locator('legend').allTextContents()).toEqual(next);
       await answerScenarios(page);
       await page.getByRole('button', { name: 'Submit answers' }).click();
-      await expect(page.getByRole('heading', { name: 'Score: 8 of 8 (100%)' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Score: 10 of 10 (100%)' })).toBeVisible();
       await expect(page.getByRole('button', { name: 'Show concise explanation' })).toHaveCount(0);
     } finally { await app.stop(); }
   } finally { repo.dispose(); }

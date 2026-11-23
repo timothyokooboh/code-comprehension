@@ -31,7 +31,8 @@ export async function saveProductBank(repo: string, input: string) {
   return { status: productStatuses.saved, path: relative, conflicts: await inspectTracking(project.root, project.config, relative) };
 }
 
-export async function productAssessment(repo: string, ids: string[]) {
+export async function productAssessment(repo: string, ids: string[], questionsPerSession?: number) {
+  const project = await configuredProject(repo);
   const banks = [];
   for (const id of [...new Set(ids)].sort()) {
     const result = await inspectProductCache(repo, id);
@@ -39,5 +40,5 @@ export async function productAssessment(repo: string, ids: string[]) {
     if (result.status !== cacheStatuses.reusable) throw new CliError(cliErrorCodes.productGenerationRequired);
     banks.push(result.bank);
   }
-  return composeProductBanks(banks);
+  return composeProductBanks(banks, questionsPerSession ?? project.config.questionsPerSession);
 }

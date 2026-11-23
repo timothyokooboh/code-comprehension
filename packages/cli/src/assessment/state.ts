@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { assessmentSourceKinds, assessmentQuestionCount, displayRequestSchema, revisionRequestSchema, type AssessmentSource, type Quiz, type RevisionInput } from '@code-comprehension/quiz-contract';
 import { CliError, cliErrorCodes } from '../errors.js';
 
-export type RevisionLoader = (input: RevisionInput) => Promise<Quiz>;
+export type RevisionLoader = (source: AssessmentSource, input: RevisionInput) => Promise<Quiz>;
 
 export function createAssessmentState(initial: Quiz | null, origin: AssessmentSource, loadRevision: RevisionLoader) {
   let revision = randomUUID();
@@ -22,7 +22,7 @@ export function createAssessmentState(initial: Quiz | null, origin: AssessmentSo
     const ids = parsed.data.questionIds;
     if (!quiz || ids.length !== assessmentQuestionCount(quiz) || new Set(ids).size !== ids.length ||
       ids.some((id) => !quiz!.questions.some((question) => question.id === id)) ||
-      quiz.selectionGroups?.some((group) => !group.some((id) => ids.includes(id)))) {
+      (quiz.selectionGroups && ids.length >= quiz.selectionGroups.length && quiz.selectionGroups.some((group) => !group.some((id) => ids.includes(id))))) {
       throw new CliError(cliErrorCodes.assessmentInvalid);
     }
     if (JSON.stringify(ids) !== JSON.stringify(questionIds)) displayToken = randomUUID();
@@ -37,12 +37,12 @@ export function createAssessmentState(initial: Quiz | null, origin: AssessmentSo
       if (request.revision !== revision || request.displayToken !== displayToken) throw new CliError(cliErrorCodes.assessmentStale);
     };
     assertCurrent();
-    const replacement = await loadRevision(request.input);
+    const replacement = await loadRevision(source, request.input);
     if (quiz && replacement.type !== quiz.type) throw new CliError(cliErrorCodes.assessmentSourceInvalid);
     assertCurrent();
     revision = randomUUID();
     quiz = { ...replacement, runtimeRevision: revision, attemptRevision: revision };
-    if ('bankIds' in request.input && source.kind === assessmentSourceKinds.product) source = { ...source, bankIds: request.input.bankIds };
+    if ('bankIds' in request.input && source.kind === assessmentSourceKinds.product) source = { ...source, bankIds: request.input.bankIds, questionsPerSession: replacement.selectionSize };
     questionIds = [];
     displayToken = null;
     return { revision };

@@ -22,12 +22,12 @@ for (const scopeCount of [2, 9]) {
         }));
         expect(runCli(['--save-product', join(repo.path, 'bank.json'), '--repo', repo.path]).status).toBe(0);
       }
-      // Keep shuffle deterministic: an ungrouped first-eight draw omits later scopes.
+      // Keep shuffle deterministic: an ungrouped first-ten draw omits later scopes.
       await page.addInitScript(() => { Math.random = () => 0.999; });
       const app = await launchCli(['--product-bank', ...ids, '--repo', repo.path]);
       try {
         await page.goto(app.url);
-        const count = scopeCount === 2 ? 8 : 9;
+        const count = 10;
         let previous: string[] = [];
         for (let attempt = 0; attempt < 2; attempt++) {
           await expect(page.locator('fieldset')).toHaveCount(count);
