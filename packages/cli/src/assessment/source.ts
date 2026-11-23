@@ -5,7 +5,7 @@ import { productAssessment } from '../product/bank.js';
 import { CliError, cliErrorCodes } from '../errors.js';
 
 export async function loadRevision(source: AssessmentSource, input: RevisionInput) {
-  if (source.kind === assessmentSourceKinds.product && 'bankIds' in input) return productAssessment(source.repo, input.bankIds);
+  if (source.kind === assessmentSourceKinds.product && 'bankIds' in input) return productAssessment(source.repo, input.bankIds, input.questionsPerSession ?? source.questionsPerSession);
   if (source.kind === assessmentSourceKinds.pr && 'quizPath' in input) return loadPrAssessment(source.directory, input.quizPath);
   if (source.kind === assessmentSourceKinds.file && 'quizPath' in input) return loadQuiz(input.quizPath);
   throw new CliError(cliErrorCodes.assessmentSourceInvalid);

@@ -14,7 +14,7 @@ import { loadRevision } from './assessment/source.js';
 export async function startServer(port: number, quiz: Quiz | null = null, source: AssessmentSource = { kind: assessmentSourceKinds.file }) {
   const assets = await loadAssets(fileURLToPath(new URL('./web/', import.meta.url)));
   const status: RuntimeStatus = { name: applicationName, status: runtimeReadyStatus };
-  const state = createAssessmentState(quiz, source, (input) => loadRevision(source, input));
+  const state = createAssessmentState(quiz, source, loadRevision);
   const server = createServer((request, response) => {
     const pathname = (request.url ?? '/').split('?')[0];
     if (Object.values(assessmentPaths).some((path) => path === pathname)) {

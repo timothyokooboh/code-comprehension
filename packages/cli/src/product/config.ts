@@ -19,9 +19,10 @@ export async function reconcileProductSetup(repo: string) {
 }
 
 export async function configureProduct(repo: string, tracking: string) {
-  const parsed = configSchema.safeParse({ version: 1, bankTracking: tracking });
-  if (!parsed.success) throw new CliError(cliErrorCodes.productConfigInvalid);
   const root = await projectRoot(repo);
+  const existing = await readConfig(root);
+  const parsed = configSchema.safeParse({ ...existing, version: 1, bankTracking: tracking });
+  if (!parsed.success) throw new CliError(cliErrorCodes.productConfigInvalid);
   try {
     await ensureProductDirectory(root);
     await writeAtomic(join(root, productPaths.config), `${JSON.stringify(parsed.data, null, 2)}\n`);

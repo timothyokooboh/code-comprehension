@@ -49,7 +49,10 @@ Preserve the workflow reported in `source`:
   with the normal product commands and existing tracking policy. For a distinct
   difficulty variant, choose an appropriate separate bank ID rather than silently
   overwriting an unrelated scope. Use `input: {"bankIds": ["payments-advanced"]}`.
-  Launch-time cache checks also apply to revisions. Do not pass a raw quiz to bypass
+  Omit `questionsPerSession` to preserve the running session's count. If the engineer
+  explicitly requests a different sitting size, add a positive whole-number
+  `questionsPerSession` to the product `input`; it changes the session, not the project
+  default. Launch-time cache checks also apply to revisions. Do not pass a raw quiz to bypass
   source review, and do not commit generated banks automatically.
 - **Direct file (`file`):** write replacement quiz JSON to a temporary file and use
   `input: {"quizPath": "/absolute/path/proposed-quiz.json"}`. Preserve its quiz type.

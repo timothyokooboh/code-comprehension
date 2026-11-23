@@ -13,7 +13,7 @@ import { cacheStatuses, inspectProductCache } from './product/cache.js';
 import { productStatuses } from './product/contract.js';
 
 type CommandOptions = {
-  port: number; open: boolean; quiz?: string;
+  port: number; open: boolean; quiz?: string; questions?: number;
   activeAssessment?: string; reviseAssessment?: string; runtime?: string;
   retainProduct?: string; checkProduct?: string; refresh?: boolean; productStatus?: boolean; configureProduct?: string;
   validateProduct?: string; saveProduct?: string; productBank?: string[];
@@ -22,6 +22,7 @@ type CommandOptions = {
 };
 
 function validateOptions(options: CommandOptions) {
+  if (options.questions !== undefined && !options.productBank) throw new CliError(cliErrorCodes.questionCountInvalid);
   const modes = [
     options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
     options.retainProduct, options.checkProduct, options.productStatus, options.configureProduct, options.validateProduct, options.saveProduct, options.productBank,
@@ -57,8 +58,9 @@ export async function runCommand(options: CommandOptions) {
     console.log(JSON.stringify(await saveProductBank(options.repo ?? process.cwd(), options.saveProduct)));
   } else if (options.productBank) {
     const repo = await projectRoot(options.repo ?? process.cwd());
-    await launchAssessment(options, await productAssessment(repo, options.productBank), undefined,
-      { kind: assessmentSourceKinds.product, repo, bankIds: options.productBank });
+    const quiz = await productAssessment(repo, options.productBank, options.questions);
+    await launchAssessment(options, quiz, undefined,
+      { kind: assessmentSourceKinds.product, repo, bankIds: options.productBank, questionsPerSession: quiz.selectionSize });
   } else if (options.productStatus) {
     console.log(JSON.stringify(await reconcileProductSetup(options.repo ?? process.cwd())));
   } else if (options.configureProduct) {

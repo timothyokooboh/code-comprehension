@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { prComparisonSchema } from './pr.ts';
 
+export const questionCountSchema = z.number().int().positive();
 export const quizSchemaVersion = 1;
 export const quizPath = '/api/quiz';
 export const questionTypes = { single: 'single', multiple: 'multiple' } as const;
@@ -57,7 +58,7 @@ export const quizSchema = z.strictObject({
   scope: z.array(text).min(1),
   comparison: prComparisonSchema.optional(),
   selectionGroups: z.array(z.array(identifier).min(1)).min(1).optional(),
-  selectionSize: z.number().int().positive().optional(),
+  selectionSize: questionCountSchema.optional(),
   questions: z.array(questionSchema).min(1),
 }).superRefine((quiz, context) => {
   for (const [index, group] of (quiz.selectionGroups ?? []).entries()) {

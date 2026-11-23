@@ -30,13 +30,15 @@ Quote paths and identifiers. Use one action per invocation:
 - `--save-product INPUT --repo PATH`: requires configured project; validates and saves
   `.comprehension/cache/BANK_ID.json`, replacing the same bank ID. Returns `saved`,
   its project-relative path, and tracking conflicts.
-- `--product-bank BANK_ID [OTHER_BANK_IDS...] --repo PATH [--no-open] [--port NUMBER]`: rechecks source fingerprints, then composes valid saved banks
+- `--product-bank BANK_ID [OTHER_BANK_IDS...] --repo PATH [--questions COUNT] [--no-open] [--port NUMBER]`: rechecks source fingerprints, then composes valid saved banks
   into one shared local assessment. Any bank requiring review or generation blocks
   launch. Each bank is checked independently with `--check-product`; a failure never
   changes the others. Repeated IDs are ignored and ID order does not change identity.
   General overview must be launched alone. Scope labels use resolved bank names.
-  The browser targets eight questions, increasing to the bank count when needed to
-  cover every bank. It redraws on product retakes and preserves the current draw
+  The count is the session override from `--questions`, otherwise the project's
+  `questionsPerSession`, otherwise 10. It is a positive whole number and caps the
+  draw even when not every bank can be represented. Smaller pools serve what is
+  available. The browser redraws on product retakes and preserves the current draw
   and answers on reload. PR retakes retain their questions.
 
 `--repo` resolves to the Git project root, including from subdirectories. Both local
@@ -72,3 +74,9 @@ This is scoped file validation, not a transitive dependency graph.
 Use the shared PR skill's `references/revisions.md` for receipt shape, grounding,
 per-workflow preparation, and temporary-file cleanup. URLs must be the running
 `http://127.0.0.1:PORT` origin, without paths, credentials, queries, or fragments.
+
+Configuration version 1 supports `questionsPerSession` alongside `bankTracking`.
+New setup saves 10; old configs without the field behave as 10. Changing tracking
+preserves a custom count. To change the project default, edit this field and validate
+with `--product-status`; a launch override never writes it. `--questions` is accepted
+only with `--product-bank`, and the resolved count stays with the running session.

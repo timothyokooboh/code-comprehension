@@ -1,4 +1,4 @@
-import { defaultProductQuestionCount, type Question, type Quiz } from '@code-comprehension/quiz-contract';
+import { type Question, type Quiz } from '@code-comprehension/quiz-contract';
 import { messages } from '../locales/en.js';
 import { CliError, cliErrorCodes } from '../errors.js';
 import { productScopeKinds, type ProductBank } from './bank-contract.js';
@@ -18,12 +18,12 @@ function questionContent(question: Question) {
   });
 }
 
-export function composeProductBanks(banks: AssessmentBank[]): Quiz {
+export function composeProductBanks(banks: AssessmentBank[], selectionSize: number): Quiz {
   const first = banks[0];
   if (!first || (banks.length > 1 && banks.some(({ scope }) => scope.kind === productScopeKinds.general))) {
     throw new CliError(cliErrorCodes.productScopesInvalid);
   }
-  if (banks.length === 1) return { ...first.quiz, selectionSize: defaultProductQuestionCount, scope: [first.scope.name] };
+  if (banks.length === 1) return { ...first.quiz, selectionSize, scope: [first.scope.name] };
   const questions: Question[] = [];
   const byContent = new Map<string, Question>();
   const selectionGroups = banks.map((bank) => {
@@ -50,6 +50,6 @@ export function composeProductBanks(banks: AssessmentBank[]): Quiz {
   return {
     schemaVersion: first.quiz.schemaVersion, type: first.quiz.type,
     id: identity(banks.map(({ id }) => id)), title: messages.product.combinedTitle(scope),
-    scope, selectionSize: defaultProductQuestionCount, selectionGroups, questions,
+    scope, selectionSize, selectionGroups, questions,
   };
 }

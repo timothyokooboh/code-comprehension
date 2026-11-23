@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { quizSchema } from './quiz.ts';
+import { quizSchema, questionCountSchema } from './quiz.ts';
 
 export const assessmentPaths = {
   active: '/api/assessment', view: '/api/assessment/view', revise: '/api/assessment/revise',
@@ -8,12 +8,12 @@ export const assessmentSourceKinds = { file: 'file', pr: 'pr', product: 'product
 export const assessmentSourceSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal(assessmentSourceKinds.file) }),
   z.strictObject({ kind: z.literal(assessmentSourceKinds.pr), directory: z.string().min(1) }),
-  z.strictObject({ kind: z.literal(assessmentSourceKinds.product), repo: z.string().min(1), bankIds: z.array(z.string().min(1)).min(1) }),
+  z.strictObject({ kind: z.literal(assessmentSourceKinds.product), repo: z.string().min(1), bankIds: z.array(z.string().min(1)).min(1), questionsPerSession: questionCountSchema.optional() }),
 ]);
 export type AssessmentSource = z.infer<typeof assessmentSourceSchema>;
 export const revisionInputSchema = z.union([
   z.strictObject({ quizPath: z.string().min(1) }),
-  z.strictObject({ bankIds: z.array(z.string().min(1)).min(1) }),
+  z.strictObject({ bankIds: z.array(z.string().min(1)).min(1), questionsPerSession: questionCountSchema.optional() }),
 ]);
 export type RevisionInput = z.infer<typeof revisionInputSchema>;
 export const revisionRequestSchema = z.strictObject({
