@@ -1,5 +1,5 @@
 import { computed, readonly, ref } from 'vue';
-import { scoreQuiz, selectQuestions, type Quiz, type QuizResult } from '@code-comprehension/quiz-contract';
+import { questionTypes, scoreQuiz, selectQuestions, type Quiz, type QuizResult } from '@code-comprehension/quiz-contract';
 
 import { createAttemptStorage } from '../storage/quiz-attempt';
 
@@ -13,7 +13,7 @@ export function useQuizAttempt(quiz: Quiz) {
   const answers = ref(saved?.answers ?? new Map<string, string[]>());
   const result = ref<QuizResult | null>(saved?.submitted ? scoreQuiz(assessment.value, answers.value) : null);
   const canSubmit = computed(() => !result.value &&
-    assessment.value.questions.every((question) => (answers.value.get(question.id)?.length ?? 0) > 0));
+    assessment.value.questions.every((question) => question.type === questionTypes.written ? Boolean(answers.value.get(question.id)?.[0]?.trim()) : (answers.value.get(question.id)?.length ?? 0) > 0));
 
   function persistAttempt(submitted: boolean) {
     storage.write(answers.value, submitted, questions.value.map(({ id }) => id));

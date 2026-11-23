@@ -1,4 +1,4 @@
-import { assessmentQuestionCount, assessmentTypes, questionTypes, type Quiz, type Answers } from '@code-comprehension/quiz-contract';
+import { assessmentQuestionCount, assessmentTypes, questionTypes, type Quiz, type Answers, reviewLimits } from '@code-comprehension/quiz-contract';
 
 const storageKey = 'code-comprehension:current-attempt:v1';
 type Attempt = { questionIds: string[]; answers: Map<string, string[]>; submitted: boolean };
@@ -11,6 +11,11 @@ function parseAnswers(value: unknown, quiz: Quiz): Map<string, string[]> | null 
     const [id, selection] = entry;
     const question = quiz.questions.find((question) => question.id === id);
     if (!question || answers.has(id) || !Array.isArray(selection)) return null;
+    if (question.type === questionTypes.written) {
+      if (selection.length > 1 || selection.some((answer) => typeof answer !== 'string' || answer.length > reviewLimits.answerCharacters)) return null;
+      answers.set(id, selection);
+      continue;
+    }
     if (selection.some((option) => !question.options.some(({ id }) => id === option))) return null;
     if (new Set(selection).size !== selection.length) return null;
     if (question.type === questionTypes.single && selection.length > 1) return null;

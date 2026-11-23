@@ -2,6 +2,16 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 import { cliErrorCodes, type CliErrorCode } from '../errors.js';
 
 export const messages = {
+  review: {
+    session: (path: string) => `Review session: ${path}`,
+    wait: 'Wait for written answers using a private review session file.',
+    feedback: 'Send structured written feedback from a JSON file.',
+    sessionOption: 'Private review session file for sending feedback.',
+    invalid: 'Review data is invalid. Repair the reported fields and retry.',
+    stale: 'This review no longer matches the active assessment or submission.',
+    forbidden: 'This review session is not authorized.',
+    unavailable: 'The review runtime is unavailable. Check that the session is still running.',
+  },
   description: 'Open the local code comprehension application',
   help: 'display help for command',
   usage: (command: string) => `Usage: ${command} [options]`,

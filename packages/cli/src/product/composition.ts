@@ -1,4 +1,4 @@
-import { type Question, type Quiz } from '@code-comprehension/quiz-contract';
+import { writtenQuizSchemaVersion, questionTypes, type Question, type Quiz } from '@code-comprehension/quiz-contract';
 import { messages } from '../locales/en.js';
 import { CliError, cliErrorCodes } from '../errors.js';
 import { productScopeKinds, type ProductBank } from './bank-contract.js';
@@ -13,8 +13,8 @@ function identity(parts: string[]) {
 function questionContent(question: Question) {
   return JSON.stringify({
     prompt: question.prompt.trim(), type: question.type,
-    options: question.options.map(({ text }) => text.trim()).sort(),
-    answers: question.options.filter(({ id }) => question.correctOptionIds.includes(id)).map(({ text }) => text.trim()).sort(),
+    options: question.type === questionTypes.written ? [] : question.options.map(({ text }) => text.trim()).sort(),
+    answers: question.type === questionTypes.written ? question.criteria : question.options.filter(({ id }) => question.correctOptionIds.includes(id)).map(({ text }) => text.trim()).sort(),
   });
 }
 
@@ -48,7 +48,7 @@ export function composeProductBanks(banks: AssessmentBank[], selectionSize: numb
   });
   const scope = banks.map((bank) => bank.scope.name);
   return {
-    schemaVersion: first.quiz.schemaVersion, type: first.quiz.type,
+    schemaVersion: questions.some(question => question.type === questionTypes.written) ? writtenQuizSchemaVersion : first.quiz.schemaVersion, type: first.quiz.type,
     id: identity(banks.map(({ id }) => id)), title: messages.product.combinedTitle(scope),
     scope, selectionSize, selectionGroups, questions,
   };

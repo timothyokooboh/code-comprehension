@@ -3,8 +3,9 @@ import { prComparisonSchema } from './pr.ts';
 
 export const questionCountSchema = z.number().int().positive();
 export const quizSchemaVersion = 1;
+export const writtenQuizSchemaVersion = 2;
 export const quizPath = '/api/quiz';
-export const questionTypes = { single: 'single', multiple: 'multiple' } as const;
+export const questionTypes = { single: 'single', multiple: 'multiple', written: 'written' } as const;
 export const assessmentTypes = { pr: 'pr', product: 'product' } as const;
 export const quizIssueCodes = {
   duplicateId: 'duplicate_id',
@@ -17,12 +18,12 @@ const minimumOptions = 2;
 const minimumMultipleAnswers = 2;
 const text = z.string().trim().min(1);
 const identifier = text.regex(/^[a-zA-Z0-9_-]+$/);
-const sourceReferenceSchema = z.strictObject({ path: text, line: z.number().int().positive().optional() });
+export const sourceReferenceSchema = z.strictObject({ path: text, line: z.number().int().positive().optional() });
 const optionSchema = z.strictObject({ id: identifier, text });
 
-const questionSchema = z.strictObject({
+const mcqQuestionSchema = z.strictObject({
   id: identifier,
-  type: z.enum(questionTypes),
+  type: z.enum([questionTypes.single, questionTypes.multiple]),
   prompt: text,
   options: z.array(optionSchema).min(minimumOptions),
   correctOptionIds: z.array(identifier).min(1),
@@ -48,8 +49,17 @@ const questionSchema = z.strictObject({
   }
 });
 
+export const writtenQuestionSchema = z.strictObject({
+  id: identifier, type: z.literal(questionTypes.written), prompt: text,
+  criteria: z.array(text).min(1),
+  explanation: z.strictObject({ concise: text, detailed: text }),
+  references: z.array(sourceReferenceSchema).min(1),
+  diagram: z.strictObject({ format: z.literal('mermaid'), source: text }).optional(),
+});
+const questionSchema = z.discriminatedUnion('type', [mcqQuestionSchema, writtenQuestionSchema]);
+
 export const quizSchema = z.strictObject({
-  schemaVersion: z.literal(quizSchemaVersion),
+  schemaVersion: z.union([z.literal(quizSchemaVersion), z.literal(writtenQuizSchemaVersion)]),
   runtimeRevision: z.uuid().optional(),
   attemptRevision: z.uuid().optional(),
   id: identifier,
@@ -68,6 +78,9 @@ export const quizSchema = z.strictObject({
   }
   const seen = new Set<string>();
   quiz.questions.forEach((question, index) => {
+    if (quiz.schemaVersion === quizSchemaVersion && question.type === questionTypes.written) {
+      context.addIssue({ code: 'custom', path: ['schemaVersion'] });
+    }
     if (seen.has(question.id)) {
       context.addIssue({ code: 'custom', path: ['questions', index, 'id'], params: { reason: quizIssueCodes.duplicateId } });
     }
@@ -78,3 +91,6 @@ export const quizSchema = z.strictObject({
 export type Quiz = z.infer<typeof quizSchema>;
 export type Question = Quiz['questions'][number];
 export type QuizValidationIssue = z.core.$ZodIssue;
+
+export type WrittenQuestion = z.infer<typeof writtenQuestionSchema>;
+export type McqQuestion = z.infer<typeof mcqQuestionSchema>;

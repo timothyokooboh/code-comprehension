@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { useId } from 'vue';
+import { useId, watch } from 'vue';
 import { useAssessmentDisplay } from '../composables/useAssessmentDisplay';
-import type { Quiz } from '@code-comprehension/quiz-contract';
+import { questionTypes, type Quiz } from '@code-comprehension/quiz-contract';
 import { useQuizAttempt } from '../composables/useQuizAttempt';
 import { messages } from '../locales/en';
+import WrittenQuestion from './WrittenQuestion.vue';
+import { useWrittenReview } from '../composables/useWrittenReview';
 import QuizQuestion from './QuizQuestion.vue';
 import QuizSidebar from './QuizSidebar.vue';
 import { useReviewTransition } from '../composables/useReviewTransition';
@@ -11,6 +13,14 @@ import { useReviewTransition } from '../composables/useReviewTransition';
 const props = defineProps<{ quiz: Quiz }>();
 const { assessment, answers, result, canSubmit, answer, submit, retake } = useQuizAttempt(props.quiz);
 const { unavailable: displayUnavailable } = useAssessmentDisplay(assessment);
+const review = useWrittenReview(assessment);
+const { snapshot: reviewSnapshot, busy: reviewBusy, error: reviewError, locked: reviewLocked } = review;
+watch(() => reviewSnapshot.value?.submission, (submission) => {
+  if (submission && !result.value) {
+    for (const [id, value] of Object.entries(submission.answers)) answer(id, value);
+    submit();
+  }
+});
 const formId = useId();
 const { updateReview } = useReviewTransition();
 let pointerSubmission = false;
@@ -19,6 +29,7 @@ async function submitReview() {
   const animate = pointerSubmission;
   pointerSubmission = false;
   if (!canSubmit.value) return;
+  if (review.enabled && !await review.submit(answers.value)) return;
   await updateReview(submit, animate);
 }
 
@@ -26,7 +37,7 @@ async function submitReview() {
 
 <template>
   <section :aria-label="messages.assessment.label" class="quiz-workspace">
-    <QuizSidebar :quiz="assessment" :answers="answers" :result="result" :anchor-prefix="formId" @retake="retake" />
+    <QuizSidebar :quiz="assessment" :answers="answers" :result="result" :anchor-prefix="formId" :has-written="review.enabled" @retake="retake" />
     <div class="workspace-content">
       <p v-if="displayUnavailable" role="status" class="mb-4 text-sm">{{ messages.quiz.displayUnavailable }}</p>
       <div class="workspace-caption">
@@ -34,14 +45,22 @@ async function submitReview() {
         <span class="text-xs text-slate-500">{{ messages.workspace.questionCount(assessment.questions.length) }}</span>
       </div>
       <form :id="formId" @submit.prevent="submitReview">
-        <QuizQuestion
-          v-for="(question, index) in assessment.questions" :id="`${formId}-${question.id}`" :key="question.id"
-          :question="question" :number="index + 1" :selected="answers.get(question.id) ?? []"
-          :submitted="result !== null" @answer="answer(question.id, $event)"
-        />
+        <template v-for="(question, index) in assessment.questions" :key="question.id">
+          <WrittenQuestion v-if="question.type === questionTypes.written" :id="`${formId}-${question.id}`"
+            :question="question" :number="index + 1" :answer="answers.get(question.id)?.[0] ?? ''"
+            :submitted="result !== null" :locked="reviewLocked" :status="reviewSnapshot?.status" :error="reviewError"
+            :feedback="reviewSnapshot?.feedback?.reviews.find(item => item.questionId === question.id)"
+            @answer="answer(question.id, $event)" />
+          <QuizQuestion v-else
+            :id="`${formId}-${question.id}`" :key="question.id"
+            :question="question" :number="index + 1" :selected="answers.get(question.id) ?? []"
+            :submitted="result !== null" :locked="reviewLocked" @answer="answer(question.id, $event)"
+          />
+        </template>
+        <p v-if="reviewError" role="alert" class="mt-4 text-red-800">{{ messages.written.errors[reviewError] }} {{ reviewLocked ? messages.written.retryLocked : '' }}</p>
         <div v-if="!result" class="py-7">
           <p class="mb-4 text-sm text-slate-500">{{ messages.quiz.submitHint }}</p>
-          <button :disabled="!canSubmit" type="submit" class="primary-button" @click="pointerSubmission = $event.detail > 0">
+          <button :disabled="!canSubmit || reviewBusy" type="submit" class="primary-button" @click="pointerSubmission = $event.detail > 0">
             {{ messages.quiz.submit }}<span aria-hidden="true">↗</span>
           </button>
         </div>

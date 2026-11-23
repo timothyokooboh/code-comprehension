@@ -1,3 +1,4 @@
+import { requestReview } from './written-review/client.js';
 import { resolve } from 'node:path';
 import { projectRoot } from './product/project.js';
 import { readActiveAssessment, reviseAssessment } from './assessment/client.js';
@@ -13,6 +14,7 @@ import { cacheStatuses, inspectProductCache } from './product/cache.js';
 import { productStatuses } from './product/contract.js';
 
 type CommandOptions = {
+  waitReview?: string; reviewFeedback?: string; reviewSession?: string;
   port: number; open: boolean; quiz?: string; questions?: number;
   activeAssessment?: string; reviseAssessment?: string; runtime?: string;
   retainProduct?: string; checkProduct?: string; refresh?: boolean; productStatus?: boolean; configureProduct?: string;
@@ -24,11 +26,12 @@ type CommandOptions = {
 function validateOptions(options: CommandOptions) {
   if (options.questions !== undefined && !options.productBank) throw new CliError(cliErrorCodes.questionCountInvalid);
   const modes = [
-    options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
+    options.waitReview, options.reviewFeedback, options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
     options.retainProduct, options.checkProduct, options.productStatus, options.configureProduct, options.validateProduct, options.saveProduct, options.productBank,
   ].filter((value) => value !== undefined && value !== false);
   const hasComparisonOptions = options.target !== undefined || options.baseline !== undefined;
   const acceptsRepo = options.retainProduct || options.checkProduct || options.preparePr || options.productStatus || options.configureProduct || options.saveProduct || options.productBank;
+  if (Boolean(options.reviewFeedback) !== Boolean(options.reviewSession)) throw new CliError(cliErrorCodes.prOptionsInvalid);
   if ((Boolean(options.runtime) !== Boolean(options.reviseAssessment)) || (options.refresh && !options.checkProduct) || modes.length > 1 || (hasComparisonOptions && !options.preparePr) ||
     (options.preparePr && !options.target) || (options.repo !== undefined && !acceptsRepo)) {
     throw new CliError(cliErrorCodes.prOptionsInvalid);
@@ -37,7 +40,9 @@ function validateOptions(options: CommandOptions) {
 
 export async function runCommand(options: CommandOptions) {
   validateOptions(options);
-  if (options.activeAssessment) {
+  if (options.waitReview || options.reviewFeedback) {
+    console.log(JSON.stringify(await requestReview(options.waitReview ?? options.reviewSession!, options.reviewFeedback)));
+  } else if (options.activeAssessment) {
     console.log(JSON.stringify(await readActiveAssessment(options.activeAssessment)));
   } else if (options.reviseAssessment && options.runtime) {
     console.log(await reviseAssessment(options.runtime, options.reviseAssessment));
