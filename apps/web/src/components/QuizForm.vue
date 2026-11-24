@@ -70,7 +70,7 @@ async function submitReview() {
 
 <style scoped>
 .quiz-workspace { display: grid; grid-template-columns: minmax(0, 1fr); }
-.workspace-content { min-width: 0; padding: 1.5rem; }
+.workspace-content { width: 100%; max-width: 64rem; min-width: 0; margin-inline: auto; padding: 1.5rem; }
 .workspace-caption { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
 @media (min-width: 1024px) {
   .quiz-workspace { grid-template-columns: 320px minmax(0, 1fr); min-height: calc(100vh - 89px); }

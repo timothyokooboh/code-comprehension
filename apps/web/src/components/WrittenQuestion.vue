@@ -19,7 +19,7 @@ function update(event: Event) { emit('answer', [(event.target as HTMLTextAreaEle
 
 <template>
   <section class="written-question" tabindex="-1" :aria-labelledby="`${inputId}-prompt`">
-    <h3 :id="`${inputId}-prompt`" class="text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</h3>
+    <h3 :id="`${inputId}-prompt`" class="text-2xl font-medium leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</h3>
     <div v-if="submitted || locked" class="review-panel" :class="{ 'is-complete': feedback, 'needs-recovery': !feedback && recovery }" role="status" aria-live="polite">
       <template v-if="feedback">
         <h4 class="font-semibold">{{ messages.written.verdicts[feedback.verdict] }}</h4>
