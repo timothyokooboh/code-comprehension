@@ -11,15 +11,15 @@ import QuizSidebar from './QuizSidebar.vue';
 import { useReviewTransition } from '../composables/useReviewTransition';
 
 const props = defineProps<{ quiz: Quiz }>();
-const { assessment, answers, result, canSubmit, answer, submit, retake, restoreSubmission } = useQuizAttempt(props.quiz);
-const { unavailable: displayUnavailable } = useAssessmentDisplay(assessment);
+const { assessment, attemptId, answers, result, canSubmit, answer, submit, retake, restoreReview, nextQuestionIds } = useQuizAttempt(props.quiz);
+const { unavailable: displayUnavailable } = useAssessmentDisplay(assessment, attemptId);
 const review = useWrittenReview(assessment);
 const { snapshot: reviewSnapshot, busy: reviewBusy, error: reviewError, locked: reviewLocked } = review;
-watch(() => reviewSnapshot.value?.submission, (submission) => {
-  if (submission && !result.value) {
-    restoreSubmission(submission);
-  }
-}, { immediate: true });
+watch(reviewSnapshot, (snapshot) => { if (snapshot) restoreReview(snapshot); }, { immediate: true });
+async function restart() {
+  if (review.enabled) await review.retake(nextQuestionIds());
+  else retake();
+}
 const formId = useId();
 const { updateReview } = useReviewTransition();
 let pointerSubmission = false;
@@ -36,7 +36,7 @@ async function submitReview() {
 
 <template>
   <section :aria-label="messages.assessment.label" class="quiz-workspace">
-    <QuizSidebar :quiz="assessment" :answers="answers" :result="result" :anchor-prefix="formId" :has-written="review.enabled" @retake="retake" />
+    <QuizSidebar :quiz="assessment" :answers="answers" :result="result" :anchor-prefix="formId" :has-written="review.enabled" :review="reviewSnapshot" :retaking="reviewBusy" @retake="restart" />
     <div class="workspace-content">
       <p v-if="displayUnavailable" role="status" class="mb-4 text-sm">{{ messages.quiz.displayUnavailable }}</p>
       <div class="workspace-caption">

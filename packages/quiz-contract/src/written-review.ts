@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { sourceReferenceSchema, writtenQuestionSchema } from './quiz.ts';
 
 export const reviewPaths = {
-  session: '/api/review/session', state: '/api/review/state', submit: '/api/review/submit',
+  retake: '/api/review/retake', session: '/api/review/session', state: '/api/review/state', submit: '/api/review/submit',
   wait: '/api/review/wait', feedback: '/api/review/feedback', failure: '/api/review/failure',
 } as const;
 export const reviewTimings = { waitMs: 45_000, leaseMs: 120_000, pollMs: 1_500, requestMs: 5_000, retentionMs: 24 * 60 * 60 * 1_000 } as const;
@@ -27,10 +27,16 @@ export const writtenFeedbackSchema = z.strictObject({
 });
 export const reviewFailureSchema = z.strictObject({ ...identity, leaseId: z.uuid() });
 export const reviewFeedbackSchema = z.strictObject({ ...identity, leaseId: z.uuid(), reviews: z.array(writtenFeedbackSchema).min(1) });
+export const reviewRetakeSchema = z.strictObject({
+  protocolVersion: z.literal(reviewProtocolVersion), sessionId: z.uuid(), revision: z.uuid(),
+  attemptId: z.uuid(), nextAttemptId: z.uuid(), questionIds: z.array(z.string()).min(1),
+});
+export type ReviewRetake = z.infer<typeof reviewRetakeSchema>;
 export const reviewSnapshotSchema = z.strictObject({
+  attemptId: z.uuid(), questionIds: z.array(z.string()), revision: z.uuid().optional(),
   status: z.enum(reviewStates), submission: reviewSubmissionSchema.nullable(), feedback: reviewFeedbackSchema.nullable(),
 });
-export const reviewSessionSchema = z.strictObject({ protocolVersion: z.literal(reviewProtocolVersion), sessionId: z.uuid(), token: z.string().min(1), revision: z.uuid() });
+export const reviewSessionSchema = z.strictObject({ protocolVersion: z.literal(reviewProtocolVersion), sessionId: z.uuid(), attemptId: z.uuid(), token: z.string().min(1), revision: z.uuid() });
 export type ReviewSubmission = z.infer<typeof reviewSubmissionSchema>;
 export type ReviewFeedback = z.infer<typeof reviewFeedbackSchema>;
 export type WrittenFeedback = z.infer<typeof writtenFeedbackSchema>;

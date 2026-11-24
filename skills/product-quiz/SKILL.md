@@ -181,5 +181,7 @@ For a sitting with written questions, immediately follow the shared automatic re
 workflow: capture the private session path, wait in the active turn, inspect code,
 deliver validated feedback, and continue waiting. The engineer submits once in the
 browser; chat is only the reconnect escape hatch. Written feedback is qualitative.
-Mixed retakes/replacement lifecycle remains in #27; the retake description above
-applies to MCQ-only sittings until then.
+Mixed and written retakes create a new attempt while preserving the requested format,
+count, and scopes. Keep waiting after each delivered review so the next submission
+arrives automatically. Retakes prioritise fresh questions where available; small
+banks repeat questions. A retake does not regenerate or delete reusable banks.

@@ -8,7 +8,7 @@ test('a crashed runtime resumes the same accepted submission without browser res
   const app = await launchCli(['--quiz', fixture]);
   const session = await (await fetch(app.url + '/api/review/session')).json();
   const submission = { protocolVersion: 1, sessionId: session.sessionId, revision: session.revision,
-    attemptId: randomUUID(), submissionId: randomUUID(), questionIds: ['retry', 'guarantees', 'explain'],
+    attemptId: session.attemptId, submissionId: randomUUID(), questionIds: ['retry', 'guarantees', 'explain'],
     answers: { retry: ['retry'], guarantees: ['key'], explain: ['The provider may already have charged.'] } };
   const response = await fetch(app.url + '/api/review/submit', { method: 'POST',
     headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' }, body: JSON.stringify(submission) });
@@ -37,7 +37,7 @@ test('completed feedback survives restart and duplicate runtimes are rejected', 
   const app = await launchCli(['--quiz', fixture]);
   expect(runCli(['--resume-review', app.reviewSession!]).stderr).toContain('already has a running runtime');
   const session = await (await fetch(app.url + '/api/review/session')).json();
-  const identity = { protocolVersion: 1, sessionId: session.sessionId, revision: session.revision, attemptId: randomUUID(), submissionId: randomUUID() };
+  const identity = { protocolVersion: 1, sessionId: session.sessionId, revision: session.revision, attemptId: session.attemptId, submissionId: randomUUID() };
   const submit = await fetch(app.url + '/api/review/submit', { method: 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...identity, questionIds: ['retry', 'guarantees', 'explain'], answers: { retry: ['retry'], guarantees: ['key'], explain: ['An uncertain outcome.'] } }) });
   expect(submit.ok).toBe(true);
@@ -74,7 +74,7 @@ test('review failure is visible and reconnect retrieves the same pending job', a
   const app = await launchCli(['--quiz', fixture]);
   try {
     const session = await (await fetch(app.url + '/api/review/session')).json();
-    const identity = { protocolVersion: 1, sessionId: session.sessionId, revision: session.revision, attemptId: randomUUID(), submissionId: randomUUID() };
+    const identity = { protocolVersion: 1, sessionId: session.sessionId, revision: session.revision, attemptId: session.attemptId, submissionId: randomUUID() };
     await fetch(app.url + '/api/review/submit', { method: 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...identity, questionIds: ['retry', 'guarantees', 'explain'], answers: { retry: ['retry'], guarantees: ['key'], explain: ['An uncertain outcome.'] } }) });
     const first = runCli(['--wait-review', app.reviewSession!]);
@@ -102,7 +102,7 @@ test('an expired lease requeues the same job and retention expiry deletes privat
     expect((await stat(app.reviewSession!)).mode & 0o077).toBe(0);
     expect((await stat(dirname(app.reviewSession!))).mode & 0o077).toBe(0);
     const session = await (await fetch(app.url + '/api/review/session')).json();
-    const identity = { protocolVersion: 1, sessionId: session.sessionId, revision: session.revision, attemptId: randomUUID(), submissionId: randomUUID() };
+    const identity = { protocolVersion: 1, sessionId: session.sessionId, revision: session.revision, attemptId: session.attemptId, submissionId: randomUUID() };
     await fetch(app.url + '/api/review/submit', { method: 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...identity, questionIds: ['retry', 'guarantees', 'explain'], answers: { retry: ['retry'], guarantees: ['key'], explain: ['An uncertain outcome.'] } }) });
     const first = runCli(['--wait-review', app.reviewSession!]);

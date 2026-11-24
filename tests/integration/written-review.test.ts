@@ -35,7 +35,7 @@ test('a disconnected submission is queued and reviewed through the public CLI', 
   try {
     const session = await (await fetch(app.url + '/api/review/session')).json();
     const submission = { protocolVersion: session.protocolVersion, sessionId: session.sessionId, revision: session.revision,
-      attemptId: randomUUID(), submissionId: randomUUID(), questionIds: ['explain'],
+      attemptId: session.attemptId, submissionId: randomUUID(), questionIds: ['explain'],
       answers: { explain: ['The provider may have charged already.'] } };
     const response = await fetch(app.url + '/api/review/submit', { method: 'POST',
       headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' }, body: JSON.stringify(submission) });

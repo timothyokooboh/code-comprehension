@@ -1,8 +1,8 @@
-import { onMounted, onScopeDispose, readonly, ref, watch, type ComputedRef } from 'vue';
-import type { Quiz } from '@code-comprehension/quiz-contract';
+import { onMounted, onScopeDispose, readonly, ref, watch, type ComputedRef, type Ref } from 'vue';
+import { questionTypes, type Quiz } from '@code-comprehension/quiz-contract';
 import { publishAssessmentDisplay } from '../api/assessment';
 
-export function useAssessmentDisplay(assessment: ComputedRef<Quiz>) {
+export function useAssessmentDisplay(assessment: ComputedRef<Quiz>, attemptId?: Readonly<Ref<string | undefined>>) {
   const unavailable = ref(false);
   const controller = new AbortController();
   let queued = false;
@@ -14,9 +14,9 @@ export function useAssessmentDisplay(assessment: ComputedRef<Quiz>) {
     while (queued && !controller.signal.aborted) {
       queued = false;
       const quiz = assessment.value;
-      if (!quiz.runtimeRevision) continue;
+      if (!quiz.runtimeRevision || quiz.questions.some(question => question.type === questionTypes.written) && !attemptId?.value) continue;
       try {
-        await publishAssessmentDisplay(quiz.runtimeRevision, quiz.questions.map(({ id }) => id), controller.signal);
+        await publishAssessmentDisplay(quiz.runtimeRevision, quiz.questions.map(({ id }) => id), controller.signal, attemptId?.value);
         unavailable.value = false;
       } catch {
         if (!controller.signal.aborted) unavailable.value = true;
@@ -40,7 +40,7 @@ export function useAssessmentDisplay(assessment: ComputedRef<Quiz>) {
     controller.abort();
   }
 
-  watch(() => assessment.value.questions, reportDisplay, { flush: 'post' });
+  watch(() => [assessment.value.questions, attemptId?.value], reportDisplay, { flush: 'post' });
   onMounted(connect);
   onScopeDispose(disconnect);
   return { unavailable: readonly(unavailable) };

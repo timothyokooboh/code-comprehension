@@ -89,6 +89,9 @@ its draw. A successful tool call is not proof the engineer has reloaded.
 
 Remove temporary product/direct-file proposals and receipts when no longer needed.
 PR proposal files stay within the original managed session and are removed with it
-on graceful shutdown. Runtime revision/mapping state is memory-only, and banks never
-store user answers, scores, or attempt history. Feedback remains in agent chat; no
-browser feedback textbox or runtime model call is involved.
+on graceful shutdown. Runtime revision/mapping and current written-review state are private session recovery
+data; banks never store answers, scores, or attempt history. Replacement invalidates
+prior attempt jobs and reviewer leases, even for identical question text. Keep the
+written-review waiting loop active after a successful replacement; discard superseded
+feedback and wait for the new submission. Question challenges remain in chat; written
+answer feedback appears in the browser through the local review transport.

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, useTemplateRef, type DeepReadonly } from 'vue';
-import type { Answers, Quiz, QuizResult as AssessmentResult } from '@code-comprehension/quiz-contract';
+import { questionTypes, reviewStates, type Answers, type Quiz, type QuizResult as AssessmentResult, type ReviewSnapshot } from '@code-comprehension/quiz-contract';
 import { messages } from '../locales/en';
 import QuizResult from './QuizResult.vue';
 import QuizNavigator from './QuizNavigator.vue';
@@ -9,18 +9,26 @@ import PrComparison from './PrComparison.vue';
 const props = defineProps<{
   quiz: Quiz;
   hasWritten?: boolean;
+  review?: ReviewSnapshot | null;
+  retaking?: boolean;
   answers: Answers;
   result: DeepReadonly<AssessmentResult> | null;
   anchorPrefix: string;
 }>();
 const emit = defineEmits<{ retake: [] }>();
 const heading = useTemplateRef('heading');
-const entries = computed(() => props.quiz.questions.map((question) => ({
-  anchor: `${props.anchorPrefix}-${question.id}`,
-  prompt: question.prompt,
-  answered: (props.answers.get(question.id)?.length ?? 0) > 0,
-  correct: props.result?.questions.find(({ questionId }) => questionId === question.id)?.correct,
-})));
+const entries = computed(() => props.quiz.questions.map((question) => {
+  const feedback = props.review?.feedback?.reviews.find(item => item.questionId === question.id);
+  const writtenStatus = question.type === questionTypes.written && props.result
+    ? feedback ? messages.written.verdicts[feedback.verdict] : messages.written.states[props.review?.status ?? reviewStates.disconnected].title
+    : undefined;
+  return {
+    anchor: `${props.anchorPrefix}-${question.id}`, prompt: question.prompt,
+    answered: (props.answers.get(question.id)?.length ?? 0) > 0,
+    correct: props.result?.questions.find(({ questionId }) => questionId === question.id)?.correct,
+    writtenStatus,
+  };
+}));
 const answeredCount = computed(() => entries.value.filter(({ answered }) => answered).length);
 
 async function restart() {
@@ -44,7 +52,7 @@ async function restart() {
         </div>
         <progress :value="answeredCount" :max="quiz.questions.length" :aria-label="messages.workspace.progress" class="quiz-progress" />
       </div>
-      <QuizResult v-if="result" :correct="result.correct" :total="result.total" :percentage="result.percentage" :has-written="hasWritten" @retake="restart" />
+      <QuizResult v-if="result" :correct="result.correct" :total="result.total" :percentage="result.percentage" :has-written="hasWritten" :retaking="retaking" @retake="restart" />
       <QuizNavigator :entries="entries" class="mt-8" />
     </div>
   </aside>
