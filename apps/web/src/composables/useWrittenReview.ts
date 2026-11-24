@@ -64,19 +64,28 @@ export function useWrittenReview(quiz: Readonly<Ref<Quiz>>) {
     finally { busy.value = false; }
   }
   function submit(answers: Answers) {
+    const expectedAttemptId = session?.attemptId;
+    const questionIds = quiz.value.questions.map(q => q.id);
+    const response = Object.fromEntries([...answers].map(([id, answer]) => [id, [...answer]]));
     return perform(async () => {
       const current = await connection();
+      assertOriginalAttempt(expectedAttemptId, current.attemptId);
       pending.value ??= { protocolVersion: current.protocolVersion, sessionId: current.sessionId, revision: current.revision,
         attemptId: current.attemptId, submissionId: crypto.randomUUID(),
-        questionIds: quiz.value.questions.map(q => q.id),
-        answers: Object.fromEntries([...answers].map(([id, answer]) => [id, [...answer]])) };
+        questionIds, answers: response };
       save();
       accept(await loadReview(current, controller.signal, pending.value));
     });
   }
+  function assertOriginalAttempt(expected: string | undefined, current: string) {
+    if (!expected) throw new ReviewRequestError(reviewErrors.unavailable);
+    if (expected !== current) throw new ReviewRequestError(reviewErrors.stale);
+  }
   function retake(questionIds: string[]) {
+    const expectedAttemptId = session?.attemptId;
     return perform(async () => {
       const current = await connection();
+      assertOriginalAttempt(expectedAttemptId, current.attemptId);
       pendingRetake.value ??= { protocolVersion: current.protocolVersion, sessionId: current.sessionId, revision: current.revision,
         attemptId: current.attemptId, nextAttemptId: crypto.randomUUID(), questionIds };
       save();

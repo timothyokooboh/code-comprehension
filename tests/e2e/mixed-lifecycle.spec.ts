@@ -105,3 +105,34 @@ test('identical mixed replacement waits for reload and starts an empty attempt',
     await expect(page.getByRole('textbox')).toHaveValue('My replacement answer.');
   } finally { await app.stop(); await rm(directory, { recursive: true, force: true }); }
 });
+
+test('a queued submit cannot attach an old draft to a concurrently retaken attempt', async ({ page }) => {
+  const app = await launchCli(['--quiz', fixture]);
+  let release: (() => void) | undefined;
+  try {
+    await page.goto(app.url);
+    const session = await (await fetch(app.url + '/api/review/session')).json();
+    await page.getByRole('radio').first().check();
+    await page.getByRole('checkbox').first().check();
+    await page.getByRole('textbox').fill('This belongs only to the old attempt.');
+    let polling = false;
+    const blocked = new Promise<void>(resolve => { release = resolve; });
+    await page.route('**/api/review/state', async route => {
+      polling = true;
+      await blocked;
+      await route.continue();
+    }, { times: 1 });
+    await expect.poll(() => polling).toBe(true);
+    const headers = { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' };
+    const { randomUUID } = await import('node:crypto');
+    const changed = await fetch(app.url + '/api/review/retake', { method: 'POST', headers, body: JSON.stringify({ protocolVersion: 1, sessionId: session.sessionId, revision: session.revision,
+      attemptId: session.attemptId, nextAttemptId: randomUUID(), questionIds: ['retry', 'guarantees', 'explain'] }) });
+    expect(changed.ok).toBe(true);
+    await page.getByRole('button', { name: 'Submit answers' }).click();
+    release!();
+    await expect(page.getByRole('textbox')).toHaveValue('');
+    await expect(page.getByRole('alert')).toContainText('changed');
+    const current = await (await fetch(app.url + '/api/review/state', { headers })).json();
+    expect(current.submission).toBeNull();
+  } finally { release?.(); await app.stop(); }
+});
