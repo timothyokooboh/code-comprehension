@@ -1,4 +1,4 @@
-import { assessmentQuestionCount, assessmentTypes, questionTypes, type Quiz, type Answers, reviewLimits } from '@code-comprehension/quiz-contract';
+import { validQuestionSelection, assessmentTypes, questionTypes, type Quiz, type Answers, reviewLimits } from '@code-comprehension/quiz-contract';
 
 const storageKey = 'code-comprehension:current-attempt:v1';
 type Attempt = { questionIds: string[]; answers: Map<string, string[]>; submitted: boolean };
@@ -35,9 +35,8 @@ export function createAttemptStorage(quiz: Quiz) {
       const data = JSON.parse(storage().getItem(storageKey) ?? 'null');
       if (!data || data.identity !== identity || typeof data.submitted !== 'boolean') return null;
       const questionIds: unknown = data.questionIds ?? (quiz.selectionSize === undefined ? quiz.questions.map(({ id }) => id) : null);
-      if (!Array.isArray(questionIds) || questionIds.length !== assessmentQuestionCount(quiz) ||
-        questionIds.some((id) => typeof id !== 'string' || !quiz.questions.some((question) => question.id === id)) ||
-        new Set(questionIds).size !== questionIds.length) return null;
+      if (!Array.isArray(questionIds) || questionIds.some(id => typeof id !== 'string') ||
+        !validQuestionSelection(quiz, questionIds)) return null;
       const selectedQuiz = { ...quiz, questions: questionIds.map((id) => quiz.questions.find((question) => question.id === id)!) };
       const answers = parseAnswers(data.answers, selectedQuiz);
       if (!answers) return null;

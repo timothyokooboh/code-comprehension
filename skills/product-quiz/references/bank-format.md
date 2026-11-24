@@ -10,10 +10,10 @@ Write one JSON object with exactly these fields:
   `supportingFiles` is an array of repository-relative paths, possibly empty.
   Avoid absolute paths, backslashes, or parent traversal. Include relevant shared
   implementation, configuration, and tests; do not include generated caches.
-- `quiz`: the shared schemaVersion 1 quiz with `type: "product"` and no `comparison`.
+- `quiz`: the shared schemaVersion 1 (MCQ) or 2 (written/mixed) quiz with `type: "product"` and no `comparison`.
 
-Quiz fields: `schemaVersion: 1`, `id`, `type`, `title`, `scope` (nonempty string array),
-and nonempty `questions`. Each question contains:
+Quiz fields: `schemaVersion: 1|2`, `id`, `type`, `title`, `scope` (nonempty string array),
+and nonempty `questions`. Each MCQ contains:
 
 - Unique `id`; `type` of `single` or `multiple`; nonempty `prompt`.
 - `options`: at least two `{id, text}` objects with unique IDs.
@@ -38,3 +38,10 @@ to spread bank coverage within the question limit and prefixes question IDs with
 bank identity. These are runtime fields; generate ordinary independent banks without
 authored selection groups. Identical prompt/options/answers are presented once.
 No machine-specific paths or timestamps are used in saved cache identity.
+
+Written question fields and evaluation criteria follow the shared PR skill's
+references/written-review.md (from the runtime checkout if the sibling is absent).
+Use schemaVersion 2 and omit MCQ options/answer IDs for written questions.
+The outer input bank version remains 1 and managed cache version remains 2.
+selectionFormat and writtenCount are runtime metadata, not authored bank fields.
+Banks may contain both types so later MCQ-only requests reuse the MCQs.

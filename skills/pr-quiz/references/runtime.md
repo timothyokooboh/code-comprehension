@@ -39,3 +39,14 @@ working-tree changes are made. Resolve merge conflicts before preparing a quiz.
 Use the shared PR skill's `references/revisions.md` for receipt shape, grounding,
 per-workflow preparation, and temporary-file cleanup. URLs must be the running
 `http://127.0.0.1:PORT` origin, without paths, credentials, queries, or fragments.
+
+
+## Written review commands
+
+- --wait-review SESSION_FILE: wait for a submitted job; idle long polls renew internally.
+- --review-feedback INPUT --review-session SESSION_FILE: validate and deliver
+  evidence-grounded feedback; invalid fields are reported for repair.
+
+Use the shared written review workflow for authorization, submission identity,
+evaluation and active-turn lifecycle. The runtime prints the private session path
+on launch. These commands use the existing agent, not a model API.

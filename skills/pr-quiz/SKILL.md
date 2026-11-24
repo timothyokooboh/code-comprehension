@@ -1,6 +1,6 @@
 ---
 name: pr-quiz
-description: Generate and launch a code-grounded MCQ assessment of proposed PR changes, including committed and uncommitted work. Use when an engineer requests a PR comprehension quiz or challenges/refines an active one; not for general product knowledge or opening a PR.
+description: Generate and launch a code-grounded assessment of proposed PR changes, including committed and uncommitted work. Use when an engineer requests a PR comprehension quiz or challenges/refines/reconnects an active one; not for general product knowledge or opening a PR.
 ---
 
 # PR comprehension quiz
@@ -8,6 +8,11 @@ description: Generate and launch a code-grounded MCQ assessment of proposed PR c
 Use the engineer's existing agent to generate questions. The runtime validates and
 presents them; it never calls a model. Do not open a PR, impose a merge gate, or
 claim that a perfect score proves production readiness.
+
+For a mixed/written request or a reconnect request, read
+[written-review.md](references/written-review.md). Reconnect resumes that workflow
+immediately rather than preparing a new session. Default fresh quizzes to MCQs;
+honour this request's format and count when generating.
 
 For a challenge or scope/difficulty refinement of an active quiz, read
 [revisions.md](references/revisions.md) and follow that workflow instead of preparing
@@ -86,3 +91,9 @@ files; use the recorded session directory with `--discard-pr` to remove them.
 Questions are retained for retakes, not as a persistent PR bank. Reload state uses
 tab-session storage; close the quiz tab when finished. A new invocation prepares a
 new session from current code. Do not claim the code remains unchanged after launch.
+
+For any assessment containing written questions, follow the shared
+[automatic review workflow](references/written-review.md) immediately after launch:
+capture the private session path, start waiting, review against code, deliver feedback,
+and continue waiting until explicit handoff or session closure. Browser submission
+is the trigger; no chat readiness step.

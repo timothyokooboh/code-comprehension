@@ -2,6 +2,9 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 import { cliErrorCodes, type CliErrorCode } from '../errors.js';
 
 export const messages = {
+  questionFormat: 'Question format for product checks/launch: mcq (default), written, or mixed.',
+  writtenCount: 'Number of written questions in a mixed product sitting.',
+
   review: {
     session: (path: string) => `Review session: ${path}`,
     wait: 'Wait for written answers using a private review session file.',
@@ -73,6 +76,9 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.questionFormatInvalid]: 'Use --format mcq, written, or mixed with --check-product or --product-bank. --written-questions requires a mixed product launch and must leave at least one MCQ.',
+    [cliErrorCodes.questionFormatUnavailable]: 'The bank cannot supply the requested question composition. Generate enough questions of each requested type or clarify the count before launching.',
+
     [cliErrorCodes.questionCountInvalid]: 'Use a positive whole number of questions with --product-bank.',
     [cliErrorCodes.assessmentInvalid]: 'Invalid assessment request. Use the current revision and displayToken with a valid input; displayed question IDs must match the current assessment.',
     [cliErrorCodes.assessmentStale]: 'The assessment or displayed question order changed. Read --active-assessment again and review the current questions before revising.',
