@@ -8,6 +8,7 @@ export const messages = {
   written: {
     retryLocked: 'Answers are locked while submission is unresolved. This page retries the same answers automatically when the runtime reconnects.',
     answer: 'Your explanation', placeholder: 'Explain what happens and why…',
+    speechUnavailable: 'Speech to text — coming soon',
     states: {
       [reviewStates.waiting]: { title: 'Waiting for a reviewer', detail: 'Your accepted answers are saved. A reviewer is connected and waiting for work.' },
       [reviewStates.reviewing]: { title: 'Reviewing your answer…', detail: 'Your agent is checking your reasoning against the supporting code. Feedback will appear here automatically.' },
