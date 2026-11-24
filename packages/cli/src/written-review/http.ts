@@ -22,12 +22,13 @@ export async function handleReviewRequest(request: IncomingMessage, response: Se
     if (request.headers.host !== new URL(origin).host || (request.headers.origin && request.headers.origin !== origin)) throw new ReviewError(reviewErrors.forbidden);
     const path = request.url?.split('?')[0];
     if (path === reviewPaths.session && request.method === 'GET') {
-      sendJson(response, { protocolVersion: reviewProtocolVersion, sessionId: review.sessionId, revision: review.revision(), token: tokens.browser });
+      sendJson(response, { protocolVersion: reviewProtocolVersion, sessionId: review.sessionId, attemptId: review.snapshot().attemptId, revision: review.revision(), token: tokens.browser });
       return;
     }
     const agent = path === reviewPaths.wait || path === reviewPaths.feedback || path === reviewPaths.failure;
     if (request.headers.authorization !== 'Bearer ' + (agent ? tokens.reviewer : tokens.browser)) throw new ReviewError(reviewErrors.forbidden);
     if (path === reviewPaths.state && request.method === 'GET') sendJson(response, review.snapshot());
+    else if (path === reviewPaths.retake && request.method === 'POST') sendJson(response, review.retake(await readBody(request)));
     else if (path === reviewPaths.submit && request.method === 'POST') sendJson(response, review.submit(await readBody(request)));
     else if (path === reviewPaths.feedback && request.method === 'POST') sendJson(response, review.review(await readBody(request)));
     else if (path === reviewPaths.failure && request.method === 'POST') sendJson(response, review.fail(await readBody(request)));

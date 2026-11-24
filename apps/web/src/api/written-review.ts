@@ -1,5 +1,5 @@
 import { reviewErrors, reviewPaths, reviewTimings, reviewSessionSchema, reviewSnapshotSchema,
-  type ReviewSession, type ReviewSubmission, type ReviewErrorCode } from '@code-comprehension/quiz-contract';
+  type ReviewSession, type ReviewSubmission, type ReviewRetake, type ReviewErrorCode } from '@code-comprehension/quiz-contract';
 
 export class ReviewRequestError extends Error {
   constructor(public code: ReviewErrorCode) { super(code); }
@@ -28,6 +28,12 @@ export async function loadReviewSession(signal: AbortSignal) {
 export async function loadReview(session: ReviewSession, signal: AbortSignal, submission?: ReviewSubmission) {
   const data = await request(submission ? reviewPaths.submit : reviewPaths.state, signal, session.token, submission);
   const parsed = reviewSnapshotSchema.safeParse(data);
+  if (!parsed.success) throw new ReviewRequestError(reviewErrors.invalid);
+  return parsed.data;
+}
+
+export async function retakeReview(session: ReviewSession, signal: AbortSignal, retake: ReviewRetake) {
+  const parsed = reviewSnapshotSchema.safeParse(await request(reviewPaths.retake, signal, session.token, retake));
   if (!parsed.success) throw new ReviewRequestError(reviewErrors.invalid);
   return parsed.data;
 }

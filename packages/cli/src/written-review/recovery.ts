@@ -11,6 +11,7 @@ const root = join(tmpdir(), `comprehension-sessions-${process.getuid?.() ?? 'loc
 const sessionName = 'session.json';
 const lockName = 'runtime.lock';
 const recoverySchema = z.strictObject({
+  attemptId: z.uuid().optional(), questionIds: z.array(z.string()).optional(),
   version: z.literal(1), sessionId: z.uuid(), expiresAt: z.number().int().positive(),
   url: z.string().url().refine(value => {
     const url = new URL(value);
@@ -68,11 +69,12 @@ export function readRecovery(file: string) {
     const parsed = recoverySchema.safeParse(JSON.parse(readFileSync(file, 'utf8')));
     if (!parsed.success) throw new ReviewError(reviewErrors.recovery);
     if (parsed.data.expiresAt <= Date.now()) throw new ReviewError(reviewErrors.expired);
-    const { assessment, sessionId, submission, feedback } = parsed.data;
+    const { assessment, sessionId, submission, feedback, attemptId, questionIds } = parsed.data;
     if (assessment.quiz && assessment.quiz.runtimeRevision !== assessment.revision) throw new ReviewError(reviewErrors.recovery);
+    if (questionIds?.length && (!assessment.quiz || !validQuestionSelection(assessment.quiz, questionIds))) throw new ReviewError(reviewErrors.recovery);
     if (assessment.displayed.length && (!assessment.quiz || !validQuestionSelection(assessment.quiz, assessment.displayed.map(item => item.id)))) throw new ReviewError(reviewErrors.recovery);
     try {
-      const validator = createWrittenReview(() => assessment.quiz, { sessionId, submission: null, feedback: null });
+      const validator = createWrittenReview(() => assessment.quiz, { sessionId, attemptId: attemptId ?? submission?.attemptId, questionIds, submission: null, feedback: null });
       if (submission) validator.submit(submission);
       if (feedback) validator.validateFeedback(feedback);
     } catch { throw new ReviewError(reviewErrors.recovery); }

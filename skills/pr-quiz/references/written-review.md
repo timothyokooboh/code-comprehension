@@ -87,7 +87,8 @@ attemptId, submissionId and the job's leaseId to a temporary JSON file and run
 an explicit recovery state while retaining accepted answers. Remove the temporary file.
 Never
 present rejected feedback as delivered. On stale identity errors retrieve current work
-rather than relabelling an old review. Delete the temporary feedback file after delivery
+rather than relabelling an old review. Retake or replacement supersedes the old job;
+discard its feedback file and return to waiting for current work. Delete the temporary feedback file after delivery
 or abandonment. Answers and feedback are session data, never bank content. The browser
 displays accepted feedback inline automatically.
 
@@ -112,8 +113,13 @@ A delivered job has a two-minute lease. Copy its leaseId into feedback/failure;
 a delayed reviewer cannot change work claimed under a newer lease. Reconnection may wait for its expiry before
 retrieving interrupted work. Connection/lease observations cannot establish that a
 host quit or a turn ended. The browser retries unacknowledged submissions idempotently;
-accepted answers need no resubmission. Mixed retakes/replacement lifecycle remains
-#27; one written submission per runtime is supported.
+accepted answers need no resubmission. Retakes create a new attempt, clear previous answers/feedback, and invalidate old
+reviewer leases. PR retakes retain their session questions; product retakes preserve
+format/count/scopes and sample fresh questions when the bank supports it. An explicit
+replacement also creates a new attempt and revision, but its form takes effect only
+after the engineer reloads. Keep waiting across retakes/replacements: only current
+work is delivered, with its current attempt, submission and lease IDs. Duplicate
+current feedback is idempotent; feedback from superseded work is rejected.
 On explicit stop cancel the wait and gracefully stop the server. For a handoff,
 state whether the server stays alive and how to reconnect. Never discard accepted
 answers merely because the agent lost connectivity.

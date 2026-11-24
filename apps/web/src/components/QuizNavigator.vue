@@ -2,7 +2,7 @@
 import { messages } from '../locales/en';
 
 defineProps<{
-  entries: { anchor: string; prompt: string; answered: boolean; correct?: boolean }[];
+  entries: { anchor: string; prompt: string; answered: boolean; correct?: boolean; writtenStatus?: string }[];
 }>();
 </script>
 
@@ -15,9 +15,9 @@ defineProps<{
           <span class="question-index" :class="{ 'is-answered': entry.answered }" aria-hidden="true">{{ index + 1 }}</span>
           <span class="min-w-0">
             <span class="block text-sm font-semibold leading-5">{{ entry.prompt }}</span>
-            <span class="mt-1 block text-xs text-slate-500">{{ entry.correct === undefined
+            <span class="mt-1 block text-xs text-slate-500">{{ entry.writtenStatus ?? (entry.correct === undefined
               ? (entry.answered ? messages.workspace.answered : messages.workspace.unanswered)
-              : (entry.correct ? messages.workspace.correct : messages.workspace.review) }}</span>
+              : (entry.correct ? messages.workspace.correct : messages.workspace.review)) }}</span>
           </span>
         </a>
       </li>

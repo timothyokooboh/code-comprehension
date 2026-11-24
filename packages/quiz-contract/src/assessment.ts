@@ -26,9 +26,11 @@ export type RevisionInput = z.infer<typeof revisionInputSchema>;
 export const revisionRequestSchema = z.strictObject({
   revision: z.uuid(), displayToken: z.uuid().nullable(), input: revisionInputSchema,
 });
-export const displayRequestSchema = z.strictObject({ revision: z.uuid(), questionIds: z.array(z.string().min(1)).min(1) });
+export const displayRequestSchema = z.strictObject({ revision: z.uuid(), attemptId: z.uuid().optional(), questionIds: z.array(z.string().min(1)).min(1) });
 export const activeAssessmentSchema = z.strictObject({
   revision: z.uuid(), displayToken: z.uuid().nullable(), source: assessmentSourceSchema,
   displayed: z.array(z.strictObject({ number: z.number().int().positive(), id: z.string().min(1) })),
   quiz: quizSchema.nullable(),
 });
+
+export type DisplayRequest = z.infer<typeof displayRequestSchema>;

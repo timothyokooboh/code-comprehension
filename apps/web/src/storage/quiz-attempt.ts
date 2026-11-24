@@ -1,7 +1,7 @@
 import { validQuestionSelection, assessmentTypes, questionTypes, type Quiz, type Answers, reviewLimits, reviewTimings } from '@code-comprehension/quiz-contract';
 
 const storageKey = 'code-comprehension:current-attempt:v1';
-type Attempt = { questionIds: string[]; answers: Map<string, string[]>; submitted: boolean };
+type Attempt = { questionIds: string[]; answers: Map<string, string[]>; submitted: boolean; attemptId?: string };
 
 function parseAnswers(value: unknown, quiz: Quiz): Map<string, string[]> | null {
   if (!Array.isArray(value)) return null;
@@ -43,15 +43,15 @@ export function createAttemptStorage(quiz: Quiz) {
       const answers = parseAnswers(data.answers, selectedQuiz);
       if (!answers) return null;
       if (data.submitted && selectedQuiz.questions.some(({ id }) => !answers.get(id)?.length)) return null;
-      return { questionIds, answers, submitted: data.submitted };
+      return { questionIds, answers, submitted: data.submitted, attemptId: typeof data.attemptId === 'string' ? data.attemptId : undefined };
     } catch {
       return null;
     }
   }
 
-  function write(answers: Answers, submitted: boolean, questionIds: readonly string[]) {
+  function write(answers: Answers, submitted: boolean, questionIds: readonly string[], attemptId?: string) {
     try {
-      storage().setItem(storageKey, JSON.stringify({ identity, questionIds, answers: [...answers], submitted, expiresAt: Date.now() + reviewTimings.retentionMs }));
+      storage().setItem(storageKey, JSON.stringify({ identity, questionIds, attemptId, answers: [...answers], submitted, expiresAt: Date.now() + reviewTimings.retentionMs }));
     } catch {
       // Storage can be blocked or full; the in-memory assessment remains usable.
     }

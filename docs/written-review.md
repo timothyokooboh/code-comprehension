@@ -78,10 +78,22 @@ credentials; keep it out of Git and shared storage.
 
 If a reviewer cannot complete its job, `--review-failure IDENTITY_FILE --review-session
 SESSION_FILE` marks a recoverable failure. The file contains the same five submission identity
-fields and the job's leaseId as feedback. Old lease tokens cannot change a newer review. Reconnection retrieves pending work; accepted answers remain saved. Mixed retakes/replacement lifecycle
-follows in #27; written assessments currently support one submitted attempt per
-runtime. MCQ-only retakes remain available. Browser drafts and accepted answers
-survive reload while that runtime remains active.
+fields and the job's leaseId as feedback. Old lease tokens cannot change a newer review. Reconnection retrieves pending work; accepted answers remain saved. Mixed and written retakes are available even while review is pending. The browser
+records an idempotent retake request with a new attempt ID and chosen question IDs;
+the runtime persists that attempt before acknowledgement, clears old answers and
+feedback, invalidates old leases, and updates the displayed mapping token. A lost
+retake acknowledgement reconciles on reload without drawing a second subset. Only
+the current attempt is retained, and reusable product banks remain unchanged.
+
+Product retakes preserve format/count/scopes and prioritise fresh questions where
+available; PR retakes keep their session questions. Written navigator outcomes use
+qualitative verdicts, while the score counts MCQs only. Pending review is not overall
+success. An explicit replacement creates a new revision and attempt, including for
+identical question text, but the open form remains unchanged until explicit reload.
+Invalid replacements leave the current attempt usable. Late feedback and display
+reports from superseded attempts are rejected; duplicate current feedback is safe.
+Keep the waiting-agent loop active between attempts. Session closure cancels waiting
+work and deletes private recovery data; it never deletes reusable product banks.
 
 CLI integration and browser tests use a scripted reviewer. They establish transport
 and rendering, not the factual quality of model reviews or cross-host compatibility.
@@ -89,3 +101,5 @@ The engineer will test Claude Code before public support claims.
 
 See [the live Codex verification](written-review-walkthrough.md) for observed results
 and the remaining Claude Code release check.
+
+See [mixed lifecycle verification and the Claude Code release checklist](mixed-review-verification.md).

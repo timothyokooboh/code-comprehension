@@ -1,18 +1,20 @@
 import { randomUUID } from 'node:crypto';
-import { validQuestionSelection, questionTypes, reviewJobStates, reviewErrors, reviewStates, reviewTimings, reviewSubmissionSchema, reviewFeedbackSchema, reviewFailureSchema,
+import { validQuestionSelection, questionTypes, reviewJobStates, reviewErrors, reviewStates, reviewTimings, reviewSubmissionSchema, reviewFeedbackSchema, reviewFailureSchema, reviewRetakeSchema,
   type ReviewErrorCode, type ReviewSubmission, type ReviewFeedback, type ReviewSnapshot, type Quiz } from '@code-comprehension/quiz-contract';
 import type { z } from 'zod';
 
 export class ReviewError extends Error {
   constructor(public code: ReviewErrorCode, public issues?: z.core.$ZodIssue[]) { super(code); }
 }
-export type SavedReview = { sessionId: string; submission: ReviewSubmission | null; feedback: ReviewFeedback | null; failed?: boolean };
+export type SavedReview = { sessionId: string; submission: ReviewSubmission | null; feedback: ReviewFeedback | null; failed?: boolean; attemptId?: string; questionIds?: string[] };
 export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedReview,
   persist: (value: SavedReview) => void = () => {}) {
   const sessionId = saved?.sessionId ?? randomUUID();
   let submission: ReviewSubmission | null = saved?.submission ?? null;
   let feedback: ReviewFeedback | null = saved?.feedback ?? null;
   let failed = saved?.failed ?? false;
+  let attemptId = saved?.attemptId ?? saved?.submission?.attemptId ?? randomUUID();
+  let questionIds = saved?.questionIds ?? saved?.submission?.questionIds ?? [];
   let leaseUntil = 0;
   let leaseId: string | null = null;
   let listener: (() => void) | null = null;
@@ -22,7 +24,7 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
   }
   function snapshot(): ReviewSnapshot {
     if (submission) assertRevision(submission.revision);
-    return { submission, feedback, status: feedback ? reviewStates.completed
+    return { attemptId, questionIds, revision: getQuiz()?.runtimeRevision, submission, feedback, status: feedback ? reviewStates.completed
       : failed ? reviewStates.failed : Date.now() < leaseUntil ? reviewStates.reviewing : listener ? reviewStates.waiting : reviewStates.disconnected };
   }
   function submit(input: unknown) {
@@ -30,7 +32,8 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
     if (!parsed.success) throw new ReviewError(reviewErrors.invalid, parsed.error.issues);
     const value = parsed.data;
     assertRevision(value.revision);
-    if (value.sessionId !== sessionId) throw new ReviewError(reviewErrors.stale);
+    if (value.sessionId !== sessionId || value.attemptId !== attemptId) throw new ReviewError(reviewErrors.stale);
+    if (questionIds.length && JSON.stringify(value.questionIds) !== JSON.stringify(questionIds)) throw new ReviewError(reviewErrors.stale);
     const questions = getQuiz()!.questions;
     if (!validQuestionSelection(getQuiz()!, value.questionIds) ||
       Object.keys(value.answers).length !== value.questionIds.length ||
@@ -48,7 +51,8 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
       if (JSON.stringify(submission) !== JSON.stringify(value)) throw new ReviewError(reviewErrors.stale);
       return snapshot();
     }
-    persist({ sessionId, submission: value, feedback });
+    persist({ sessionId, attemptId, questionIds: value.questionIds, submission: value, feedback });
+    questionIds = value.questionIds;
     submission = value;
     listener?.();
     return snapshot();
@@ -56,7 +60,7 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
   function job() {
     if (!submission || Date.now() < leaseUntil) return { status: reviewJobStates.timeout };
     assertRevision(submission.revision);
-    persist({ sessionId, submission, feedback, failed: false });
+    persist({ sessionId, attemptId, questionIds, submission, feedback, failed: false });
     failed = false;
     leaseId = randomUUID();
     leaseUntil = Date.now() + reviewTimings.leaseMs;
@@ -101,7 +105,7 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
     const value = validateFeedback(input);
     if (feedback) return snapshot();
     if (value.leaseId !== leaseId) throw new ReviewError(reviewErrors.stale);
-    persist({ sessionId, submission, feedback: value });
+    persist({ sessionId, attemptId, questionIds, submission, feedback: value });
     feedback = value;
     return snapshot();
   }
@@ -112,13 +116,37 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
     if (!submission || feedback || value.leaseId !== leaseId || value.sessionId !== sessionId || value.revision !== submission.revision ||
       value.attemptId !== submission.attemptId || value.submissionId !== submission.submissionId) throw new ReviewError(reviewErrors.stale);
     assertRevision(value.revision);
-    persist({ sessionId, submission, feedback, failed: true });
+    persist({ sessionId, attemptId, questionIds, submission, feedback, failed: true });
     failed = true;
     leaseId = null;
     leaseUntil = 0;
     listener?.();
     return snapshot();
   }
-  return { sessionId, snapshot, submit, wait, review, fail, validateFeedback, revision: () => getQuiz()?.runtimeRevision };
+  function reset(value: Pick<ReviewSnapshot, 'attemptId' | 'questionIds'>) {
+    attemptId = value.attemptId;
+    questionIds = value.questionIds;
+    submission = null;
+    feedback = null;
+    failed = false;
+    leaseId = null;
+    leaseUntil = 0;
+    listener?.();
+  }
+  function retake(input: unknown) {
+    const parsed = reviewRetakeSchema.safeParse(input);
+    if (!parsed.success) throw new ReviewError(reviewErrors.invalid, parsed.error.issues);
+    const value = parsed.data;
+    assertRevision(value.revision);
+    if (value.sessionId !== sessionId || value.nextAttemptId === value.attemptId) throw new ReviewError(reviewErrors.stale);
+    if (value.nextAttemptId === attemptId && JSON.stringify(value.questionIds) === JSON.stringify(questionIds)) return snapshot();
+    if (value.attemptId !== attemptId) throw new ReviewError(reviewErrors.stale);
+    if (!getQuiz() || !validQuestionSelection(getQuiz()!, value.questionIds)) throw new ReviewError(reviewErrors.invalid);
+    const next = { sessionId, attemptId: value.nextAttemptId, questionIds: value.questionIds, submission: null, feedback: null, failed: false };
+    persist(next);
+    reset(next);
+    return snapshot();
+  }
+  return { sessionId, snapshot, submit, wait, review, fail, validateFeedback, retake, reset, revision: () => getQuiz()?.runtimeRevision };
 }
 export type WrittenReview = ReturnType<typeof createWrittenReview>;
