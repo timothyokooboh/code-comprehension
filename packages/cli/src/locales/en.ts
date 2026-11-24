@@ -2,6 +2,7 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 import { cliErrorCodes, type CliErrorCode } from '../errors.js';
 
 export const messages = {
+  developmentUi: 'Serve a local Vite UI workspace with live updates (development only).',
   questionFormat: 'Question format for product checks/launch: mcq (default), written, or mixed.',
   writtenCount: 'Number of written questions in a mixed product sitting.',
 
@@ -85,6 +86,7 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.developmentUiUnavailable]: 'Could not start the development UI. Provide the apps/web directory from a checkout with dependencies installed (pnpm install), then retry.',
     [cliErrorCodes.questionFormatInvalid]: 'Use --format mcq, written, or mixed with --check-product or --product-bank. --written-questions requires a mixed product launch and must leave at least one MCQ.',
     [cliErrorCodes.questionFormatUnavailable]: 'The bank cannot supply the requested question composition. Generate enough questions of each requested type or clarify the count before launching.',
 

@@ -17,7 +17,7 @@ import { productStatuses } from './product/contract.js';
 type CommandOptions = {
   resumeReview?: string; closeReview?: string; waitReview?: string; reviewFeedback?: string; reviewFailure?: string; reviewSession?: string;
   format?: QuestionFormat; writtenQuestions?: number;
-  port: number; open: boolean; quiz?: string; questions?: number;
+  port: number; open: boolean; quiz?: string; questions?: number; devUi?: string;
   activeAssessment?: string; reviseAssessment?: string; runtime?: string;
   retainProduct?: string; checkProduct?: string; refresh?: boolean; productStatus?: boolean; configureProduct?: string;
   validateProduct?: string; saveProduct?: string; productBank?: string[];
@@ -34,6 +34,9 @@ function validateOptions(options: CommandOptions) {
     options.retainProduct, options.checkProduct, options.productStatus, options.configureProduct, options.validateProduct, options.saveProduct, options.productBank,
   ].filter((value) => value !== undefined && value !== false);
   const hasComparisonOptions = options.target !== undefined || options.baseline !== undefined;
+  if (options.devUi && modes.length && !options.quiz && !options.productBank && !options.prSession && !options.resumeReview) {
+    throw new CliError(cliErrorCodes.prOptionsInvalid);
+  }
   const acceptsRepo = options.retainProduct || options.checkProduct || options.preparePr || options.productStatus || options.configureProduct || options.saveProduct || options.productBank;
   if (Boolean(options.reviewFeedback || options.reviewFailure) !== Boolean(options.reviewSession)) throw new CliError(cliErrorCodes.prOptionsInvalid);
   if ((Boolean(options.runtime) !== Boolean(options.reviseAssessment)) || (options.refresh && !options.checkProduct) || modes.length > 1 || (hasComparisonOptions && !options.preparePr) ||

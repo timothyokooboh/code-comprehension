@@ -36,3 +36,10 @@ test('unknown CLI options use catalog-backed recovery guidance', () => {
   expect(result.status).toBe(1);
   expect(result.stderr.trim()).toBe('Invalid command arguments. Run with --help to see available options.');
 });
+
+test('an unavailable development UI gives actionable setup guidance', () => {
+  const result = runCli(['--dev-ui', '/missing-code-comprehension-ui', '--no-open']);
+  expect(result.status).toBe(1);
+  expect(result.stderr).toContain('Could not start the development UI.');
+  expect(result.stderr).toContain('pnpm install');
+});

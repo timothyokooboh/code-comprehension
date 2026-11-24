@@ -44,6 +44,30 @@ See the [UI SDK evaluation](docs/ui-sdk-evaluation.md) for the native-control de
 
 ## Workspace
 
+### Live UI development
+
+```sh
+pnpm dev --quiz tests/fixtures/mixed-quiz.json
+```
+
+This builds the CLI once, then serves the Vue source through Vite on the quiz's
+own loopback address. Style/template edits update automatically; changes that need
+a page reload restore the current answers from browser storage. The quiz server,
+question selection, revision, and review attempt stay alive. Keep the same tab and
+URL, and allow browser storage for reload persistence.
+
+Use the usual launch arguments for a real assessment, for example
+`pnpm dev --product-bank general-overview --repo . --format mixed`.
+For an already-built runtime, append `--dev-ui apps/web` to a launch command or to
+`--resume-review SESSION_FILE` when resuming an interrupted session. Development
+mode must be selected when starting the runtime; refreshing a production-mode
+server does not enable it. Do not stop a quiz normally to migrate it: normal shutdown
+deletes its recovery record.
+
+Vite and the UI source are needed only in this development checkout. Normal
+`pnpm start` and packaged CLI launches still serve prebuilt assets. Server/CLI edits
+require a rebuild and restart; live updates apply to browser code only.
+
 - `apps/web`: Vue 3 UI, built with Vite and Tailwind.
 - `packages/cli`: Commander CLI and local HTTP server.
 - `packages/quiz-contract`: shared runtime/quiz contracts consumed by both applications.

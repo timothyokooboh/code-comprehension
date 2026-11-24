@@ -8,13 +8,15 @@ import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import { applicationName, runtimeStatusPath, runtimeReadyStatus, type RuntimeStatus, quizPath, type Quiz, type AssessmentSource, assessmentPaths, assessmentSourceKinds, runtimeLoopbackHost } from '@code-comprehension/quiz-contract';
 import { loadAssets } from './assets.js';
+import { startDevelopmentUi } from './development-ui.js';
 import { CliError, cliErrorCodes } from './errors.js';
 import { messages } from './locales/en.js';
 
 import { handleAssessmentRequest, sendJson } from './assessment/http.js';
 
-export async function startServer(port: number, quiz: Quiz | null = null, source: AssessmentSource = { kind: assessmentSourceKinds.file }, resumeFile?: string) {
-  const assets = await loadAssets(fileURLToPath(new URL('./web/', import.meta.url)));
+export async function startServer(port: number, quiz: Quiz | null = null, source: AssessmentSource = { kind: assessmentSourceKinds.file }, resumeFile?: string, devUi?: string) {
+  const assets = devUi ? null : await loadAssets(fileURLToPath(new URL('./web/', import.meta.url)));
+  let developmentUi: Awaited<ReturnType<typeof startDevelopmentUi>> | undefined;
   const status: RuntimeStatus = { name: applicationName, status: runtimeReadyStatus };
   const session = createReviewSession(quiz, source, resumeFile);
   const { state, review, tokens } = session;
@@ -45,7 +47,13 @@ export async function startServer(port: number, quiz: Quiz | null = null, source
       response.end(request.method === 'HEAD' ? undefined : JSON.stringify(pathname === quizPath ? state.snapshot().quiz : status));
       return;
     }
-    const asset = assets.get(pathname ?? '/');
+    if (developmentUi) {
+      developmentUi.middlewares(request, response, () => {
+        response.writeHead(httpStatus.HTTP_STATUS_NOT_FOUND).end(messages.notFound);
+      });
+      return;
+    }
+    const asset = assets?.get(pathname ?? '/');
     if (!asset) {
       response.writeHead(httpStatus.HTTP_STATUS_NOT_FOUND).end(messages.notFound);
       return;
@@ -55,12 +63,15 @@ export async function startServer(port: number, quiz: Quiz | null = null, source
   });
 
   try {
+    if (devUi) developmentUi = await startDevelopmentUi(devUi, server);
     server.listen(session.port ?? port, runtimeLoopbackHost);
     await once(server, 'listening');
   } catch (error) {
+    await developmentUi?.close();
     session.release();
+    if (!resumeFile) session.remove();
+    if (error instanceof CliError) throw error;
     if (resumeFile) throw new ReviewError(reviewErrors.address);
-    session.remove();
     throw error;
   }
   const address = server.address();
@@ -69,6 +80,7 @@ export async function startServer(port: number, quiz: Quiz | null = null, source
   const url = `http://${runtimeLoopbackHost}:${address.port}`;
   try { session.bind(url);
   } catch (error) {
+    await developmentUi?.close();
     server.closeAllConnections();
     server.close();
     session.release();
@@ -79,12 +91,17 @@ export async function startServer(port: number, quiz: Quiz | null = null, source
   const expiry = setTimeout(() => { void close().catch(reportCloseFailure); }, Math.max(0, session.expiresAt - Date.now()));
   function close() {
     clearTimeout(expiry);
-    closing ??= new Promise<void>((resolve, reject) => {
-      server.close(error => {
-        try { session.remove(); error ? reject(error) : resolve(); } catch (error) { reject(error); }
-      });
-      server.closeAllConnections();
-    });
+    closing ??= (async () => {
+      try { await developmentUi?.close(); }
+      finally {
+        await new Promise<void>((resolve, reject) => {
+          server.close(error => {
+            try { session.remove(); error ? reject(error) : resolve(); } catch (error) { reject(error); }
+          });
+          server.closeAllConnections();
+        });
+      }
+    })();
     return closing;
   }
   return { reviewSession: session.path, url, close };
