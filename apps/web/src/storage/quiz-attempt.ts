@@ -1,4 +1,4 @@
-import { validQuestionSelection, assessmentTypes, questionTypes, type Quiz, type Answers, reviewLimits } from '@code-comprehension/quiz-contract';
+import { validQuestionSelection, assessmentTypes, questionTypes, type Quiz, type Answers, reviewLimits, reviewTimings } from '@code-comprehension/quiz-contract';
 
 const storageKey = 'code-comprehension:current-attempt:v1';
 type Attempt = { questionIds: string[]; answers: Map<string, string[]>; submitted: boolean };
@@ -27,12 +27,14 @@ function parseAnswers(value: unknown, quiz: Quiz): Map<string, string[]> | null 
 export function createAttemptStorage(quiz: Quiz) {
   // Transport revisions protect agent requests; only a deliberate replacement resets an attempt.
   const { runtimeRevision: _runtimeRevision, ...persistentQuiz } = quiz;
-  const identity = JSON.stringify(persistentQuiz);
-  const storage = () => quiz.type === assessmentTypes.pr ? sessionStorage : localStorage;
+  const written = quiz.questions.some(question => question.type === questionTypes.written);
+  const identity = JSON.stringify(written ? quiz : persistentQuiz);
+  const storage = () => written || quiz.type === assessmentTypes.pr ? sessionStorage : localStorage;
 
   function read(): Attempt | null {
     try {
       const data = JSON.parse(storage().getItem(storageKey) ?? 'null');
+      if (written && data?.expiresAt <= Date.now()) { clear(); return null; }
       if (!data || data.identity !== identity || typeof data.submitted !== 'boolean') return null;
       const questionIds: unknown = data.questionIds ?? (quiz.selectionSize === undefined ? quiz.questions.map(({ id }) => id) : null);
       if (!Array.isArray(questionIds) || questionIds.some(id => typeof id !== 'string') ||
@@ -49,7 +51,7 @@ export function createAttemptStorage(quiz: Quiz) {
 
   function write(answers: Answers, submitted: boolean, questionIds: readonly string[]) {
     try {
-      storage().setItem(storageKey, JSON.stringify({ identity, questionIds, answers: [...answers], submitted }));
+      storage().setItem(storageKey, JSON.stringify({ identity, questionIds, answers: [...answers], submitted, expiresAt: Date.now() + reviewTimings.retentionMs }));
     } catch {
       // Storage can be blocked or full; the in-memory assessment remains usable.
     }

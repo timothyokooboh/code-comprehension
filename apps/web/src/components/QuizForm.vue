@@ -11,16 +11,15 @@ import QuizSidebar from './QuizSidebar.vue';
 import { useReviewTransition } from '../composables/useReviewTransition';
 
 const props = defineProps<{ quiz: Quiz }>();
-const { assessment, answers, result, canSubmit, answer, submit, retake } = useQuizAttempt(props.quiz);
+const { assessment, answers, result, canSubmit, answer, submit, retake, restoreSubmission } = useQuizAttempt(props.quiz);
 const { unavailable: displayUnavailable } = useAssessmentDisplay(assessment);
 const review = useWrittenReview(assessment);
 const { snapshot: reviewSnapshot, busy: reviewBusy, error: reviewError, locked: reviewLocked } = review;
 watch(() => reviewSnapshot.value?.submission, (submission) => {
   if (submission && !result.value) {
-    for (const [id, value] of Object.entries(submission.answers)) answer(id, value);
-    submit();
+    restoreSubmission(submission);
   }
-});
+}, { immediate: true });
 const formId = useId();
 const { updateReview } = useReviewTransition();
 let pointerSubmission = false;

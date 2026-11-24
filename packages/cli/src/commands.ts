@@ -1,3 +1,4 @@
+import { closeRecovery } from './written-review/recovery.js';
 import { requestReview } from './written-review/client.js';
 import { resolve } from 'node:path';
 import { projectRoot } from './product/project.js';
@@ -14,7 +15,7 @@ import { cacheStatuses, inspectProductCache } from './product/cache.js';
 import { productStatuses } from './product/contract.js';
 
 type CommandOptions = {
-  waitReview?: string; reviewFeedback?: string; reviewSession?: string;
+  resumeReview?: string; closeReview?: string; waitReview?: string; reviewFeedback?: string; reviewFailure?: string; reviewSession?: string;
   format?: QuestionFormat; writtenQuestions?: number;
   port: number; open: boolean; quiz?: string; questions?: number;
   activeAssessment?: string; reviseAssessment?: string; runtime?: string;
@@ -29,12 +30,12 @@ function validateOptions(options: CommandOptions) {
     (options.writtenQuestions !== undefined && (!options.productBank || options.format !== questionFormats.mixed))) throw new CliError(cliErrorCodes.questionFormatInvalid);
   if (options.questions !== undefined && !options.productBank) throw new CliError(cliErrorCodes.questionCountInvalid);
   const modes = [
-    options.waitReview, options.reviewFeedback, options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
+    options.resumeReview, options.closeReview, options.waitReview, options.reviewFeedback, options.reviewFailure, options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
     options.retainProduct, options.checkProduct, options.productStatus, options.configureProduct, options.validateProduct, options.saveProduct, options.productBank,
   ].filter((value) => value !== undefined && value !== false);
   const hasComparisonOptions = options.target !== undefined || options.baseline !== undefined;
   const acceptsRepo = options.retainProduct || options.checkProduct || options.preparePr || options.productStatus || options.configureProduct || options.saveProduct || options.productBank;
-  if (Boolean(options.reviewFeedback) !== Boolean(options.reviewSession)) throw new CliError(cliErrorCodes.prOptionsInvalid);
+  if (Boolean(options.reviewFeedback || options.reviewFailure) !== Boolean(options.reviewSession)) throw new CliError(cliErrorCodes.prOptionsInvalid);
   if ((Boolean(options.runtime) !== Boolean(options.reviseAssessment)) || (options.refresh && !options.checkProduct) || modes.length > 1 || (hasComparisonOptions && !options.preparePr) ||
     (options.preparePr && !options.target) || (options.repo !== undefined && !acceptsRepo)) {
     throw new CliError(cliErrorCodes.prOptionsInvalid);
@@ -43,8 +44,12 @@ function validateOptions(options: CommandOptions) {
 
 export async function runCommand(options: CommandOptions) {
   validateOptions(options);
-  if (options.waitReview || options.reviewFeedback) {
-    console.log(JSON.stringify(await requestReview(options.waitReview ?? options.reviewSession!, options.reviewFeedback)));
+  if (options.resumeReview) {
+    await launchAssessment(options, null);
+  } else if (options.closeReview) {
+    closeRecovery(options.closeReview);
+  } else if (options.waitReview || options.reviewFeedback || options.reviewFailure) {
+    console.log(JSON.stringify(await requestReview(options.waitReview ?? options.reviewSession!, options.reviewFeedback ?? options.reviewFailure, Boolean(options.reviewFailure))));
   } else if (options.activeAssessment) {
     console.log(JSON.stringify(await readActiveAssessment(options.activeAssessment)));
   } else if (options.reviseAssessment && options.runtime) {
@@ -83,6 +88,6 @@ export async function runCommand(options: CommandOptions) {
   } else if (options.prSession) {
     const directory = resolve(options.prSession);
     const quiz = await loadPrAssessment(directory);
-    await launchAssessment(options, quiz, () => discardPr(directory), { kind: assessmentSourceKinds.pr, directory });
+    await launchAssessment(options, quiz, undefined, { kind: assessmentSourceKinds.pr, directory });
   } else await launch(options);
 }

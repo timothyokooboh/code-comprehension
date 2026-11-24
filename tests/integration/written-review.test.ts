@@ -51,7 +51,7 @@ test('a disconnected submission is queued and reviewed through the public CLI', 
     expect(wait.status, wait.stderr).toBe(0);
     const job = JSON.parse(wait.stdout);
     expect(job.submission).toEqual(submission);
-    const feedback = { ...submission, reviews: [{ questionId: 'explain', verdict: 'correct', summary: 'Correct reasoning.', understood: 'The uncertain outcome.', missing: 'No essential gaps.', references: [{ path: 'payments.ts' }] }] };
+    const feedback = { ...submission, leaseId: job.leaseId, reviews: [{ questionId: 'explain', verdict: 'correct', summary: 'Correct reasoning.', understood: 'The uncertain outcome.', missing: 'No essential gaps.', references: [{ path: 'payments.ts' }] }] };
     const { answers: _, questionIds: __, ...review } = feedback;
     const feedbackPath = join(directory, 'feedback.json');
     await writeFile(feedbackPath, JSON.stringify(review));

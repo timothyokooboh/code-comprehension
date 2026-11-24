@@ -34,7 +34,9 @@ export function reportFailure(error: unknown) {
   if (error instanceof CommanderError && error.exitCode === 0) return;
   if (error instanceof ReviewError) {
     const copy = { [reviewErrors.invalid]: messages.review.invalid, [reviewErrors.stale]: messages.review.stale,
-      [reviewErrors.forbidden]: messages.review.forbidden, [reviewErrors.unavailable]: messages.review.unavailable };
+      [reviewErrors.forbidden]: messages.review.forbidden, [reviewErrors.unavailable]: messages.review.unavailable,
+      [reviewErrors.recovery]: messages.review.recovery, [reviewErrors.expired]: messages.review.expired,
+      [reviewErrors.active]: messages.review.active, [reviewErrors.storage]: messages.review.storage, [reviewErrors.address]: messages.review.address };
     console.error(copy[error.code]);
     if (error.issues) console.error(formatQuizIssues(error.issues));
     process.exitCode = 1;

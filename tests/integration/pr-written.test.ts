@@ -28,3 +28,23 @@ test('the PR workflow validates and launches generated written questions without
     expect(runCli(['--product-status', '--repo', repo.path]).stdout).toContain('setup_required');
   } finally { repo.dispose(); }
 });
+
+test('discarding an interrupted PR review removes its comparison and quiz files', async () => {
+  const repo = createRepository();
+  try {
+    repo.write('payment.ts', 'export const retries = 2;\n');
+    repo.git('add', 'payment.ts');
+    repo.git('commit', '-m', 'change retries');
+    const prepared = JSON.parse(runCli(['--prepare-pr', '--repo', repo.path, '--target', 'main']).stdout);
+    const fixture = JSON.parse(readFileSync(new URL('../fixtures/mixed-quiz.json', import.meta.url), 'utf8'));
+    const { writeFileSync, existsSync } = await import('node:fs');
+    writeFileSync(prepared.quizPath, JSON.stringify({ ...fixture, type: 'pr', questions: fixture.questions.map((q: object) => ({ ...q, references: [{ path: 'payment.ts' }] })) }));
+    const app = await launchCli(['--pr-session', prepared.directory]);
+    await app.stop('SIGKILL');
+    expect(existsSync(prepared.diffPath)).toBe(true);
+    const closed = runCli(['--close-review', app.reviewSession!]);
+    expect(closed.status, closed.stderr).toBe(0);
+    expect(existsSync(prepared.directory)).toBe(false);
+    expect(existsSync(app.reviewSession!)).toBe(false);
+  } finally { repo.dispose(); }
+});

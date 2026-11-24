@@ -1,5 +1,5 @@
 import { computed, readonly, ref } from 'vue';
-import { questionTypes, scoreQuiz, selectQuestions, type Quiz, type QuizResult } from '@code-comprehension/quiz-contract';
+import { questionTypes, scoreQuiz, selectQuestions, type Quiz, type QuizResult, type ReviewSubmission } from '@code-comprehension/quiz-contract';
 
 import { createAttemptStorage } from '../storage/quiz-attempt';
 
@@ -33,6 +33,13 @@ export function useQuizAttempt(quiz: Quiz) {
     persistAttempt(true);
   }
 
+  function restoreSubmission(submission: ReviewSubmission) {
+    questions.value = submission.questionIds.map(id => quiz.questions.find(question => question.id === id)!);
+    answers.value = new Map(Object.entries(submission.answers));
+    result.value = scoreQuiz(assessment.value, answers.value);
+    persistAttempt(true);
+  }
+
   function retake() {
     answers.value = new Map();
     result.value = null;
@@ -41,5 +48,5 @@ export function useQuizAttempt(quiz: Quiz) {
     persistAttempt(false);
   }
 
-  return { assessment, answers: readonly(answers), result: readonly(result), canSubmit, answer, submit, retake };
+  return { assessment, answers: readonly(answers), result: readonly(result), canSubmit, answer, submit, retake, restoreSubmission };
 }

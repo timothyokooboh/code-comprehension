@@ -34,11 +34,11 @@ export async function launch(options: { port: number; open: boolean; quiz?: stri
 }
 
 export async function launchAssessment(
-  options: { port: number; open: boolean }, quiz: Quiz | null,
+  options: { port: number; open: boolean; resumeReview?: string }, quiz: Quiz | null,
   cleanup: () => Promise<void> = async () => {},
   source: AssessmentSource = { kind: assessmentSourceKinds.file },
 ) {
-  const app = await startServer(options.port, quiz, source);
+  const app = await startServer(options.port, quiz, source, options.resumeReview);
   registerShutdown(app, cleanup);
   console.log(messages.review.session(app.reviewSession));
   console.log(messages.started(app.url));
