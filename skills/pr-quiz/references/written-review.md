@@ -73,7 +73,7 @@ or incorrect (Correct, Partly correct, Needs correction). Give no written percen
 or blended score.
 
 Write temporary feedback JSON containing the job submission's exact protocolVersion,
-sessionId, revision, attemptId and submissionId, plus reviews. Supply one entry per
+sessionId, revision, attemptId and submissionId, plus the job's leaseId and reviews. Supply one entry per
 selected written question: questionId, verdict, summary, understood, missing,
 references. All prose fields are nonempty. State when no essential gap remains or
 when the answer establishes no relevant point. Keep feedback concise and specific.
@@ -82,7 +82,7 @@ Use references from that question's evidence, matching path and line exactly.
 Run RUNTIME --review-feedback FEEDBACK_FILE --review-session SESSION_FILE.
 Repair field-specific validation errors internally and retry at most twice. If review
 cannot be completed, write only the current job's protocolVersion, sessionId, revision,
-attemptId and submissionId to a temporary JSON file and run
+attemptId, submissionId and the job's leaseId to a temporary JSON file and run
 `RUNTIME --review-failure FILE --review-session SESSION_FILE`. This gives the browser
 an explicit recovery state while retaining accepted answers. Remove the temporary file.
 Never
@@ -108,7 +108,8 @@ saved port must be freed before resuming; do not silently choose a new port. Mis
 corrupt or expired recovery data requires explaining that this session cannot resume;
 keep any browser draft and ask before starting a new assessment.
 
-A delivered job has a two-minute lease. Reconnection may wait for its expiry before
+A delivered job has a two-minute lease. Copy its leaseId into feedback/failure;
+a delayed reviewer cannot change work claimed under a newer lease. Reconnection may wait for its expiry before
 retrieving interrupted work. Connection/lease observations cannot establish that a
 host quit or a turn ended. The browser retries unacknowledged submissions idempotently;
 accepted answers need no resubmission. Mixed retakes/replacement lifecycle remains

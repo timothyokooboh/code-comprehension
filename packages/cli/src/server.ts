@@ -1,5 +1,4 @@
 import { ReviewError } from './written-review/state.js';
-import { discardPr } from './pr/session.js';
 import { createReviewSession } from './written-review/session.js';
 import { reviewPaths, reviewErrors } from '@code-comprehension/quiz-contract';
 import { handleReviewRequest } from './written-review/http.js';
@@ -85,9 +84,6 @@ export async function startServer(port: number, quiz: Quiz | null = null, source
         try { session.remove(); error ? reject(error) : resolve(); } catch (error) { reject(error); }
       });
       server.closeAllConnections();
-    }).then(async () => {
-      const currentSource = state.snapshot().source;
-      if (currentSource.kind === assessmentSourceKinds.pr) await discardPr(currentSource.directory);
     });
     return closing;
   }

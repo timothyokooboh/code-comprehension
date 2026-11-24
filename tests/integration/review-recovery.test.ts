@@ -41,7 +41,8 @@ test('completed feedback survives restart and duplicate runtimes are rejected', 
   const submit = await fetch(app.url + '/api/review/submit', { method: 'POST', headers: { Authorization: 'Bearer ' + session.token, 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...identity, questionIds: ['retry', 'guarantees', 'explain'], answers: { retry: ['retry'], guarantees: ['key'], explain: ['An uncertain outcome.'] } }) });
   expect(submit.ok).toBe(true);
-  const feedback = { ...identity, reviews: [{ questionId: 'explain', verdict: 'partial', summary: 'Add the consequence.', understood: 'The outcome is uncertain.', missing: 'Explain duplicate charge risk.', references: [{ path: 'payments.ts' }] }] };
+  const job = JSON.parse(runCli(['--wait-review', app.reviewSession!]).stdout);
+  const feedback = { ...identity, leaseId: job.leaseId, reviews: [{ questionId: 'explain', verdict: 'partial', summary: 'Add the consequence.', understood: 'The outcome is uncertain.', missing: 'Explain duplicate charge risk.', references: [{ path: 'payments.ts' }] }] };
   const file = join(directory, 'feedback.json');
   await writeFile(file, JSON.stringify(feedback));
   expect(runCli(['--review-feedback', file, '--review-session', app.reviewSession!]).status).toBe(0);
@@ -78,12 +79,12 @@ test('review failure is visible and reconnect retrieves the same pending job', a
       body: JSON.stringify({ ...identity, questionIds: ['retry', 'guarantees', 'explain'], answers: { retry: ['retry'], guarantees: ['key'], explain: ['An uncertain outcome.'] } }) });
     const first = runCli(['--wait-review', app.reviewSession!]);
     const file = join(directory, 'failure.json');
-    await writeFile(file, JSON.stringify(identity));
+    await writeFile(file, JSON.stringify({ ...identity, leaseId: JSON.parse(first.stdout).leaseId }));
     const failure = runCli(['--review-failure', file, '--review-session', app.reviewSession!]);
     expect(failure.status, failure.stderr).toBe(0);
     const state = await (await fetch(app.url + '/api/review/state', { headers: { Authorization: 'Bearer ' + session.token } })).json();
     expect(state.status).toBe('failed');
-    expect(runCli(['--wait-review', app.reviewSession!]).stdout).toBe(first.stdout);
+    expect(JSON.parse(runCli(['--wait-review', app.reviewSession!]).stdout).submission).toEqual(JSON.parse(first.stdout).submission);
   } finally { await app.stop(); await rm(directory, { recursive: true, force: true }); }
 });
 
@@ -109,11 +110,35 @@ test('an expired lease requeues the same job and retention expiry deletes privat
     expect((await state()).status).toBe('reviewing');
     await writeFile(clock, String(now + 121_000));
     expect((await state()).status).toBe('disconnected');
-    expect(runCli(['--wait-review', app.reviewSession!]).stdout).toBe(first.stdout);
+    const replacement = JSON.parse(runCli(['--wait-review', app.reviewSession!]).stdout);
+    expect(replacement.submission).toEqual(JSON.parse(first.stdout).submission);
+    expect(replacement.leaseId).not.toBe(JSON.parse(first.stdout).leaseId);
+    const lateFailure = join(directory, 'late-failure.json');
+    await writeFile(lateFailure, JSON.stringify({ ...identity, leaseId: JSON.parse(first.stdout).leaseId }));
+    expect(runCli(['--review-failure', lateFailure, '--review-session', app.reviewSession!]).status).toBe(1);
+    expect((await state()).status).toBe('reviewing');
     await app.stop('SIGKILL');
     await writeFile(clock, String(now + 25 * 60 * 60 * 1000));
     const expired = runCli(['--resume-review', app.reviewSession!], env);
     expect(expired.status).toBe(1);
     await expect(access(app.reviewSession!)).rejects.toThrow();
   } finally { await app.stop(); await rm(directory, { recursive: true, force: true }); }
+});
+
+test('competing resumes cannot release or delete the surviving runtime ownership', async () => {
+  const app = await launchCli(['--quiz', fixture]);
+  await app.stop('SIGKILL');
+  const attempts = await Promise.allSettled([
+    launchCli(['--resume-review', app.reviewSession!]),
+    launchCli(['--resume-review', app.reviewSession!]),
+  ]);
+  const running = attempts.flatMap(result => result.status === 'fulfilled' ? [result.value] : []);
+  expect(running.length).toBeLessThanOrEqual(1);
+  // Both contenders may safely back off; the next explicit resume can then win.
+  const owner = running[0] ?? await launchCli(['--resume-review', app.reviewSession!]);
+  try {
+    expect(runCli(['--close-review', app.reviewSession!]).status).toBe(1);
+    await expect(access(app.reviewSession!)).resolves.toBeUndefined();
+    expect((await fetch(owner.url + '/api/review/session')).ok).toBe(true);
+  } finally { await owner.stop(); }
 });

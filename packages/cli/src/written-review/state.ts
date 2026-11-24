@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { validQuestionSelection, questionTypes, reviewJobStates, reviewErrors, reviewStates, reviewTimings, reviewSubmissionSchema, reviewFeedbackSchema, reviewIdentitySchema,
+import { validQuestionSelection, questionTypes, reviewJobStates, reviewErrors, reviewStates, reviewTimings, reviewSubmissionSchema, reviewFeedbackSchema, reviewFailureSchema,
   type ReviewErrorCode, type ReviewSubmission, type ReviewFeedback, type ReviewSnapshot, type Quiz } from '@code-comprehension/quiz-contract';
 import type { z } from 'zod';
 
 export class ReviewError extends Error {
   constructor(public code: ReviewErrorCode, public issues?: z.core.$ZodIssue[]) { super(code); }
 }
-type SavedReview = { sessionId: string; submission: ReviewSubmission | null; feedback: ReviewFeedback | null; failed?: boolean };
+export type SavedReview = { sessionId: string; submission: ReviewSubmission | null; feedback: ReviewFeedback | null; failed?: boolean };
 export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedReview,
   persist: (value: SavedReview) => void = () => {}) {
   const sessionId = saved?.sessionId ?? randomUUID();
@@ -14,6 +14,7 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
   let feedback: ReviewFeedback | null = saved?.feedback ?? null;
   let failed = saved?.failed ?? false;
   let leaseUntil = 0;
+  let leaseId: string | null = null;
   let listener: (() => void) | null = null;
 
   function assertRevision(revision: string) {
@@ -57,11 +58,13 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
     assertRevision(submission.revision);
     persist({ sessionId, submission, feedback, failed: false });
     failed = false;
+    leaseId = randomUUID();
     leaseUntil = Date.now() + reviewTimings.leaseMs;
-    return { status: reviewJobStates.submitted, submission,
+    return { status: reviewJobStates.submitted, leaseId, submission,
       questions: getQuiz()!.questions.filter(q => q.type === questionTypes.written && submission!.questionIds.includes(q.id)) };
   }
   async function wait(signal: AbortSignal) {
+    if (signal.aborted) return { status: reviewJobStates.timeout };
     if (listener) throw new ReviewError(reviewErrors.stale);
     if (submission && !feedback && Date.now() >= leaseUntil) return job();
     await new Promise<void>(resolve => {
@@ -76,9 +79,9 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
       signal.addEventListener('abort', finish, { once: true });
       if (signal.aborted) finish();
     });
-    return feedback ? { status: reviewJobStates.timeout } : job();
+    return signal.aborted || feedback ? { status: reviewJobStates.timeout } : job();
   }
-  function review(input: unknown) {
+  function validateFeedback(input: unknown) {
     const parsed = reviewFeedbackSchema.safeParse(input);
     if (!parsed.success) throw new ReviewError(reviewErrors.invalid, parsed.error.issues);
     const value = parsed.data;
@@ -92,23 +95,30 @@ export function createWrittenReview(getQuiz: () => Quiz | null, saved?: SavedRev
       if (!question || item.references.some(ref => !question.references.some(source => source.path === ref.path && source.line === ref.line))) throw new ReviewError(reviewErrors.invalid);
     }
     if (feedback && JSON.stringify(feedback) !== JSON.stringify(value)) throw new ReviewError(reviewErrors.stale);
+    return value;
+  }
+  function review(input: unknown) {
+    const value = validateFeedback(input);
+    if (feedback) return snapshot();
+    if (value.leaseId !== leaseId) throw new ReviewError(reviewErrors.stale);
     persist({ sessionId, submission, feedback: value });
     feedback = value;
     return snapshot();
   }
   function fail(input: unknown) {
-    const parsed = reviewIdentitySchema.safeParse(input);
+    const parsed = reviewFailureSchema.safeParse(input);
     if (!parsed.success) throw new ReviewError(reviewErrors.invalid, parsed.error.issues);
     const value = parsed.data;
-    if (!submission || feedback || value.sessionId !== sessionId || value.revision !== submission.revision ||
+    if (!submission || feedback || value.leaseId !== leaseId || value.sessionId !== sessionId || value.revision !== submission.revision ||
       value.attemptId !== submission.attemptId || value.submissionId !== submission.submissionId) throw new ReviewError(reviewErrors.stale);
     assertRevision(value.revision);
     persist({ sessionId, submission, feedback, failed: true });
     failed = true;
+    leaseId = null;
     leaseUntil = 0;
     listener?.();
     return snapshot();
   }
-  return { sessionId, snapshot, submit, wait, review, fail, revision: () => getQuiz()?.runtimeRevision };
+  return { sessionId, snapshot, submit, wait, review, fail, validateFeedback, revision: () => getQuiz()?.runtimeRevision };
 }
 export type WrittenReview = ReturnType<typeof createWrittenReview>;

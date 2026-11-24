@@ -25,7 +25,8 @@ export const writtenFeedbackSchema = z.strictObject({
   summary: text, understood: text, missing: text,
   references: z.array(sourceReferenceSchema).min(1),
 });
-export const reviewFeedbackSchema = z.strictObject({ ...identity, reviews: z.array(writtenFeedbackSchema).min(1) });
+export const reviewFailureSchema = z.strictObject({ ...identity, leaseId: z.uuid() });
+export const reviewFeedbackSchema = z.strictObject({ ...identity, leaseId: z.uuid(), reviews: z.array(writtenFeedbackSchema).min(1) });
 export const reviewSnapshotSchema = z.strictObject({
   status: z.enum(reviewStates), submission: reviewSubmissionSchema.nullable(), feedback: reviewFeedbackSchema.nullable(),
 });
@@ -39,5 +40,5 @@ export type ReviewSession = z.infer<typeof reviewSessionSchema>;
 export const reviewJobSchema = z.discriminatedUnion('status', [
   z.strictObject({ status: z.literal(reviewJobStates.timeout) }),
   z.strictObject({ status: z.literal(reviewJobStates.completed) }),
-  z.strictObject({ status: z.literal(reviewJobStates.submitted), submission: reviewSubmissionSchema, questions: z.array(writtenQuestionSchema).min(1) }),
+  z.strictObject({ status: z.literal(reviewJobStates.submitted), leaseId: z.uuid(), submission: reviewSubmissionSchema, questions: z.array(writtenQuestionSchema).min(1) }),
 ]);

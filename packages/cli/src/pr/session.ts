@@ -1,4 +1,5 @@
-import { mkdtemp, writeFile, readFile, realpath, lstat, rm } from 'node:fs/promises';
+import { readFileSync, realpathSync, lstatSync, rmSync, existsSync } from 'node:fs';
+import { mkdtemp, writeFile, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname, basename, resolve } from 'node:path';
 import { z } from 'zod';
@@ -39,12 +40,12 @@ export async function preparePr(repo: string, target: string, baseline?: string)
   }
 }
 
-export async function readSession(path: string) {
+function readSessionSync(path: string) {
   try {
     const directory = resolve(path);
-    if (!(await lstat(directory)).isDirectory() || dirname(directory) !== await realpath(tmpdir()) ||
+    if (!lstatSync(directory).isDirectory() || dirname(directory) !== realpathSync(tmpdir()) ||
       !basename(directory).startsWith(sessionPrefix)) throw new Error();
-    const manifest = manifestSchema.parse(JSON.parse(await readFile(join(directory, manifestName), 'utf8')));
+    const manifest = manifestSchema.parse(JSON.parse(readFileSync(join(directory, manifestName), 'utf8')));
     return { directory, manifest, quizPath: join(directory, quizName) };
   } catch (cause) { throw new CliError(cliErrorCodes.sessionInvalid, { cause }); }
 }
@@ -52,5 +53,14 @@ export async function readSession(path: string) {
 export async function discardPr(path: string) {
   const { directory } = await readSession(path);
   try { await rm(directory, { recursive: true, force: true }); }
+  catch (cause) { throw new CliError(cliErrorCodes.sessionCleanupFailed, { cause }); }
+}
+
+export async function readSession(path: string) { return readSessionSync(path); }
+
+export function discardPrSync(path: string) {
+  if (!existsSync(path)) return;
+  const { directory } = readSessionSync(path);
+  try { rmSync(directory, { recursive: true, force: true }); }
   catch (cause) { throw new CliError(cliErrorCodes.sessionCleanupFailed, { cause }); }
 }

@@ -25,7 +25,7 @@ test('mixed submission shows per-question feedback automatically above the writt
     await expect(page.getByText('Reviewing your answer…')).toBeVisible();
     const { answers, questionIds, ...identity } = job.submission;
     const feedbackPath = join(directory, 'feedback.json');
-    await writeFile(feedbackPath, JSON.stringify({ ...identity, reviews: [{
+    await writeFile(feedbackPath, JSON.stringify({ ...identity, leaseId: job.leaseId, reviews: [{
       questionId: 'explain', verdict: 'correct', summary: 'You explained the uncertain outcome.',
       understood: 'The charge can succeed before the response is lost.', missing: 'No essential gaps.',
       references: [{ path: 'payments.ts' }],
