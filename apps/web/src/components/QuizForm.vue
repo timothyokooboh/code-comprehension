@@ -74,7 +74,7 @@ async function submitReview() {
 .workspace-content { min-width: 0; padding: 1.5rem; }
 .workspace-caption { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line); }
 @media (min-width: 1024px) {
-  .quiz-workspace { grid-template-columns: 270px minmax(0, 1fr); min-height: calc(100vh - 89px); }
+  .quiz-workspace { grid-template-columns: 320px minmax(0, 1fr); min-height: calc(100vh - 89px); }
   .workspace-content { padding: 2rem clamp(1.5rem, 3vw, 4rem); }
 }
 </style>
