@@ -1,25 +1,37 @@
 import { diagramErrorCodes, type DiagramErrorCode } from '../diagrams/render-diagram.ts';
 import { quizLoadErrorCodes, type QuizLoadErrorCode } from '../api/quiz-errors.ts';
-import { questionTypes, reviewErrors } from '@code-comprehension/quiz-contract';
+import { questionTypes, reviewErrors, reviewStates } from '@code-comprehension/quiz-contract';
 import { runtimeErrorCodes, type RuntimeErrorCode } from '../api/runtime-errors.ts';
 import { applicationName } from '@code-comprehension/quiz-contract';
 
 export const messages = {
   written: {
-    retryLocked: 'Answers are locked while submission is unresolved. Retry submission to safely resend the same answers.',
+    retryLocked: 'Answers are locked while submission is unresolved. This page retries the same answers automatically when the runtime reconnects.',
     answer: 'Your explanation', placeholder: 'Explain what happens and why…',
-    waiting: 'Waiting for a reviewer', reviewing: 'Reviewing your answer…',
-    waitingDetail: 'Your answer is saved for review. If your agent is disconnected, return to its chat and say “Reconnect to my quiz”. You do not need to submit again.',
-    reviewingDetail: 'Your agent is checking your reasoning against the supporting code. Feedback will appear here automatically.',
+    states: {
+      [reviewStates.waiting]: { title: 'Waiting for a reviewer', detail: 'Your accepted answers are saved. A reviewer is connected and waiting for work.' },
+      [reviewStates.reviewing]: { title: 'Reviewing your answer…', detail: 'Your agent is checking your reasoning against the supporting code. Feedback will appear here automatically.' },
+      [reviewStates.disconnected]: { title: 'Reviewer disconnected', detail: 'Your accepted answers are saved. No active reviewer is currently observed. Say “Reconnect to my quiz” in agent chat; you do not need to submit again.' },
+      [reviewStates.failed]: { title: 'Review needs attention', detail: 'Your accepted answers are saved, but the review could not be completed. Say “Reconnect to my quiz” in agent chat to retry the review.' },
+      [reviewStates.completed]: { title: 'Review completed', detail: 'Your feedback is saved for this session.' },
+    },
+    pending: 'Submission not yet confirmed',
+    pendingDetail: 'Your answers are saved in this browser tab. The runtime has not confirmed acceptance. This page will retry the same submission automatically when it reconnects.',
+
     understood: 'What you got right', missing: 'What to add or correct',
     resultHint: 'Written feedback appears below each question. MCQ results do not include written answers.',
     mcqScore: (correct: number, total: number, percentage: number) => `MCQ score: ${correct} of ${total} (${percentage}%)`,
     verdicts: { correct: 'Correct', partial: 'Partly correct', incorrect: 'Needs correction', uncertain: 'Couldn’t assess' },
     errors: {
+      [reviewErrors.address]: 'The saved local address is unavailable. Ask your agent to resume this session at its original address.',
+      [reviewErrors.recovery]: 'Session recovery data is missing or corrupt. Keep your browser draft and ask your agent for recovery help.',
+      [reviewErrors.expired]: 'This review session has expired. Ask your agent to start a new quiz.',
+      [reviewErrors.active]: 'This review session is already active. Reconnect to the existing runtime.',
+      [reviewErrors.storage]: 'Your answers could not be saved locally. Keep this page open and check browser storage, disk space, and permissions with your agent.',
       [reviewErrors.invalid]: 'The review data is invalid. Ask your agent to check the session.',
       [reviewErrors.stale]: 'This assessment has changed. Reload to start the current assessment.',
       [reviewErrors.forbidden]: 'This review session is not authorized. Reopen the quiz from your agent.',
-      [reviewErrors.unavailable]: 'The local review server is unavailable. Keep this page open and restart the runtime before retrying.',
+      [reviewErrors.unavailable]: 'The local review server is unavailable. Keep this page open and say “Reconnect to my quiz” in agent chat to resume the same session.',
     },
   },
   app: {

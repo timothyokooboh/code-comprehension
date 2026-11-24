@@ -10,14 +10,17 @@ const props = defineProps<{
 const emit = defineEmits<{ answer: [value: string[]] }>();
 const inputId = useId();
 const reviewing = computed(() => !props.error && props.status === reviewStates.reviewing);
-const statusText = computed(() => props.error ? messages.written.errors[props.error] : reviewing.value ? messages.written.reviewing : messages.written.waiting);
+const stateCopy = computed(() => messages.written.states[props.status ?? reviewStates.disconnected]);
+const statusText = computed(() => props.error ? messages.written.errors[props.error]
+  : !props.submitted ? messages.written.pending : stateCopy.value.title);
+const recovery = computed(() => Boolean(props.error) || !props.submitted || props.status === reviewStates.disconnected || props.status === reviewStates.failed);
 function update(event: Event) { emit('answer', [(event.target as HTMLTextAreaElement).value]); }
 </script>
 
 <template>
   <section class="written-question" tabindex="-1" :aria-labelledby="`${inputId}-prompt`">
     <h3 :id="`${inputId}-prompt`" class="text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</h3>
-    <div v-if="submitted" class="review-panel" :class="{ 'is-complete': feedback }" role="status" aria-live="polite">
+    <div v-if="submitted || locked" class="review-panel" :class="{ 'is-complete': feedback, 'needs-recovery': !feedback && recovery }" role="status" aria-live="polite">
       <template v-if="feedback">
         <h4 class="font-semibold">{{ messages.written.verdicts[feedback.verdict] }}</h4>
         <p class="mt-2">{{ feedback.summary }}</p>
@@ -34,7 +37,7 @@ function update(event: Event) { emit('answer', [(event.target as HTMLTextAreaEle
           <span v-else class="waiting-mark" aria-hidden="true">…</span>
           {{ statusText }}
         </div>
-        <p v-if="!error" class="mt-2 text-sm leading-6">{{ reviewing ? messages.written.reviewingDetail : messages.written.waitingDetail }}</p>
+        <p class="mt-2 text-sm leading-6">{{ submitted ? stateCopy.detail : messages.written.pendingDetail }}</p>
       </template>
     </div>
     <label :for="inputId" class="mt-6 mb-2 block text-sm font-semibold">{{ messages.written.answer }}</label>
@@ -46,6 +49,7 @@ function update(event: Event) { emit('answer', [(event.target as HTMLTextAreaEle
 <style scoped>
 .written-question { padding: 2rem 0; border-bottom: 1px solid var(--line); scroll-margin-top: 2rem; }
 .review-panel { margin-top: 1.25rem; padding: 1.25rem; background: var(--accent-soft); border: 1px solid var(--ink); border-left-width: 4px; border-radius: .25rem; }
+.needs-recovery { background: #fff8e6; border-color: #9a6700; }
 .is-complete { background: var(--surface); }
 .review-spinner { width: 1.25rem; height: 1.25rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: review-spin 1s linear infinite; flex-shrink: 0; }
 .waiting-mark { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border: 1px solid currentColor; border-radius: 50%; }

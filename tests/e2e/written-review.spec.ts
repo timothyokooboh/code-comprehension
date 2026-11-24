@@ -18,7 +18,7 @@ test('mixed submission shows per-question feedback automatically above the writt
     await expect(page.getByRole('button', { name: 'Submit answers' })).toBeEnabled();
     await page.getByRole('button', { name: 'Submit answers' }).click();
     await expect(page.getByText('MCQ score: 2 of 2 (100%)')).toBeVisible();
-    await expect(page.getByText('Waiting for a reviewer')).toBeVisible();
+    await expect(page.getByText('Reviewer disconnected')).toBeVisible();
     const wait = runCli(['--wait-review', app.reviewSession!]);
     expect(wait.status, wait.stderr).toBe(0);
     const job = JSON.parse(wait.stdout);
@@ -53,11 +53,11 @@ test('written-only assessment has no numeric score and preserves its submitted a
     const answer = page.getByRole('textbox', { name: 'Your explanation' });
     await answer.fill('The response can be lost after processing.');
     await page.getByRole('button', { name: 'Submit answers' }).click();
-    await expect(page.getByText('Waiting for a reviewer')).toBeVisible();
+    await expect(page.getByText('Reviewer disconnected')).toBeVisible();
     await expect(page.getByText(/score:/i)).toHaveCount(0);
     await page.reload();
     await expect(answer).toHaveValue('The response can be lost after processing.');
-    await expect(page.getByText('Waiting for a reviewer')).toBeVisible();
+    await expect(page.getByText('Reviewer disconnected')).toBeVisible();
   } finally { await app.stop(); await rm(directory, { recursive: true, force: true }); }
 });
 
@@ -75,7 +75,75 @@ test('an unresolved submission locks answers and can be retried without changing
     await expect(answer).toHaveAttribute('readonly', '');
     await expect(page.getByRole('radio').first()).toBeDisabled();
     await page.getByRole('button', { name: 'Submit answers' }).click();
-    await expect(page.getByText('Waiting for a reviewer')).toBeVisible();
+    await expect(page.getByText('Reviewer disconnected')).toBeVisible();
     await expect(answer).toHaveValue('The charge may have succeeded.');
   } finally { await app.stop(); }
+});
+
+test('a lost acknowledgement survives reload and reconnects without another submit', async ({ page }) => {
+  const app = await launchCli(['--quiz', fixture]);
+  try {
+    await page.goto(app.url);
+    await page.getByRole('radio').first().check();
+    await page.getByRole('checkbox').first().check();
+    const answer = page.getByRole('textbox', { name: 'Your explanation' });
+    await answer.fill('The provider may have charged already.');
+    let submitted: unknown;
+    await page.route('**/api/review/submit', async route => {
+      submitted = route.request().postDataJSON();
+      await route.fetch();
+      await route.abort();
+    }, { times: 1 });
+    await page.route('**/api/review/state', route => route.abort());
+    await page.getByRole('button', { name: 'Submit answers' }).click();
+    await expect(page.getByRole('alert')).toContainText('Answers are locked');
+    await page.reload();
+    await expect(answer).toHaveAttribute('readonly', '');
+    await page.unroute('**/api/review/state');
+    await expect(page.getByText('MCQ score: 1 of 2 (50%)')).toBeVisible();
+    const job = runCli(['--wait-review', app.reviewSession!]);
+    expect(JSON.parse(job.stdout).submission).toEqual(submitted);
+  } finally { await app.stop(); }
+});
+
+test('offline pending answers reload and retry automatically when the runtime returns', async ({ page }) => {
+  const app = await launchCli(['--quiz', fixture]);
+  try {
+    await page.goto(app.url);
+    await page.getByRole('radio').first().check();
+    await page.getByRole('checkbox').first().check();
+    await page.getByRole('textbox', { name: 'Your explanation' }).fill('A timeout leaves the outcome uncertain.');
+    await page.route('**/api/review/submit', route => route.abort());
+    await page.getByRole('button', { name: 'Submit answers' }).click();
+    await expect(page.getByRole('alert')).toContainText('Answers are locked');
+    await page.reload();
+    await expect(page.getByRole('textbox')).toHaveAttribute('readonly', '');
+    await page.unroute('**/api/review/submit');
+    await expect(page.getByText('Reviewer disconnected')).toBeVisible();
+    await expect(page.getByText('MCQ score: 1 of 2 (50%)')).toBeVisible();
+    await expect(page.getByText(/accepted answers are saved/i)).toBeVisible();
+  } finally { await app.stop(); }
+});
+
+test('an accepted answer reconnects after process restart without another submit', async ({ page }) => {
+  const app = await launchCli(['--quiz', fixture]);
+  let resumed: Awaited<ReturnType<typeof launchCli>> | undefined;
+  try {
+    await page.goto(app.url);
+    await page.getByRole('radio').first().check();
+    await page.getByRole('checkbox').first().check();
+    await page.getByRole('textbox', { name: 'Your explanation' }).fill('The charge can precede the timeout.');
+    await page.getByRole('button', { name: 'Submit answers' }).click();
+    await expect(page.getByText('Reviewer disconnected')).toBeVisible();
+    await app.stop('SIGKILL');
+    await expect(page.getByRole('alert')).toContainText('local review server is unavailable');
+    resumed = await launchCli(['--resume-review', app.reviewSession!]);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await expect(page.getByText('Reviewer disconnected')).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('textbox')).toHaveValue('The charge can precede the timeout.');
+    await expect(page.getByRole('button', { name: 'Submit answers' })).toHaveCount(0);
+    expect(runCli(['--wait-review', resumed.reviewSession!]).status).toBe(0);
+    await expect(page.getByText('Reviewing your answer…')).toBeVisible();
+  } finally { await resumed?.stop(); await app.stop(); }
 });

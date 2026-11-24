@@ -6,6 +6,15 @@ export const messages = {
   writtenCount: 'Number of written questions in a mixed product sitting.',
 
   review: {
+    address: 'The saved local address is unavailable. Stop the process using that port and retry --resume-review with the same recovery file. No new session was started.',
+    failure: 'Report a failed review using the current submission identity JSON.',
+    resume: 'Resume an interrupted review from its private recovery file at the same local address.',
+    close: 'Delete an inactive review session and its private recovery data.',
+    recovery: 'Session recovery data is missing or corrupt. The existing quiz cannot be resumed. Keep any browser draft; explicitly start a new quiz when ready.',
+    expired: 'This review session has expired and its recovery data was removed. Start a new quiz explicitly.',
+    active: 'This review session already has a running runtime. Reconnect to that runtime instead of resuming another copy.',
+    storage: 'The private session could not be saved. Check local disk space and permissions before retrying.',
+
     session: (path: string) => `Review session: ${path}`,
     wait: 'Wait for written answers using a private review session file.',
     feedback: 'Send structured written feedback from a JSON file.',

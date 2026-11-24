@@ -1,15 +1,16 @@
+import type { z } from 'zod';
 import { randomUUID } from 'node:crypto';
-import { assessmentSourceKinds, validQuestionSelection, displayRequestSchema, revisionRequestSchema, type AssessmentSource, type Quiz, type RevisionInput } from '@code-comprehension/quiz-contract';
+import { assessmentSourceKinds, validQuestionSelection, displayRequestSchema, revisionRequestSchema, type AssessmentSource, type Quiz, type RevisionInput, type activeAssessmentSchema } from '@code-comprehension/quiz-contract';
 import { CliError, cliErrorCodes } from '../errors.js';
 
 export type RevisionLoader = (source: AssessmentSource, input: RevisionInput) => Promise<Quiz>;
 
-export function createAssessmentState(initial: Quiz | null, origin: AssessmentSource, loadRevision: RevisionLoader) {
-  let revision = randomUUID();
-  let quiz: Quiz | null = initial ? { ...initial, runtimeRevision: revision, attemptRevision: undefined } : null;
-  let source = origin;
-  let questionIds: string[] = [];
-  let displayToken: string | null = null;
+export function createAssessmentState(initial: Quiz | null, origin: AssessmentSource, loadRevision: RevisionLoader, restored?: z.infer<typeof activeAssessmentSchema>, persist: (snapshot: z.infer<typeof activeAssessmentSchema>) => void = () => {}) {
+  let revision = restored?.revision ?? randomUUID();
+  let quiz: Quiz | null = restored ? restored.quiz : initial ? { ...initial, runtimeRevision: revision, attemptRevision: undefined } : null;
+  let source = restored?.source ?? origin;
+  let questionIds: string[] = restored?.displayed.map(item => item.id) ?? [];
+  let displayToken: string | null = restored?.displayToken ?? null;
 
   function snapshot() {
     return { revision, displayToken, source, quiz, displayed: questionIds.map((id, index) => ({ number: index + 1, id })) };
@@ -23,7 +24,9 @@ export function createAssessmentState(initial: Quiz | null, origin: AssessmentSo
     if (!quiz || !validQuestionSelection(quiz, ids)) {
       throw new CliError(cliErrorCodes.assessmentInvalid);
     }
-    if (JSON.stringify(ids) !== JSON.stringify(questionIds)) displayToken = randomUUID();
+    const token = JSON.stringify(ids) !== JSON.stringify(questionIds) ? randomUUID() : displayToken;
+    persist({ ...snapshot(), displayToken: token, displayed: ids.map((id, index) => ({ id, number: index + 1 })) });
+    displayToken = token;
     questionIds = ids;
   }
 
@@ -38,9 +41,14 @@ export function createAssessmentState(initial: Quiz | null, origin: AssessmentSo
     const replacement = await loadRevision(source, request.input);
     if (quiz && replacement.type !== quiz.type) throw new CliError(cliErrorCodes.assessmentSourceInvalid);
     assertCurrent();
-    revision = randomUUID();
-    quiz = { ...replacement, runtimeRevision: revision, attemptRevision: revision };
-    if ('bankIds' in request.input && source.kind === assessmentSourceKinds.product) source = { ...source, bankIds: request.input.bankIds, questionsPerSession: replacement.selectionSize, format: replacement.selectionFormat, writtenCount: replacement.writtenCount };
+    const nextRevision = randomUUID();
+    const nextQuiz = { ...replacement, runtimeRevision: nextRevision, attemptRevision: nextRevision };
+    let nextSource = source;
+    if ('bankIds' in request.input && source.kind === assessmentSourceKinds.product) nextSource = { ...source, bankIds: request.input.bankIds, questionsPerSession: replacement.selectionSize, format: replacement.selectionFormat, writtenCount: replacement.writtenCount };
+    persist({ revision: nextRevision, quiz: nextQuiz, source: nextSource, displayed: [], displayToken: null });
+    revision = nextRevision;
+    quiz = nextQuiz;
+    source = nextSource;
     questionIds = [];
     displayToken = null;
     return { revision };

@@ -80,7 +80,12 @@ when the answer establishes no relevant point. Keep feedback concise and specifi
 Use references from that question's evidence, matching path and line exactly.
 
 Run RUNTIME --review-feedback FEEDBACK_FILE --review-session SESSION_FILE.
-Repair field-specific validation errors internally and retry at most twice. Never
+Repair field-specific validation errors internally and retry at most twice. If review
+cannot be completed, write only the current job's protocolVersion, sessionId, revision,
+attemptId and submissionId to a temporary JSON file and run
+`RUNTIME --review-failure FILE --review-session SESSION_FILE`. This gives the browser
+an explicit recovery state while retaining accepted answers. Remove the temporary file.
+Never
 present rejected feedback as delivered. On stale identity errors retrieve current work
 rather than relabelling an old review. Delete the temporary feedback file after delivery
 or abandonment. Answers and feedback are session data, never bank content. The browser
@@ -94,9 +99,28 @@ arrive without resubmission. If the path is missing from context, ask for the ac
 runtime's private session-file location. Do not guess among other projects' sessions
 or generate a fresh quiz to conceal a failed reconnection.
 
-Distinguish local runtime loss from reviewer loss. Current state is in memory; restart
-recovery is #26. Mixed retakes/replacement lifecycle is #27. One written submission
-per runtime is currently supported; MCQ-only retakes remain unchanged.
+If the wait command reports runtime unavailable, run
+`RUNTIME --resume-review SESSION_FILE` to explicitly restore that session, then wait
+using the same file. Keep the resumed runtime alive. Resume restores the original
+address, quiz revision, accepted answers and completed feedback; it never generates a
+new quiz. An already-active error means reconnect to that existing runtime. A busy
+saved port must be freed before resuming; do not silently choose a new port. Missing,
+corrupt or expired recovery data requires explaining that this session cannot resume;
+keep any browser draft and ask before starting a new assessment.
+
+A delivered job has a two-minute lease. Reconnection may wait for its expiry before
+retrieving interrupted work. Connection/lease observations cannot establish that a
+host quit or a turn ended. The browser retries unacknowledged submissions idempotently;
+accepted answers need no resubmission. Mixed retakes/replacement lifecycle remains
+#27; one written submission per runtime is supported.
 On explicit stop cancel the wait and gracefully stop the server. For a handoff,
 state whether the server stays alive and how to reconnect. Never discard accepted
 answers merely because the agent lost connectivity.
+
+Normal SIGINT/SIGTERM shutdown closes the session and deletes private recovery files;
+use it only when the engineer wants to close the quiz. Ending the reviewer while
+leaving results open keeps the server running. Process crashes/forced interruption
+leave recovery files with a fixed 24-hour expiry. Live sessions clean up at expiry;
+interrupted session files are purged on a subsequent runtime launch. To discard an
+inactive session explicitly, run `RUNTIME --close-review SESSION_FILE`. Recovery data
+contains answers and capabilities: keep it private and outside product banks/Git.

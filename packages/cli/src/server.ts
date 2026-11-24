@@ -1,9 +1,7 @@
-import { randomBytes } from 'node:crypto';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { reviewPaths } from '@code-comprehension/quiz-contract';
-import { createWrittenReview } from './written-review/state.js';
+import { ReviewError } from './written-review/state.js';
+import { discardPr } from './pr/session.js';
+import { createReviewSession } from './written-review/session.js';
+import { reviewPaths, reviewErrors } from '@code-comprehension/quiz-contract';
 import { handleReviewRequest } from './written-review/http.js';
 import { createServer } from 'node:http';
 import { constants as httpStatus } from 'node:http2';
@@ -14,17 +12,19 @@ import { loadAssets } from './assets.js';
 import { CliError, cliErrorCodes } from './errors.js';
 import { messages } from './locales/en.js';
 
-import { createAssessmentState } from './assessment/state.js';
-import { handleAssessmentRequest } from './assessment/http.js';
-import { loadRevision } from './assessment/source.js';
+import { handleAssessmentRequest, sendJson } from './assessment/http.js';
 
-export async function startServer(port: number, quiz: Quiz | null = null, source: AssessmentSource = { kind: assessmentSourceKinds.file }) {
+export async function startServer(port: number, quiz: Quiz | null = null, source: AssessmentSource = { kind: assessmentSourceKinds.file }, resumeFile?: string) {
   const assets = await loadAssets(fileURLToPath(new URL('./web/', import.meta.url)));
   const status: RuntimeStatus = { name: applicationName, status: runtimeReadyStatus };
-  const state = createAssessmentState(quiz, source, loadRevision);
-  const review = createWrittenReview(() => state.snapshot().quiz);
-  const tokens = { browser: randomBytes(32).toString('hex'), reviewer: randomBytes(32).toString('hex') };
+  const session = createReviewSession(quiz, source, resumeFile);
+  const { state, review, tokens } = session;
   const server = createServer((request, response) => {
+    if (Date.now() >= session.expiresAt) {
+      sendJson(response, { code: reviewErrors.expired }, httpStatus.HTTP_STATUS_GONE);
+      response.once('finish', () => { void close().catch(reportCloseFailure); });
+      return;
+    }
     const pathname = (request.url ?? '/').split('?')[0];
     if (Object.values(reviewPaths).some(path => path === pathname)) {
       const address = server.address();
@@ -55,29 +55,41 @@ export async function startServer(port: number, quiz: Quiz | null = null, source
     response.end(request.method === 'HEAD' ? undefined : asset.body);
   });
 
-  server.listen(port, runtimeLoopbackHost);
-  await once(server, 'listening');
+  try {
+    server.listen(session.port ?? port, runtimeLoopbackHost);
+    await once(server, 'listening');
+  } catch (error) {
+    session.release();
+    if (resumeFile) throw new ReviewError(reviewErrors.address);
+    session.remove();
+    throw error;
+  }
   const address = server.address();
   if (!address || typeof address === 'string') throw new CliError(cliErrorCodes.addressUnavailable);
 
-  let directory: string | undefined;
-  let reviewSession: string;
-  try {
-    directory = await mkdtemp(join(tmpdir(), 'comprehension-review-'));
-    reviewSession = join(directory, 'session.json');
-    await writeFile(reviewSession, JSON.stringify({ url: `http://${runtimeLoopbackHost}:${address.port}`, token: tokens.reviewer }), { mode: 0o600 });
+  const url = `http://${runtimeLoopbackHost}:${address.port}`;
+  try { session.bind(url);
   } catch (error) {
     server.closeAllConnections();
-    await new Promise<void>(resolve => server.close(() => resolve()));
-    if (directory) await rm(directory!, { recursive: true, force: true });
+    server.close();
+    session.release();
     throw error;
   }
-  return {
-    reviewSession,
-    url: `http://${runtimeLoopbackHost}:${address.port}`,
-    close: () => new Promise<void>((resolve, reject) => {
-      server.close((error) => { void rm(directory!, { recursive: true, force: true }).then(() => error ? reject(error) : resolve(), reject); });
+  const reportCloseFailure = () => console.error(messages.errors[cliErrorCodes.shutdownFailed]);
+  let closing: Promise<void> | undefined;
+  const expiry = setTimeout(() => { void close().catch(reportCloseFailure); }, Math.max(0, session.expiresAt - Date.now()));
+  function close() {
+    clearTimeout(expiry);
+    closing ??= new Promise<void>((resolve, reject) => {
+      server.close(error => {
+        try { session.remove(); error ? reject(error) : resolve(); } catch (error) { reject(error); }
+      });
       server.closeAllConnections();
-    }),
-  };
+    }).then(async () => {
+      const currentSource = state.snapshot().source;
+      if (currentSource.kind === assessmentSourceKinds.pr) await discardPr(currentSource.directory);
+    });
+    return closing;
+  }
+  return { reviewSession: session.path, url, close };
 }

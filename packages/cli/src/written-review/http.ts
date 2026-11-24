@@ -25,11 +25,12 @@ export async function handleReviewRequest(request: IncomingMessage, response: Se
       sendJson(response, { protocolVersion: reviewProtocolVersion, sessionId: review.sessionId, revision: review.revision(), token: tokens.browser });
       return;
     }
-    const agent = path === reviewPaths.wait || path === reviewPaths.feedback;
+    const agent = path === reviewPaths.wait || path === reviewPaths.feedback || path === reviewPaths.failure;
     if (request.headers.authorization !== 'Bearer ' + (agent ? tokens.reviewer : tokens.browser)) throw new ReviewError(reviewErrors.forbidden);
     if (path === reviewPaths.state && request.method === 'GET') sendJson(response, review.snapshot());
     else if (path === reviewPaths.submit && request.method === 'POST') sendJson(response, review.submit(await readBody(request)));
     else if (path === reviewPaths.feedback && request.method === 'POST') sendJson(response, review.review(await readBody(request)));
+    else if (path === reviewPaths.failure && request.method === 'POST') sendJson(response, review.fail(await readBody(request)));
     else if (path === reviewPaths.wait && request.method === 'GET') {
       const controller = new AbortController();
       const cancel = () => controller.abort();

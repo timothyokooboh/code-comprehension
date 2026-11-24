@@ -3,12 +3,12 @@ import { sourceReferenceSchema, writtenQuestionSchema } from './quiz.ts';
 
 export const reviewPaths = {
   session: '/api/review/session', state: '/api/review/state', submit: '/api/review/submit',
-  wait: '/api/review/wait', feedback: '/api/review/feedback',
+  wait: '/api/review/wait', feedback: '/api/review/feedback', failure: '/api/review/failure',
 } as const;
-export const reviewTimings = { waitMs: 45_000, leaseMs: 120_000, pollMs: 1_500, requestMs: 5_000 } as const;
+export const reviewTimings = { waitMs: 45_000, leaseMs: 120_000, pollMs: 1_500, requestMs: 5_000, retentionMs: 24 * 60 * 60 * 1_000 } as const;
 export const reviewLimits = { answerCharacters: 8_000, feedbackCharacters: 8_000, requestBytes: 128 * 1024 } as const;
-export const reviewStates = { waiting: 'waiting', reviewing: 'reviewing', disconnected: 'disconnected', completed: 'completed' } as const;
-export const reviewErrors = { invalid: 'review_invalid', stale: 'review_stale', forbidden: 'review_forbidden', unavailable: 'review_unavailable' } as const;
+export const reviewStates = { waiting: 'waiting', reviewing: 'reviewing', disconnected: 'disconnected', completed: 'completed', failed: 'failed' } as const;
+export const reviewErrors = { invalid: 'review_invalid', stale: 'review_stale', forbidden: 'review_forbidden', unavailable: 'review_unavailable', recovery: 'review_recovery', expired: 'review_expired', active: 'review_active', storage: 'review_storage', address: 'review_address' } as const;
 export type ReviewErrorCode = typeof reviewErrors[keyof typeof reviewErrors];
 export const reviewVerdicts = { correct: 'correct', partial: 'partial', incorrect: 'incorrect', uncertain: 'uncertain' } as const;
 export const reviewProtocolVersion = 1;

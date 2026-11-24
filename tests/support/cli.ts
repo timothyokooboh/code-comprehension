@@ -4,9 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 const entry = fileURLToPath(new URL('../../packages/cli/dist/index.js', import.meta.url));
 
-export async function launchCli(args: string[] = []) {
+export async function launchCli(args: string[] = [], env: NodeJS.ProcessEnv = process.env) {
   const child = spawn(process.execPath, [entry, '--no-open', ...args], {
-    stdio: ['ignore', 'pipe', 'pipe'],
+    stdio: ['ignore', 'pipe', 'pipe'], env,
   });
   const exited = once(child, 'exit');
   let output = '';
@@ -32,8 +32,8 @@ export async function launchCli(args: string[] = []) {
     return {
       url,
       get reviewSession() { return output.match(/Review session: (.+)/)?.[1]; },
-      async stop() {
-        child.kill('SIGTERM');
+      async stop(signal: NodeJS.Signals = 'SIGTERM') {
+        child.kill(signal);
         await exited;
       },
     };
