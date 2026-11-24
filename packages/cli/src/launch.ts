@@ -40,6 +40,7 @@ export async function launchAssessment(
 ) {
   const app = await startServer(options.port, quiz, source);
   registerShutdown(app, cleanup);
+  console.log(messages.review.session(app.reviewSession));
   console.log(messages.started(app.url));
   if (quiz?.type === assessmentTypes.product && quiz.selectionSize !== undefined && (quiz.selectionGroups?.length ?? 0) > quiz.selectionSize) {
     console.log(messages.product.limitedCoverage(quiz.selectionSize));

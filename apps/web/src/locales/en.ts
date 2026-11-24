@@ -1,10 +1,27 @@
 import { diagramErrorCodes, type DiagramErrorCode } from '../diagrams/render-diagram.ts';
 import { quizLoadErrorCodes, type QuizLoadErrorCode } from '../api/quiz-errors.ts';
-import { questionTypes } from '@code-comprehension/quiz-contract';
+import { questionTypes, reviewErrors } from '@code-comprehension/quiz-contract';
 import { runtimeErrorCodes, type RuntimeErrorCode } from '../api/runtime-errors.ts';
 import { applicationName } from '@code-comprehension/quiz-contract';
 
 export const messages = {
+  written: {
+    retryLocked: 'Answers are locked while submission is unresolved. Retry submission to safely resend the same answers.',
+    answer: 'Your explanation', placeholder: 'Explain what happens and why…',
+    waiting: 'Waiting for a reviewer', reviewing: 'Reviewing your answer…',
+    waitingDetail: 'Your answer is saved for review. If your agent is disconnected, return to its chat and say “Reconnect to my quiz”. You do not need to submit again.',
+    reviewingDetail: 'Your agent is checking your reasoning against the supporting code. Feedback will appear here automatically.',
+    understood: 'What you got right', missing: 'What to add or correct',
+    resultHint: 'Written feedback appears below each question. MCQ results do not include written answers.',
+    mcqScore: (correct: number, total: number, percentage: number) => `MCQ score: ${correct} of ${total} (${percentage}%)`,
+    verdicts: { correct: 'Correct', partial: 'Partly correct', incorrect: 'Needs correction', uncertain: 'Couldn’t assess' },
+    errors: {
+      [reviewErrors.invalid]: 'The review data is invalid. Ask your agent to check the session.',
+      [reviewErrors.stale]: 'This assessment has changed. Reload to start the current assessment.',
+      [reviewErrors.forbidden]: 'This review session is not authorized. Reopen the quiz from your agent.',
+      [reviewErrors.unavailable]: 'The local review server is unavailable. Keep this page open and restart the runtime before retrying.',
+    },
+  },
   app: {
     title: applicationName,
     tagline: 'Local quiz workspace',

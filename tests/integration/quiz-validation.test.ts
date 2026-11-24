@@ -2,24 +2,25 @@ import { expect, test } from 'vitest';
 import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { quizSchema, type Quiz } from '../../packages/quiz-contract/src/index.js';
+import { quizSchema, type Quiz, type McqQuestion } from '../../packages/quiz-contract/src/index.js';
 import { runCli } from '../support/cli.js';
 
-const fixture: Quiz = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
+type McqQuiz = Omit<Quiz, 'questions'> & { questions: McqQuestion[] };
+const fixture: McqQuiz = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
 
 test.each([
-  ['unknown selection question', (quiz: Quiz) => { quiz.selectionGroups = [['missing']]; }, 'selectionGroups.0'],
-  ['duplicate selection question', (quiz: Quiz) => { quiz.selectionGroups = [['retry', 'retry']]; }, 'selectionGroups.0'],
-  ['unsupported version', (quiz: Quiz) => { Object.assign(quiz, { schemaVersion: 99 }); }, 'schemaVersion'],
-  ['duplicate questions', (quiz: Quiz) => { quiz.questions[1]!.id = 'retry'; }, 'questions.1.id'],
-  ['duplicate options', (quiz: Quiz) => { quiz.questions[0]!.options[1]!.id = 'retry'; }, 'questions.0.options'],
-  ['duplicate answers', (quiz: Quiz) => { quiz.questions[1]!.correctOptionIds = ['key', 'key']; }, 'questions.1.correctOptionIds'],
-  ['unknown answer', (quiz: Quiz) => { quiz.questions[0]!.correctOptionIds = ['missing']; }, 'questions.0.correctOptionIds'],
-  ['single answer count', (quiz: Quiz) => { quiz.questions[0]!.correctOptionIds = ['retry', 'new']; }, 'questions.0.correctOptionIds'],
-  ['multiple answer count', (quiz: Quiz) => { quiz.questions[1]!.correctOptionIds = ['key']; }, 'questions.1.correctOptionIds'],
-  ['empty explanation', (quiz: Quiz) => { quiz.questions[0]!.explanation.concise = ''; }, 'questions.0.explanation.concise'],
-  ['missing references', (quiz: Quiz) => { quiz.questions[0]!.references = []; }, 'questions.0.references'],
-  ['empty questions', (quiz: Quiz) => { quiz.questions = []; }, 'questions'],
+  ['unknown selection question', (quiz: McqQuiz) => { quiz.selectionGroups = [['missing']]; }, 'selectionGroups.0'],
+  ['duplicate selection question', (quiz: McqQuiz) => { quiz.selectionGroups = [['retry', 'retry']]; }, 'selectionGroups.0'],
+  ['unsupported version', (quiz: McqQuiz) => { Object.assign(quiz, { schemaVersion: 99 }); }, 'schemaVersion'],
+  ['duplicate questions', (quiz: McqQuiz) => { quiz.questions[1]!.id = 'retry'; }, 'questions.1.id'],
+  ['duplicate options', (quiz: McqQuiz) => { quiz.questions[0]!.options[1]!.id = 'retry'; }, 'questions.0.options'],
+  ['duplicate answers', (quiz: McqQuiz) => { quiz.questions[1]!.correctOptionIds = ['key', 'key']; }, 'questions.1.correctOptionIds'],
+  ['unknown answer', (quiz: McqQuiz) => { quiz.questions[0]!.correctOptionIds = ['missing']; }, 'questions.0.correctOptionIds'],
+  ['single answer count', (quiz: McqQuiz) => { quiz.questions[0]!.correctOptionIds = ['retry', 'new']; }, 'questions.0.correctOptionIds'],
+  ['multiple answer count', (quiz: McqQuiz) => { quiz.questions[1]!.correctOptionIds = ['key']; }, 'questions.1.correctOptionIds'],
+  ['empty explanation', (quiz: McqQuiz) => { quiz.questions[0]!.explanation.concise = ''; }, 'questions.0.explanation.concise'],
+  ['missing references', (quiz: McqQuiz) => { quiz.questions[0]!.references = []; }, 'questions.0.references'],
+  ['empty questions', (quiz: McqQuiz) => { quiz.questions = []; }, 'questions'],
 ])('rejects %s with a field location', (_name, mutate, path) => {
   const quiz = structuredClone(fixture);
   mutate(quiz);

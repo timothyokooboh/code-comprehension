@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue';
-import { questionTypes, type Question } from '@code-comprehension/quiz-contract';
+import { questionTypes, type McqQuestion } from '@code-comprehension/quiz-contract';
 import { messages } from '../locales/en';
 import QuestionExplanation from './QuestionExplanation.vue';
 
 const props = defineProps<{
-  question: Question;
+  question: McqQuestion;
   number: number;
   selected: readonly string[];
   submitted: boolean;
+  locked?: boolean;
 }>();
 const emit = defineEmits<{ answer: [selection: string[]] }>();
 const inputName = useId();
@@ -33,7 +34,7 @@ const options = computed(() => props.question.options.map((option) => {
     selected,
     feedback,
     classes: {
-      'cursor-pointer': !props.submitted,
+      'cursor-pointer': !props.submitted && !props.locked,
       'border-slate-200': !highlighted && !incorrect,
       'option-selected': !props.submitted && selected,
       'border-emerald-700 bg-emerald-50': props.submitted && correct,
@@ -43,7 +44,7 @@ const options = computed(() => props.question.options.map((option) => {
 }));
 
 function select(optionId: string) {
-  if (props.submitted) return;
+  if (props.submitted || props.locked) return;
   const selection = props.question.type === questionTypes.single ? [optionId]
     : props.selected.includes(optionId) ? props.selected.filter((id) => id !== optionId)
       : [...props.selected, optionId];
@@ -53,7 +54,7 @@ function select(optionId: string) {
 
 <template>
   <div tabindex="-1" class="question-row" :class="{ 'is-review': submitted }">
-    <fieldset :style="{ viewTransitionName: `quiz-answers-${inputName}` }" class="min-w-0" :disabled="submitted" :aria-describedby="`${inputName}-hint`">
+    <fieldset :style="{ viewTransitionName: `quiz-answers-${inputName}` }" class="min-w-0" :disabled="submitted || locked" :aria-describedby="`${inputName}-hint`">
       <legend class="mb-4 text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</legend>
       <p :id="`${inputName}-hint`" class="mb-6 font-mono text-xs text-zinc-500">{{ instruction }}</p>
       <div class="answer-options">

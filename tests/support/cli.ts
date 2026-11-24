@@ -31,6 +31,7 @@ export async function launchCli(args: string[] = []) {
     });
     return {
       url,
+      get reviewSession() { return output.match(/Review session: (.+)/)?.[1]; },
       async stop() {
         child.kill('SIGTERM');
         await exited;

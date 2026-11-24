@@ -8,6 +8,7 @@ import PrComparison from './PrComparison.vue';
 
 const props = defineProps<{
   quiz: Quiz;
+  hasWritten?: boolean;
   answers: Answers;
   result: DeepReadonly<AssessmentResult> | null;
   anchorPrefix: string;
@@ -43,7 +44,7 @@ async function restart() {
         </div>
         <progress :value="answeredCount" :max="quiz.questions.length" :aria-label="messages.workspace.progress" class="quiz-progress" />
       </div>
-      <QuizResult v-if="result" :correct="result.correct" :total="result.total" :percentage="result.percentage" @retake="restart" />
+      <QuizResult v-if="result" :correct="result.correct" :total="result.total" :percentage="result.percentage" :has-written="hasWritten" @retake="restart" />
       <QuizNavigator :entries="entries" class="mt-8" />
     </div>
   </aside>
