@@ -11,8 +11,17 @@ claim that a perfect score proves production readiness.
 
 For a mixed/written request or a reconnect request, read
 [written-review.md](references/written-review.md). Reconnect resumes that workflow
-immediately rather than preparing a new session. Default fresh quizzes to MCQs;
-honour this request's format and count when generating.
+immediately rather than preparing a new session.
+
+For every fresh request, resolve the format from that request. If unspecified, ask
+“Which question format would you like?” with MCQs only, Written responses only, and
+Mixed as choices. Prefer the agent's interactive question UI; use chat if unavailable.
+Wait for an explicit answer before generating or launching. Previous sessions and
+CLI defaults do not choose the format. Preserve explicit comparison/count choices
+while asking. A reply completes the pending choice rather than restarting selection.
+Explicit formats skip this question. Resume, reconnect, retake, and revision requests
+keep the active format unless the engineer requests a change. After selecting mixed
+or written, read the written review workflow above before proceeding.
 
 For a challenge or scope/difficulty refinement of an active quiz, read
 [revisions.md](references/revisions.md) and follow that workflow instead of preparing
