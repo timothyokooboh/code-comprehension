@@ -6,8 +6,8 @@ account or MCP installation is needed. The existing agent performs review.
 
 ## Resolve the question format
 
-MCQ-only is the default for each fresh request. Honour explicit mixed or written-only
-requests, including natural language. Preserve scope and total count independently.
+Use the format resolved by the invoking skill from the current request or its explicit
+follow-up answer. Preserve scope and total count independently.
 Use an exact split when supplied; otherwise choose a useful mix with at least one of
 each type. Clarify impossible requests such as one total question with both formats.
 Never silently increase the total or turn a mixed request into MCQs.

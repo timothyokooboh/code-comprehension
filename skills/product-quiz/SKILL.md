@@ -12,9 +12,19 @@ in this chat; the browser is for answering and reviewing the assessment.
 For any mixed/written or reconnect request, read the shared
 [written review workflow](../pr-quiz/references/written-review.md); if that sibling
 is absent, read skills/pr-quiz/references/written-review.md from the runtime checkout.
-Reconnect resumes the existing session before scope selection. For fresh requests,
-default to MCQs and preserve explicit format/count choices while resolving scope.
-No extra setup question is needed for question format.
+Reconnect resumes the existing session before scope selection.
+
+For every fresh request, resolve the format from that request. If unspecified, ask
+“Which question format would you like?” with MCQs only, Written responses only, and
+Mixed as choices. Prefer the agent's interactive question UI; use chat if unavailable.
+Wait for an explicit answer before checking banks, generating, or launching. Previous
+sessions, cached question types, and CLI defaults do not choose the format. Preserve
+explicit scope/count choices while asking; combine pending scope and format questions
+where the UI supports it. A reply completes the pending choice rather than restarting
+selection. Explicit formats (for example, “5 written questions on caching”) skip this
+question. Resume, reconnect, retake, and revision requests keep the active format
+unless the engineer requests a change. After selecting mixed or written, read the
+shared written review workflow above before proceeding.
 
 For a challenge or scope/difficulty refinement of an active quiz, read the shared
 [revision workflow](../pr-quiz/references/revisions.md). If that sibling is not installed,
