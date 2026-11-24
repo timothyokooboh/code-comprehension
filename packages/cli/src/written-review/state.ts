@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { assessmentQuestionCount, questionTypes, reviewJobStates, reviewErrors, reviewStates, reviewTimings, reviewSubmissionSchema, reviewFeedbackSchema,
+import { validQuestionSelection, questionTypes, reviewJobStates, reviewErrors, reviewStates, reviewTimings, reviewSubmissionSchema, reviewFeedbackSchema,
   type ReviewErrorCode, type ReviewSubmission, type ReviewFeedback, type ReviewSnapshot, type Quiz } from '@code-comprehension/quiz-contract';
 import type { z } from 'zod';
 
@@ -28,7 +28,7 @@ export function createWrittenReview(getQuiz: () => Quiz | null) {
     assertRevision(value.revision);
     if (value.sessionId !== sessionId) throw new ReviewError(reviewErrors.stale);
     const questions = getQuiz()!.questions;
-    if (value.questionIds.length !== assessmentQuestionCount(getQuiz()!) || new Set(value.questionIds).size !== value.questionIds.length ||
+    if (!validQuestionSelection(getQuiz()!, value.questionIds) ||
       Object.keys(value.answers).length !== value.questionIds.length ||
       !value.questionIds.some(id => questions.find(q => q.id === id)?.type === questionTypes.written)) throw new ReviewError(reviewErrors.invalid);
     for (const id of value.questionIds) {
@@ -57,8 +57,7 @@ export function createWrittenReview(getQuiz: () => Quiz | null) {
   }
   async function wait(signal: AbortSignal) {
     if (listener) throw new ReviewError(reviewErrors.stale);
-    if (feedback) return { status: reviewJobStates.completed };
-    if (submission) return job();
+    if (submission && !feedback) return job();
     await new Promise<void>(resolve => {
       function finish() {
         clearTimeout(timer);
@@ -71,7 +70,7 @@ export function createWrittenReview(getQuiz: () => Quiz | null) {
       signal.addEventListener('abort', finish, { once: true });
       if (signal.aborted) finish();
     });
-    return job();
+    return feedback ? { status: reviewJobStates.timeout } : job();
   }
   function review(input: unknown) {
     const parsed = reviewFeedbackSchema.safeParse(input);

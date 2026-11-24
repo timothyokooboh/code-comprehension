@@ -9,7 +9,7 @@ uses generation; do not reuse an earlier review token to avoid that request.
    equals the difference from the cached version. Use Git history when helpful, but
    assess the questions against current code.
 2. Check every question's prompt, options, correct answer IDs, both explanations,
-   references, and diagram against the current behaviour. A comment-only or formatting
+   references, written criteria/reference answers (when present), and diagram against the current behaviour. A comment-only or formatting
    change is a candidate for retention, not permission to skip this check. Wording
    changes can alter eligibility, pricing, payment instructions, or other product meaning.
 3. If any assessed behaviour changed, evidence is missing, or validity is uncertain,

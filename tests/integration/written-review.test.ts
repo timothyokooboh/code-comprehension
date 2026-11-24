@@ -1,3 +1,5 @@
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { test, expect } from 'vitest';
 import { quizSchema, scoreQuiz } from '../../packages/quiz-contract/src/index.js';
 import fixture from '../fixtures/quiz.json' with { type: 'json' };
@@ -67,5 +69,10 @@ test('a disconnected submission is queued and reviewed through the public CLI', 
     const result = runCli(['--review-feedback', feedbackPath, '--review-session', app.reviewSession!]);
     expect(result.status, result.stderr).toBe(0);
     expect(runCli(['--review-feedback', feedbackPath, '--review-session', app.reviewSession!]).status).toBe(0);
+    const idle = spawnSync(process.execPath, [
+      fileURLToPath(new URL('../../packages/cli/dist/index.js', import.meta.url)), '--wait-review', app.reviewSession!,
+    ], { encoding: 'utf8', timeout: 700 });
+    expect(idle.stdout).toBe('');
+    expect(idle.signal).toBe('SIGTERM');
   } finally { await app.stop(); await rm(directory, { recursive: true, force: true }); }
 });

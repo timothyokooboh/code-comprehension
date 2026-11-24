@@ -6,6 +6,9 @@ export const quizSchemaVersion = 1;
 export const writtenQuizSchemaVersion = 2;
 export const quizPath = '/api/quiz';
 export const questionTypes = { single: 'single', multiple: 'multiple', written: 'written' } as const;
+export const questionFormats = { mcq: 'mcq', written: 'written', mixed: 'mixed' } as const;
+export const questionFormatSchema = z.enum(questionFormats);
+export type QuestionFormat = z.infer<typeof questionFormatSchema>;
 export const assessmentTypes = { pr: 'pr', product: 'product' } as const;
 export const quizIssueCodes = {
   duplicateId: 'duplicate_id',
@@ -69,11 +72,28 @@ export const quizSchema = z.strictObject({
   comparison: prComparisonSchema.optional(),
   selectionGroups: z.array(z.array(identifier).min(1)).min(1).optional(),
   selectionSize: questionCountSchema.optional(),
+  selectionFormat: questionFormatSchema.optional(),
+  writtenCount: questionCountSchema.optional(),
   questions: z.array(questionSchema).min(1),
 }).superRefine((quiz, context) => {
   for (const [index, group] of (quiz.selectionGroups ?? []).entries()) {
     if (new Set(group).size !== group.length || group.some((id) => !quiz.questions.some((question) => question.id === id))) {
       context.addIssue({ code: 'custom', path: ['selectionGroups', index], params: { reason: quizIssueCodes.invalidSelectionGroup } });
+    }
+  }
+  if (quiz.selectionFormat === questionFormats.mixed && quiz.writtenCount === undefined) {
+    context.addIssue({ code: 'custom', path: ['writtenCount'] });
+  }
+  if ((quiz.selectionFormat === questionFormats.mcq && quiz.questions.some(question => question.type === questionTypes.written)) ||
+    (quiz.selectionFormat === questionFormats.written && quiz.questions.some(question => question.type !== questionTypes.written))) {
+    context.addIssue({ code: 'custom', path: ['selectionFormat'] });
+  }
+  if (quiz.writtenCount !== undefined) {
+    const count = Math.min(quiz.selectionSize ?? quiz.questions.length, quiz.questions.length);
+    const written = quiz.questions.filter(question => question.type === questionTypes.written).length;
+    if (quiz.selectionFormat !== questionFormats.mixed || quiz.writtenCount >= count ||
+      quiz.writtenCount > written || count - quiz.writtenCount > quiz.questions.length - written) {
+      context.addIssue({ code: 'custom', path: ['writtenCount'] });
     }
   }
   const seen = new Set<string>();

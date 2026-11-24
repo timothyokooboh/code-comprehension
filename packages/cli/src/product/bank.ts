@@ -1,3 +1,5 @@
+import { questionFormats, type ProductSelectionOptions } from '@code-comprehension/quiz-contract';
+import { formatProductAssessment } from './format.js';
 import { join } from 'node:path';
 import { composeProductBanks } from './composition.js';
 import { QuizValidationError, readQuizData } from '../load-quiz.js';
@@ -31,14 +33,14 @@ export async function saveProductBank(repo: string, input: string) {
   return { status: productStatuses.saved, path: relative, conflicts: await inspectTracking(project.root, project.config, relative) };
 }
 
-export async function productAssessment(repo: string, ids: string[], questionsPerSession?: number) {
+export async function productAssessment(repo: string, ids: string[], selection: ProductSelectionOptions = {}) {
   const project = await configuredProject(repo);
   const banks = [];
   for (const id of [...new Set(ids)].sort()) {
-    const result = await inspectProductCache(repo, id);
+    const result = await inspectProductCache(repo, id, false, selection.format ?? questionFormats.mcq);
     if (result.status === cacheStatuses.reviewRequired) throw new CliError(cliErrorCodes.productReviewRequired);
     if (result.status !== cacheStatuses.reusable) throw new CliError(cliErrorCodes.productGenerationRequired);
     banks.push(result.bank);
   }
-  return composeProductBanks(banks, questionsPerSession ?? project.config.questionsPerSession);
+  return formatProductAssessment(composeProductBanks(banks, selection.questionsPerSession ?? project.config.questionsPerSession), selection.format ?? questionFormats.mcq, selection.writtenCount);
 }

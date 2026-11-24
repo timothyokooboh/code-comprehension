@@ -1,3 +1,4 @@
+import { questionFormats, questionTypes, type QuestionFormat } from '@code-comprehension/quiz-contract';
 import { createReviewToken } from './review-token.js';
 import { join } from 'node:path';
 import { CliError, cliErrorCodes } from '../errors.js';
@@ -7,7 +8,7 @@ import { productPaths, readOptional } from './project.js';
 import { captureSources } from './sources.js';
 
 export const cacheStatuses = { reviewRequired: 'review_required', reusable: 'reusable', generationRequired: 'generation_required' } as const;
-export const cacheReasons = { missing: 'missing', incompatible: 'incompatible', changed: 'changed', refresh: 'refresh', unavailable: 'sources_unavailable' } as const;
+export const cacheReasons = { format: 'question_format', missing: 'missing', incompatible: 'incompatible', changed: 'changed', refresh: 'refresh', unavailable: 'sources_unavailable' } as const;
 
 export async function configuredProject(repo: string) {
   const status = await reconcileProductSetup(repo);
@@ -15,7 +16,7 @@ export async function configuredProject(repo: string) {
   return { ...status, config: status.config };
 }
 
-export async function inspectProductCache(repo: string, id: string, refresh = false) {
+export async function inspectProductCache(repo: string, id: string, refresh = false, format?: QuestionFormat) {
   if (!bankIdentifier.safeParse(id).success) throw new CliError(cliErrorCodes.productBankInvalid);
   const project = await configuredProject(repo);
   const required = (reason: typeof cacheReasons[keyof typeof cacheReasons], changedFiles: string[] = []) =>
@@ -28,6 +29,10 @@ export async function inspectProductCache(repo: string, id: string, refresh = fa
   const parsed = cachedBankSchema.safeParse(raw);
   if (!parsed.success || parsed.data.id !== id || !isProductQuiz(parsed.data.quiz)) return required(cacheReasons.incompatible);
   const bank = parsed.data;
+  const written = bank.quiz.questions.some(question => question.type === questionTypes.written);
+  const mcq = bank.quiz.questions.some(question => question.type !== questionTypes.written);
+  if ((format === questionFormats.written && !written) || (format === questionFormats.mcq && !mcq) ||
+    (format === questionFormats.mixed && (!written || !mcq))) return required(cacheReasons.format);
   const input: ProductBank = { ...bank, version: 1 };
   let current;
   try { current = await captureSources(project.root, input); }

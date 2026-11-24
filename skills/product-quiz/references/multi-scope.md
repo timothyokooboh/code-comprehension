@@ -4,8 +4,8 @@
 
 Keep one bank per resolved module. Match saved scope metadata to the engineer's intent;
 use the same IDs on subsequent requests, including when request order changes. Run
-`--check-product` separately for each selected bank. Keep reusable banks unchanged,
-review only those requiring review, and generate only missing/invalidated banks.
+`--check-product --format FORMAT` separately for each selected bank. Keep reusable banks unchanged,
+review only those requiring review, and generate missing/invalidated banks or banks lacking the requested question types.
 An explicit request to refresh the entire assessment applies to every selected bank;
 a refresh of one named module affects that bank and any interaction bank whose evidence
 changed. Complete each bank's validation and save/review before combined launch.
@@ -37,7 +37,7 @@ bank useful on its own. Do not invent extra questions merely to create variety.
 When every selected module and supported interaction bank is reusable, run:
 
 ```sh
-RUNTIME --product-bank payments cart cart-payment-checkout --repo PROJECT
+RUNTIME --product-bank payments cart cart-payment-checkout --repo PROJECT --format FORMAT
 ```
 
 Omit the interaction ID when there is no grounded interaction bank. The runtime
@@ -47,3 +47,9 @@ priority when there are more banks than slots. Tell the engineer that some areas
 may be absent in that sitting. Shared duplicate questions can cover multiple banks. General overview is launched alone rather than combined with
 module banks. Tell the engineer the resolved modules and any interaction coverage;
 keep answering and feedback in the existing browser and agent-chat flows.
+
+Carry the current format, total and any exact written split into the combined launch.
+Type counts and the total are authoritative; cover every selected scope when feasible,
+including one deduplicated question supporting several scopes. Explain when quotas or
+a small total prevent full coverage. For a mixed sitting, follow the shared written
+review workflow immediately after launch.

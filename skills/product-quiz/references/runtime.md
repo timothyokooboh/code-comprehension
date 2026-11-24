@@ -80,3 +80,20 @@ New setup saves 10; old configs without the field behave as 10. Changing trackin
 preserves a custom count. To change the project default, edit this field and validate
 with `--product-status`; a launch override never writes it. `--questions` is accepted
 only with `--product-bank`, and the resolved count stays with the running session.
+
+
+## Written review commands
+
+- --wait-review SESSION_FILE: wait for a submitted job; idle long polls renew internally.
+- --review-feedback INPUT --review-session SESSION_FILE: validate and deliver
+  evidence-grounded feedback; invalid fields are reported for repair.
+
+Use the shared written review workflow for authorization, submission identity,
+evaluation and active-turn lifecycle. The runtime prints the private session path
+on launch. These commands use the existing agent, not a model API.
+
+Product checks and launches accept --format mcq|written|mixed; launch defaults to mcq.
+For an exact split add --written-questions N and --questions TOTAL at launch.
+Checks report generation_required / question_format when needed types are absent.
+Launch reports composition errors when the pool cannot supply the requested split.
+Generate compatible content before retrying.

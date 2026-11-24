@@ -1,4 +1,4 @@
-import { questionCountSchema } from '@code-comprehension/quiz-contract';
+import { questionCountSchema, questionFormatSchema } from '@code-comprehension/quiz-contract';
 import { CliError, cliErrorCodes } from './errors.js';
 import { InvalidArgumentError } from 'commander';
 import { messages } from './locales/en.js';
@@ -17,5 +17,11 @@ export function parsePort(value: string) {
 export function parseQuestionCount(value: string) {
   const parsed = questionCountSchema.safeParse(Number(value));
   if (!/^\d+$/.test(value) || !parsed.success) throw new CliError(cliErrorCodes.questionCountInvalid);
+  return parsed.data;
+}
+
+export function parseQuestionFormat(value: string) {
+  const parsed = questionFormatSchema.safeParse(value);
+  if (!parsed.success) throw new CliError(cliErrorCodes.questionFormatInvalid);
   return parsed.data;
 }

@@ -50,8 +50,10 @@ agent turn. Capability protection is local session authorization, not account se
 
 ## Current slice boundaries
 
-Issue #24 provides the public transport and real UI. Skill-driven generation and
-review orchestration follow in #25. Current-session restart recovery follows in #26;
+Issue #24 provides the transport/UI. Issue #25 wires both skills to generation and
+active-turn review. Product checks/launches accept --format mcq|written|mixed; an
+exact mixed split uses --written-questions N and --questions TOTAL.
+Current-session restart recovery follows in #26;
 server review state is currently in memory. Mixed retakes/replacement lifecycle
 follows in #27; written assessments currently support one submitted attempt per
 runtime. MCQ-only retakes remain available. Browser drafts and accepted answers
@@ -60,3 +62,6 @@ survive reload while that runtime remains active.
 CLI integration and browser tests use a scripted reviewer. They establish transport
 and rendering, not the factual quality of model reviews or cross-host compatibility.
 The engineer will test Claude Code before public support claims.
+
+See [the live Codex verification](written-review-walkthrough.md) for observed results
+and the remaining Claude Code release check.

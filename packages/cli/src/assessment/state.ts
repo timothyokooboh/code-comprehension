@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { assessmentSourceKinds, assessmentQuestionCount, displayRequestSchema, revisionRequestSchema, type AssessmentSource, type Quiz, type RevisionInput } from '@code-comprehension/quiz-contract';
+import { assessmentSourceKinds, validQuestionSelection, displayRequestSchema, revisionRequestSchema, type AssessmentSource, type Quiz, type RevisionInput } from '@code-comprehension/quiz-contract';
 import { CliError, cliErrorCodes } from '../errors.js';
 
 export type RevisionLoader = (source: AssessmentSource, input: RevisionInput) => Promise<Quiz>;
@@ -20,9 +20,7 @@ export function createAssessmentState(initial: Quiz | null, origin: AssessmentSo
     if (!parsed.success) throw new CliError(cliErrorCodes.assessmentInvalid);
     if (parsed.data.revision !== revision) throw new CliError(cliErrorCodes.assessmentStale);
     const ids = parsed.data.questionIds;
-    if (!quiz || ids.length !== assessmentQuestionCount(quiz) || new Set(ids).size !== ids.length ||
-      ids.some((id) => !quiz!.questions.some((question) => question.id === id)) ||
-      (quiz.selectionGroups && ids.length >= quiz.selectionGroups.length && quiz.selectionGroups.some((group) => !group.some((id) => ids.includes(id))))) {
+    if (!quiz || !validQuestionSelection(quiz, ids)) {
       throw new CliError(cliErrorCodes.assessmentInvalid);
     }
     if (JSON.stringify(ids) !== JSON.stringify(questionIds)) displayToken = randomUUID();
@@ -42,7 +40,7 @@ export function createAssessmentState(initial: Quiz | null, origin: AssessmentSo
     assertCurrent();
     revision = randomUUID();
     quiz = { ...replacement, runtimeRevision: revision, attemptRevision: revision };
-    if ('bankIds' in request.input && source.kind === assessmentSourceKinds.product) source = { ...source, bankIds: request.input.bankIds, questionsPerSession: replacement.selectionSize };
+    if ('bankIds' in request.input && source.kind === assessmentSourceKinds.product) source = { ...source, bankIds: request.input.bankIds, questionsPerSession: replacement.selectionSize, format: replacement.selectionFormat, writtenCount: replacement.writtenCount };
     questionIds = [];
     displayToken = null;
     return { revision };

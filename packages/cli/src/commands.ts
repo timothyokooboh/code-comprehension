@@ -2,7 +2,7 @@ import { requestReview } from './written-review/client.js';
 import { resolve } from 'node:path';
 import { projectRoot } from './product/project.js';
 import { readActiveAssessment, reviseAssessment } from './assessment/client.js';
-import { assessmentSourceKinds, prSessionStatuses } from '@code-comprehension/quiz-contract';
+import { questionFormats, type QuestionFormat, assessmentSourceKinds, prSessionStatuses } from '@code-comprehension/quiz-contract';
 import { launch, launchAssessment } from './launch.js';
 import { preparePr, discardPr } from './pr/session.js';
 import { loadPrAssessment } from './pr/assessment.js';
@@ -15,6 +15,7 @@ import { productStatuses } from './product/contract.js';
 
 type CommandOptions = {
   waitReview?: string; reviewFeedback?: string; reviewSession?: string;
+  format?: QuestionFormat; writtenQuestions?: number;
   port: number; open: boolean; quiz?: string; questions?: number;
   activeAssessment?: string; reviseAssessment?: string; runtime?: string;
   retainProduct?: string; checkProduct?: string; refresh?: boolean; productStatus?: boolean; configureProduct?: string;
@@ -24,6 +25,8 @@ type CommandOptions = {
 };
 
 function validateOptions(options: CommandOptions) {
+  if ((options.format && !options.checkProduct && !options.productBank) ||
+    (options.writtenQuestions !== undefined && (!options.productBank || options.format !== questionFormats.mixed))) throw new CliError(cliErrorCodes.questionFormatInvalid);
   if (options.questions !== undefined && !options.productBank) throw new CliError(cliErrorCodes.questionCountInvalid);
   const modes = [
     options.waitReview, options.reviewFeedback, options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
@@ -49,7 +52,7 @@ export async function runCommand(options: CommandOptions) {
   } else if (options.retainProduct) {
     console.log(JSON.stringify(await retainProductBank(options.repo ?? process.cwd(), options.retainProduct)));
   } else if (options.checkProduct) {
-    const result = await inspectProductCache(options.repo ?? process.cwd(), options.checkProduct, options.refresh);
+    const result = await inspectProductCache(options.repo ?? process.cwd(), options.checkProduct, options.refresh, options.format ?? questionFormats.mcq);
     if (result.status === cacheStatuses.reviewRequired) {
       const { bank, current: _current, ...report } = result;
       console.log(JSON.stringify({ ...report, scope: bank.scope }));
@@ -63,9 +66,9 @@ export async function runCommand(options: CommandOptions) {
     console.log(JSON.stringify(await saveProductBank(options.repo ?? process.cwd(), options.saveProduct)));
   } else if (options.productBank) {
     const repo = await projectRoot(options.repo ?? process.cwd());
-    const quiz = await productAssessment(repo, options.productBank, options.questions);
+    const quiz = await productAssessment(repo, options.productBank, { questionsPerSession: options.questions, format: options.format, writtenCount: options.writtenQuestions });
     await launchAssessment(options, quiz, undefined,
-      { kind: assessmentSourceKinds.product, repo, bankIds: options.productBank, questionsPerSession: quiz.selectionSize });
+      { kind: assessmentSourceKinds.product, repo, bankIds: options.productBank, questionsPerSession: quiz.selectionSize, format: quiz.selectionFormat, writtenCount: quiz.writtenCount });
   } else if (options.productStatus) {
     console.log(JSON.stringify(await reconcileProductSetup(options.repo ?? process.cwd())));
   } else if (options.configureProduct) {

@@ -1,4 +1,6 @@
 export const cliErrorCodes = {
+  questionFormatInvalid: 'question_format_invalid',
+  questionFormatUnavailable: 'question_format_unavailable',
   questionCountInvalid: 'question_count_invalid',
   assessmentInvalid: 'assessment_invalid',
   assessmentStale: 'assessment_stale',
