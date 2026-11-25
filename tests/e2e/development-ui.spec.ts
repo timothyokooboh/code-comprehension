@@ -33,7 +33,7 @@ test('live UI edits and reloads preserve mixed answers and the active review att
     const sessionBefore = await (await page.request.get(`${app.url}/api/review/session`)).json();
     await page.evaluate(() => { (window as unknown as { liveMarker: boolean }).liveMarker = true; });
 
-    const component = join(directory, 'src/components/WrittenQuestion.vue');
+    const component = join(directory, 'src/components/WrittenAnswer.vue');
     const source = await readFile(component, 'utf8');
     await writeFile(component, source.replace('class="answer-editor"', 'class="answer-editor" data-live-update="ready"')
       .replace('border-radius: .875rem', 'border-radius: 1.125rem'));

@@ -110,3 +110,20 @@ Active quizzes support question challenges and scope/difficulty refinements thro
 the existing agent chat. The agent can inspect displayed question IDs and validate a
 replacement; the engineer reloads to start the revised attempt. See the
 [revision workflow](skills/pr-quiz/references/revisions.md).
+
+## Voice input
+
+Written answers support optional browser dictation without API keys. Click the mic,
+allow microphone access, and speak. The recording pill shows microphone activity;
+Stop returns to the editor and appends recognised words to the existing answer.
+Cancel (× or Escape) discards that recording. You can edit the resulting text before
+submitting. Only one question records at a time, and quiz submission waits until
+recording is stopped or cancelled.
+
+This uses the browser's Web Speech recognition service, which may send audio to its
+provider and require internet access. No audio is uploaded to our CLI or stored in
+question banks. Support varies by browser; unavailable recognition, denied permission,
+and service errors leave typing available. If the browser ends recording unexpectedly,
+completed words are retained with a notice. Actual recognition accuracy depends on
+the browser, microphone, language, and connection; automated tests exercise the UI
+with simulated recognition events rather than a live speech provider.
