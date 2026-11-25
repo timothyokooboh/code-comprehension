@@ -19,6 +19,7 @@
     "zod": "4.6.0"
   },
   "devDependencies": {
-    "@code-comprehension/quiz-contract": "workspace:*"
+    "@code-comprehension/quiz-contract": "workspace:*",
+    "vite": "8.3.8"
   }
 }

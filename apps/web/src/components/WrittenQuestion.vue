@@ -19,7 +19,7 @@ function update(event: Event) { emit('answer', [(event.target as HTMLTextAreaEle
 
 <template>
   <section class="written-question" tabindex="-1" :aria-labelledby="`${inputId}-prompt`">
-    <h3 :id="`${inputId}-prompt`" class="text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</h3>
+    <h3 :id="`${inputId}-prompt`" class="text-2xl font-medium leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</h3>
     <div v-if="submitted || locked" class="review-panel" :class="{ 'is-complete': feedback, 'needs-recovery': !feedback && recovery }" role="status" aria-live="polite">
       <template v-if="feedback">
         <h4 class="font-semibold">{{ messages.written.verdicts[feedback.verdict] }}</h4>
@@ -42,7 +42,7 @@ function update(event: Event) { emit('answer', [(event.target as HTMLTextAreaEle
     </div>
     <label :for="inputId" class="mt-6 mb-2 block text-sm font-semibold">{{ messages.written.answer }}</label>
     <div class="answer-editor">
-      <textarea :id="inputId" :value="answer" :readonly="submitted || locked" :maxlength="reviewLimits.answerCharacters" rows="5"
+      <textarea :id="inputId" :value="answer" :readonly="submitted || locked" :maxlength="reviewLimits.answerCharacters" rows="3"
         :placeholder="messages.written.placeholder" class="answer-input" @input="update" />
       <button type="button" class="microphone-button" disabled
         :aria-label="messages.written.speechUnavailable" :title="messages.written.speechUnavailable">
@@ -59,7 +59,7 @@ function update(event: Event) { emit('answer', [(event.target as HTMLTextAreaEle
 .written-question { padding: 2rem 0; border-bottom: 1px solid var(--line); scroll-margin-top: 2rem; }
 .answer-editor { position: relative; }
 .answer-input {
-  display: block; width: 100%; min-height: 12rem; resize: vertical;
+  display: block; width: 100%; height: 10rem; resize: none;
   padding: 1rem 1rem 4.25rem; line-height: 1.75;
   border: 1px solid var(--line); border-radius: .875rem; background: #fff;
   box-shadow: 0 2px 4px rgb(0 0 0 / 4%), 0 8px 24px -12px rgb(0 0 0 / 16%);

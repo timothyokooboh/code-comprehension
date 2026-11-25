@@ -55,7 +55,7 @@ function select(optionId: string) {
 <template>
   <div tabindex="-1" class="question-row" :class="{ 'is-review': submitted }">
     <fieldset :style="{ viewTransitionName: `quiz-answers-${inputName}` }" class="min-w-0" :disabled="submitted || locked" :aria-describedby="`${inputName}-hint`">
-      <legend class="mb-4 text-2xl font-semibold leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</legend>
+      <legend class="mb-4 text-2xl font-medium leading-snug tracking-tight">{{ messages.quiz.question(number, question.prompt) }}</legend>
       <p :id="`${inputName}-hint`" class="mb-6 font-mono text-xs text-zinc-500">{{ instruction }}</p>
       <div class="answer-options">
         <label v-for="option in options" :key="option.id" :class="option.classes" class="answer-option flex items-start gap-3 rounded border p-4">

@@ -42,6 +42,7 @@ await new Command()
   .option('--port <number>', messages.portOption, parsePort, automaticPort)
   .option('--quiz <path>', messages.quizOption)
   .option('--no-open', messages.noOpenOption)
+  .option('--dev-ui <directory>', messages.developmentUi)
   .action(runCommand)
   .parseAsync()
   .catch(reportFailure);

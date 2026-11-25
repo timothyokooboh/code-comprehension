@@ -1,4 +1,5 @@
 export const cliErrorCodes = {
+  developmentUiUnavailable: 'development_ui_unavailable',
   questionFormatInvalid: 'question_format_invalid',
   questionFormatUnavailable: 'question_format_unavailable',
   questionCountInvalid: 'question_count_invalid',
