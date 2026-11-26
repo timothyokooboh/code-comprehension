@@ -1,7 +1,11 @@
 {
   "title": "How Code Comprehension works",
   "subtitle": "Follow one assessment through the system.",
-  "nodes": ["Coding agent", "Local runtime", "Browser"],
+  "nodes": [
+    "Coding agent",
+    "Local runtime",
+    "Browser"
+  ],
   "chapters": [
     {
       "title": "Three parts, one learning loop",
@@ -16,7 +20,7 @@
         "The local runtime checks and serves quiz data.",
         "The browser turns that data into a learning session."
       ],
-      "duration": 15,
+      "duration": 10.5,
       "start": 0
     },
     {
@@ -33,8 +37,8 @@
         "Product quiz: reason about current behaviour.",
         "Changed source fingerprints trigger a bank review."
       ],
-      "duration": 15,
-      "start": 15
+      "duration": 10.5,
+      "start": 10.5
     },
     {
       "title": "The contract is a boundary",
@@ -49,8 +53,8 @@
         "The agent repairs the reported problems.",
         "Valid structure does not guarantee factual accuracy."
       ],
-      "duration": 15,
-      "start": 30
+      "duration": 10.5,
+      "start": 21.0
     },
     {
       "title": "Two kinds of assessment",
@@ -65,8 +69,8 @@
         "Written answers go to a waiting coding agent.",
         "The agent returns feedback grounded in code evidence."
       ],
-      "duration": 15,
-      "start": 45
+      "duration": 10.5,
+      "start": 31.5
     },
     {
       "title": "Feedback belongs to an attempt",
@@ -81,8 +85,8 @@
         "A retake creates a new attempt.",
         "Feedback from the old attempt cannot overwrite it."
       ],
-      "duration": 15,
-      "start": 60
+      "duration": 10.5,
+      "start": 42.0
     },
     {
       "title": "The architecture to remember",
@@ -97,8 +101,8 @@
         "Runtime: validation and review coordination.",
         "Browser: answers, explanations, and feedback."
       ],
-      "duration": 15,
-      "start": 75
+      "duration": 10.5,
+      "start": 52.5
     }
   ]
 }

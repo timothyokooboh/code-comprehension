@@ -1,6 +1,7 @@
 import { onMounted, onBeforeUnmount, ref, type Ref } from "vue";
 import { Player, Stage, Vector2 } from "@motion-canvas/core";
 import project from "./project?project";
+import { frame, palette } from "./presentation";
 const framesPerSecond = 30;
 export function useWalkthrough(container: Ref<HTMLElement | null>) {
   const ready = ref(false),
@@ -28,14 +29,14 @@ export function useWalkthrough(container: Ref<HTMLElement | null>) {
   function connect() {
     try {
       stage.configure({
-        size: new Vector2(1280, 720),
+        size: new Vector2(frame.width, frame.height),
         resolutionScale: 1,
-        background: "#151e22",
+        background: palette.background,
       });
       container.value?.append(stage.finalBuffer);
       player = new Player(
         project,
-        { size: new Vector2(1280, 720), fps: framesPerSecond },
+        { size: new Vector2(frame.width, frame.height), fps: framesPerSecond },
         { paused: true, muted: false, loop: false },
       );
       player.onRender.subscribe(render);

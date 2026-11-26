@@ -25,8 +25,8 @@ await page
   .click();
 await expect
   .poll(async () => Number(await slider.inputValue()))
-  .toBeGreaterThanOrEqual(60);
-await slider.fill("89.9");
+  .toBeGreaterThanOrEqual(42);
+await slider.fill("62.9");
 await expect(
   page.getByRole("button", { name: "Replay", exact: true }),
 ).toBeVisible();

@@ -1,13 +1,7 @@
 import { makeScene2D, Rect, Txt, Line, Circle } from "@motion-canvas/2d";
 import { all, createRef, waitFor, easeInOutCubic } from "@motion-canvas/core";
 import content from "./content.json";
-const palette = {
-  background: "#151e22",
-  ink: "#f5f3e8",
-  muted: "#98a8ad",
-  accent: "#d6ee86",
-  panel: "#253237",
-};
+import { palette } from "./presentation";
 const positions = [-390, 0, 390];
 const revealSeconds = 0.4;
 export default makeScene2D(function* (view) {
@@ -27,14 +21,14 @@ export default makeScene2D(function* (view) {
       <Txt
         ref={counter}
         x={-530}
-        y={-310}
+        y={-240}
         fill={palette.accent}
         fontSize={18}
         fontFamily="monospace"
       />
       <Txt
         ref={title}
-        y={-235}
+        y={-180}
         width={1120}
         textWrap
         fill={palette.ink}
@@ -43,8 +37,8 @@ export default makeScene2D(function* (view) {
       />
       <Line
         points={[
-          [-390, -90],
-          [390, -90],
+          [-390, -65],
+          [390, -65],
         ]}
         stroke={palette.muted}
         lineWidth={3}
@@ -54,7 +48,7 @@ export default makeScene2D(function* (view) {
         <Rect
           ref={nodes[index]}
           x={x}
-          y={-90}
+          y={-65}
           width={290}
           height={90}
           radius={14}
@@ -65,11 +59,11 @@ export default makeScene2D(function* (view) {
           <Txt text={content.nodes[index]} fill={palette.ink} fontSize={28} />
         </Rect>
       ))}
-      <Circle ref={marker} x={-390} y={-20} size={10} fill={palette.accent} />
+      <Circle ref={marker} x={-390} y={-5} size={10} fill={palette.accent} />
       {lines.map((line, index) => (
         <Txt
           ref={line}
-          y={65 + index * 62}
+          y={55 + index * 47}
           width={1080}
           textWrap
           fill={palette.ink}
@@ -78,7 +72,7 @@ export default makeScene2D(function* (view) {
       ))}
       <Txt
         ref={subtitle}
-        y={290}
+        y={235}
         width={1100}
         textWrap
         fill={palette.muted}

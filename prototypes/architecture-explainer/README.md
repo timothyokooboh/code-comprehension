@@ -1,6 +1,6 @@
 # Silent architecture explainer prototype
 
-A 90-second Motion Canvas walkthrough inside a Vue 3 page, followed by a short
+A 63-second Motion Canvas walkthrough inside a Vue 3 page, followed by a short
 illustrated explanation and code references. Content is authored from this repo;
 this does not implement the proposed explainer skills or change quiz scopes.
 
