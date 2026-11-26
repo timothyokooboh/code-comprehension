@@ -1,0 +1,104 @@
+{
+  "title": "How Code Comprehension works",
+  "subtitle": "Follow one assessment through the system.",
+  "nodes": ["Coding agent", "Local runtime", "Browser"],
+  "chapters": [
+    {
+      "title": "Three parts, one learning loop",
+      "subtitle": "The agent understands. The runtime coordinates. The browser teaches.",
+      "active": 0,
+      "references": [
+        "skills/product-quiz/SKILL.md",
+        "packages/cli/src/server.ts"
+      ],
+      "lines": [
+        "Your coding agent reads the repository.",
+        "The local runtime checks and serves quiz data.",
+        "The browser turns that data into a learning session."
+      ],
+      "duration": 15,
+      "start": 0
+    },
+    {
+      "title": "Evidence comes first",
+      "subtitle": "Code \u2192 questions, explanations, references",
+      "active": 0,
+      "references": [
+        "skills/pr-quiz/references/generation.md",
+        "packages/cli/src/product/sources.ts",
+        "skills/product-quiz/references/source-review.md"
+      ],
+      "lines": [
+        "PR quiz: reason about what changed.",
+        "Product quiz: reason about current behaviour.",
+        "Changed source fingerprints trigger a bank review."
+      ],
+      "duration": 15,
+      "start": 15
+    },
+    {
+      "title": "The contract is a boundary",
+      "subtitle": "Valid structure is necessary. It is not proof of truth.",
+      "active": 1,
+      "references": [
+        "packages/cli/src/load-quiz.ts",
+        "packages/cli/src/server.ts"
+      ],
+      "lines": [
+        "A shared schema rejects malformed quiz data.",
+        "The agent repairs the reported problems.",
+        "Valid structure does not guarantee factual accuracy."
+      ],
+      "duration": 15,
+      "start": 30
+    },
+    {
+      "title": "Two kinds of assessment",
+      "subtitle": "MCQs score locally. Written answers need a reviewer.",
+      "active": 2,
+      "references": [
+        "skills/pr-quiz/references/written-review.md",
+        "packages/cli/src/written-review/state.ts"
+      ],
+      "lines": [
+        "MCQs use the supplied answer key in the browser.",
+        "Written answers go to a waiting coding agent.",
+        "The agent returns feedback grounded in code evidence."
+      ],
+      "duration": 15,
+      "start": 45
+    },
+    {
+      "title": "Feedback belongs to an attempt",
+      "subtitle": "A retake must never inherit an old review.",
+      "active": 1,
+      "references": [
+        "packages/cli/src/written-review/state.ts",
+        "skills/pr-quiz/references/written-review.md"
+      ],
+      "lines": [
+        "Each sitting has its own attempt identity.",
+        "A retake creates a new attempt.",
+        "Feedback from the old attempt cannot overwrite it."
+      ],
+      "duration": 15,
+      "start": 60
+    },
+    {
+      "title": "The architecture to remember",
+      "subtitle": "Generate with evidence \u2192 validate \u2192 learn \u2192 review",
+      "active": 2,
+      "references": [
+        "packages/cli/src/server.ts",
+        "skills/pr-quiz/references/written-review.md"
+      ],
+      "lines": [
+        "Agent: code-grounded reasoning.",
+        "Runtime: validation and review coordination.",
+        "Browser: answers, explanations, and feedback."
+      ],
+      "duration": 15,
+      "start": 75
+    }
+  ]
+}
