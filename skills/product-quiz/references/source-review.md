@@ -3,10 +3,9 @@
 Use this only for `review_required` from `--check-product`. Explicit refresh always
 uses generation; do not reuse an earlier review token to avoid that request.
 
-For reason `architecture_focus`, first read [architecture.md](architecture.md).
-Review architectural coverage even with empty `changedFiles`; include
-`reviewedFocus: "system_architecture_v1"` only after confirming the bank meets that
-contract. Ordinary `confirmed: true` alone cannot perform this upgrade.
+For reason `architecture_focus`, first follow the semantic review and additional
+receipt requirements in [architecture.md](architecture.md), including when
+`changedFiles` is empty.
 
 1. Read the saved bank and every reported changed input. Follow their effects into
    relevant shared implementation and configuration. The fingerprints identify changed
