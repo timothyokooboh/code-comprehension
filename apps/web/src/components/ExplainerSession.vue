@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { explainerStates } from '../explainer/state';
 import { useExplainer } from '../explainer/useExplainer';
 import { explainerMessages as copy } from '../locales/explainer.en';
 import ExplainerPlayer from './ExplainerPlayer.vue';
@@ -8,13 +9,17 @@ const { data, status, load } = useExplainer();
 </script>
 <template>
   <article class="walkthrough">
-    <p v-if="status === 'loading'" role="status">{{ copy.loading }}</p>
-    <div v-else-if="status === 'failed'" role="alert">
+    <p v-if="status === explainerStates.loading" role="status">
+      {{ copy.loading }}
+    </p>
+    <div v-else-if="status === explainerStates.failed" role="alert">
       {{ copy.failed }} <button @click="load">{{ copy.retry }}</button>
     </div>
     <template v-else-if="data">
       <header>
-        <p>{{ data.scope.join(' · ') }}</p>
+        <p class="scope" :title="data.scope.join(' · ')">
+          {{ data.scope.join(' · ') }}
+        </p>
         <h2>{{ data.title }}</h2>
       </header>
       <ExplainerPlayer :data="data" />
@@ -72,6 +77,11 @@ const { data, status, load } = useExplainer();
   max-width: 1120px;
   padding: 24px;
   margin-inline: auto;
+}
+.scope {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 header {
   margin-bottom: 20px;

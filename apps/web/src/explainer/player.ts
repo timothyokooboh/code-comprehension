@@ -48,11 +48,15 @@ export function mountPlayer(
     { paused: true, loop: false, muted: true },
   );
   let disposed = false;
+  let failed = false;
   const loadingTimeoutMs = 15_000;
   const timer = window.setTimeout(fail, loadingTimeoutMs);
   function fail() {
-    if (!disposed) {
+    if (!disposed && !failed) {
+      failed = true;
+      clearTimeout(timer);
       player.togglePlayback(false);
+      player.deactivate();
       events.failed();
     }
   }
@@ -62,7 +66,7 @@ export function mountPlayer(
   project.logger.onLogged.subscribe(logged);
   function ready() {
     clearTimeout(timer);
-    if (!disposed) events.ready();
+    if (!disposed && !failed) events.ready();
   }
   async function render() {
     try {
@@ -87,9 +91,14 @@ export function mountPlayer(
   player.onRecalculated.subscribe(ready);
   return {
     toggle: () => player.togglePlayback(),
+    replay: () => {
+      player.requestSeek(0);
+      player.togglePlayback(true);
+    },
     seek: (seconds: number) =>
       player.requestSeek(Math.round(seconds * presentation.fps)),
     dispose() {
+      if (disposed) return;
       disposed = true;
       clearTimeout(timer);
       player.togglePlayback(false);

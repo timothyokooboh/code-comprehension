@@ -1,8 +1,9 @@
+import { explainerStates, type ExplainerState } from './state';
 import { onMounted, onBeforeUnmount, ref, type Ref } from 'vue';
 import type { Explainer } from '@code-comprehension/quiz-contract';
 import type { mountPlayer } from './player';
 export function usePlayer(container: Ref<HTMLElement | null>, data: Explainer) {
-  const status = ref<'loading' | 'ready' | 'failed'>('loading');
+  const status = ref<ExplainerState>(explainerStates.loading);
   const seconds = ref(0);
   const playing = ref(false);
   let player: ReturnType<typeof mountPlayer> | undefined;
@@ -15,26 +16,28 @@ export function usePlayer(container: Ref<HTMLElement | null>, data: Explainer) {
   async function connect() {
     disconnect();
     const current = generation;
-    status.value = 'loading';
+    status.value = explainerStates.loading;
     try {
       const { mountPlayer } = await import('./player');
       if (current !== generation || !container.value) return;
       player = mountPlayer(container.value, data, {
         ready: () => {
-          status.value = 'ready';
+          if (current === generation) status.value = explainerStates.ready;
         },
         failed: () => {
-          status.value = 'failed';
+          if (current !== generation) return;
+          disconnect();
+          status.value = explainerStates.failed;
         },
         frame: (value) => {
-          seconds.value = value;
+          if (current === generation) seconds.value = value;
         },
         playing: (value) => {
-          playing.value = value;
+          if (current === generation) playing.value = value;
         },
       });
     } catch {
-      if (current === generation) status.value = 'failed';
+      if (current === generation) status.value = explainerStates.failed;
     }
   }
   function seek(seconds: number) {
@@ -44,7 +47,7 @@ export function usePlayer(container: Ref<HTMLElement | null>, data: Explainer) {
     player?.toggle();
   }
   function replay() {
-    seek(0);
+    player?.replay();
   }
   onMounted(connect);
   onBeforeUnmount(disconnect);

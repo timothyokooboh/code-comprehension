@@ -28,7 +28,7 @@ const reference = z.strictObject({
   line: z.number().int().positive().optional(),
 });
 const references = z.array(reference).min(1).max(32);
-const scene = z.strictObject({
+const sceneSchema = z.strictObject({
   id: identifier,
   title: text.max(80),
   nodes: z
@@ -50,6 +50,10 @@ const scene = z.strictObject({
     .max(explainerLimits.beats),
   references,
 });
+function sceneDuration(scene: z.infer<typeof sceneSchema>) {
+  return scene.beats.reduce((total, beat) => total + beat.durationSeconds, 0);
+}
+
 export const explainerSchema = z
   .strictObject({
     schemaVersion: z.literal(1),
@@ -63,7 +67,7 @@ export const explainerSchema = z
       includesUncommitted: z.boolean(),
     }),
     comparison: prComparisonSchema.optional(),
-    scenes: z.array(scene).min(1).max(explainerLimits.scenes),
+    scenes: z.array(sceneSchema).min(1).max(explainerLimits.scenes),
     companion: z.strictObject({
       paragraphs: z.array(text.max(6000)).min(1).max(12),
       references,
@@ -76,12 +80,8 @@ export const explainerSchema = z
     const issue = (path: (string | number)[], reason: string) =>
       context.addIssue({ code: 'custom', path, params: { reason } });
     if (
-      value.scenes.reduce(
-        (sum, scene) =>
-          sum +
-          scene.beats.reduce((total, beat) => total + beat.durationSeconds, 0),
-        0,
-      ) > explainerLimits.durationSeconds
+      value.scenes.reduce((sum, scene) => sum + sceneDuration(scene), 0) >
+      explainerLimits.durationSeconds
     )
       issue(['scenes'], explainerIssueCodes.duration);
     const words = value.companion.paragraphs
@@ -131,8 +131,7 @@ export type Explainer = z.infer<typeof explainerSchema>;
 export type ExplainerScene = Explainer['scenes'][number];
 export function explainerDuration(explainer: Explainer) {
   return explainer.scenes.reduce(
-    (total, scene) =>
-      total + scene.beats.reduce((sum, beat) => sum + beat.durationSeconds, 0),
+    (total, scene) => total + sceneDuration(scene),
     0,
   );
 }
@@ -140,7 +139,7 @@ export function explainerChapters(explainer: Explainer) {
   let start = 0;
   return explainer.scenes.map((scene) => {
     const chapter = { scene, start };
-    start += scene.beats.reduce((sum, beat) => sum + beat.durationSeconds, 0);
+    start += sceneDuration(scene);
     return chapter;
   });
 }

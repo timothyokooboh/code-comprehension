@@ -6,6 +6,7 @@ export const presentation = { width: 1280, height: 480, fps: 30 };
 export function createWalkthrough(data: Explainer) {
   return makeScene2D(function* (view) {
     view.fill('#fafbf7');
+    view.fontFamily('system-ui, sans-serif');
     for (const scene of data.scenes) {
       view.removeChildren();
       view.add(
@@ -22,13 +23,27 @@ export function createWalkthrough(data: Explainer) {
         (scene.nodes.findIndex((node) => node.id === id) -
           (scene.nodes.length - 1) / 2) *
         290;
-      for (const edge of scene.edges) {
+      for (const [index, edge] of scene.edges.entries()) {
+        const from = position(edge.from);
+        const to = position(edge.to);
+        const direction = Math.sign(to - from);
+        const halfNodeWidth = 125;
+        const nodeBottom = 20;
+        const routeY = 50 + index * 7;
+        const adjacent = Math.abs(to - from) === 290;
         view.add(
           new Line({
-            points: [
-              [position(edge.from), -35],
-              [position(edge.to), -35],
-            ],
+            points: adjacent
+              ? [
+                  [from + direction * halfNodeWidth, -35],
+                  [to - direction * halfNodeWidth, -35],
+                ]
+              : [
+                  [from, nodeBottom],
+                  [from, routeY],
+                  [to, routeY],
+                  [to, nodeBottom],
+                ],
             stroke: '#646760',
             lineWidth: 3,
             endArrow: true,

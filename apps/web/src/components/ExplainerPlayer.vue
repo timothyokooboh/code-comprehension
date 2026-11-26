@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { explainerStates } from '../explainer/state';
+import { computed, ref } from 'vue';
 import {
   explainerChapters,
   explainerDuration,
@@ -15,6 +16,17 @@ const { status, seconds, playing, seek, toggle, replay, connect } = usePlayer(
 );
 const duration = explainerDuration(props.data);
 const chapters = explainerChapters(props.data);
+const currentChapter = computed(
+  () =>
+    chapters.findLast((chapter) => seconds.value >= chapter.start)?.scene.id ??
+    chapters[0]!.scene.id,
+);
+function seekChapter(event: Event) {
+  const chapter = chapters.find(
+    (chapter) => chapter.scene.id === (event.target as HTMLSelectElement).value,
+  );
+  if (chapter) seek(chapter.start);
+}
 function seekFromInput(event: Event) {
   seek(Number((event.target as HTMLInputElement).value));
 }
@@ -22,15 +34,17 @@ function seekFromInput(event: Event) {
 <template>
   <section class="player" :aria-label="copy.silent">
     <div ref="container" class="frame" role="img" :aria-label="copy.canvas" />
-    <p v-if="status === 'loading'" role="status">{{ copy.loading }}</p>
-    <div v-if="status === 'failed'" role="alert">
+    <p v-if="status === explainerStates.loading" role="status">
+      {{ copy.loading }}
+    </p>
+    <div v-if="status === explainerStates.failed" role="alert">
       {{ copy.renderFailed }} <button @click="connect">{{ copy.retry }}</button>
     </div>
     <div class="controls">
-      <button :disabled="status !== 'ready'" @click="toggle">
+      <button :disabled="status !== explainerStates.ready" @click="toggle">
         {{ playing ? copy.pause : copy.play }}
       </button>
-      <button :disabled="status !== 'ready'" @click="replay">
+      <button :disabled="status !== explainerStates.ready" @click="replay">
         {{ copy.replay }}
       </button>
       <input
@@ -40,21 +54,28 @@ function seekFromInput(event: Event) {
         :max="duration"
         step="0.1"
         :value="seconds"
-        :disabled="status !== 'ready'"
+        :disabled="status !== explainerStates.ready"
         @input="seekFromInput"
       />
       <output>{{ copy.time(seconds, duration) }}</output>
     </div>
-    <nav :aria-label="copy.chapters" class="chapters">
-      <button
-        v-for="chapter in chapters"
-        :key="chapter.scene.id"
-        :disabled="status !== 'ready'"
-        @click="seek(chapter.start)"
+    <label class="chapters">
+      {{ copy.chapters }}
+      <select
+        :aria-label="copy.chapters"
+        :value="currentChapter"
+        :disabled="status !== explainerStates.ready"
+        @change="seekChapter"
       >
-        {{ chapter.scene.title }}
-      </button>
-    </nav>
+        <option
+          v-for="chapter in chapters"
+          :key="chapter.scene.id"
+          :value="chapter.scene.id"
+        >
+          {{ chapter.scene.title }}
+        </option>
+      </select>
+    </label>
   </section>
 </template>
 <style scoped>
@@ -82,6 +103,14 @@ function seekFromInput(event: Event) {
   gap: 12px;
   padding: 12px 16px;
   flex-wrap: wrap;
+}
+.chapters select {
+  min-width: 0;
+  flex: 1;
+  padding: 6px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 6px;
 }
 .controls input {
   flex: 1;
