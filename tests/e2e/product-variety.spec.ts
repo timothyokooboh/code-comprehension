@@ -16,7 +16,7 @@ test('cached product retakes draw new questions while reload preserves the activ
   try {
     const fixture = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
     const questions = Array.from({ length: 12 }, (_, i) => ({ ...fixture.questions[0], id: `q${i}`, prompt: `Behaviour scenario ${i}`, correctOptionIds: [i % 2 === 0 ? 'retry' : 'new'], references: [{ path: 'payment.ts' }] }));
-    const bank = { version: 1, id: 'overview', scope: { kind: 'general', name: 'Overview', description: 'Whole product', sourcePatterns: ['payment.ts'], supportingFiles: [] }, quiz: { ...fixture, type: 'product', questions } };
+    const bank = { version: 1, id: 'overview', scope: { kind: 'general', focus: 'system_architecture_v1', name: 'Overview', description: 'Whole product', sourcePatterns: ['payment.ts'], supportingFiles: [] }, quiz: { ...fixture, type: 'product', questions } };
     repo.write('generated.json', JSON.stringify(bank));
     expect(runCli(['--configure-product', 'local', '--repo', repo.path]).status).toBe(0);
     expect(runCli(['--save-product', join(repo.path, 'generated.json'), '--repo', repo.path]).status).toBe(0);

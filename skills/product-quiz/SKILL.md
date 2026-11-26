@@ -1,6 +1,6 @@
 ---
 name: product-quiz
-description: Generate and launch a code-grounded quiz about one or more product modules or general system behaviour. Use for product knowledge practice, scope refinement, reconnecting a written review, or changing product bank tracking preferences; not for assessing a PR diff.
+description: Generate and launch a code-grounded quiz about one or more product modules or general system architecture. Use for product knowledge practice, scope refinement, reconnecting a written review, or changing product bank tracking preferences; not for assessing a PR diff.
 ---
 
 # Product comprehension quiz
@@ -57,7 +57,7 @@ Resolve scope from the **current quiz request**, not a previous assessment. Ever
 fresh request without an explicit scope must present module choices and wait for the
 engineer's selection before checking banks, generating questions, or launching.
 “Use product-quiz to assess my understanding of this codebase/system” and a bare
-`/product-quiz` are unscoped requests, not selections of General overview. A previous
+`/product-quiz` are unscoped requests, not selections of General system architecture. A previous
 selection, reusable cache, or running quiz does not supply the new request's scope.
 This applies even within the same conversation; scope selection is per invocation,
 while the saved tracking preference remains per project.
@@ -65,7 +65,7 @@ while the saved tracking preference remains per project.
 For an unscoped request, infer candidate modules from domain docs, workspace structure,
 routes, services, tests, and code relationships. Prefer the agent's interactive
 question UI when its available tool supports genuine multi-select. Present short
-module descriptions and allow one or more modules, with General overview as an
+module descriptions and allow one or more modules, with General system architecture as an
 alternative taken on its own. Check the tool's actual capabilities; multiple listed
 options do not necessarily mean multiple selections are supported.
 
@@ -83,12 +83,15 @@ Resolve explicit arguments and natural language against repository evidence. For
 example, “payment integration & cart” and “assess my understanding of payment
 integration and cart” select both areas when they exist. Preserve compound names:
 “identity and access management” can be one module, not three. Clarify only genuine
-ambiguity; state the resolved scopes and proceed when clear. General overview assesses
-the system's main flow and meaningful relationships; it is an alternative to a module
+ambiguity; state the resolved scopes and proceed when clear. General system architecture assesses
+how the system fits together; it is an alternative to a module
 selection, not an extra bank mixed into that selection.
 
 For multiple modules, read [multi-scope.md](references/multi-scope.md) before checking
 banks. It covers independent reuse, grounded interactions, and combined launch.
+
+For General system architecture generation or review, read
+[architecture.md](references/architecture.md) before checking content.
 
 Read current implementation and supporting tests before finalising the scope. Record
 each scope's name, description, repository-relative source patterns, and supporting files in
@@ -125,7 +128,8 @@ scope and avoid overwriting an unrelated bank.
 
 Run `RUNTIME --check-product BANK_ID --repo PROJECT --format FORMAT`, adding `--refresh` when explicitly
 requested. A `reusable` result for the requested format permits launching without model generation. Keep that bank unchanged and continue with the other selected banks. For `review_required`, read [source-review.md](references/source-review.md)
-and check the bank against changed inputs. Retain only after explicitly confirming
+and check the bank against the reported reason and changed inputs. An
+`architecture_focus` review is required even when no source files changed. Retain only after explicitly confirming
 all content remains valid and correcting shifted references; otherwise regenerate in
 step 4. `generation_required` reports missing/incompatible data, unavailable inputs,
 or explicit refresh: generate in step 4, without retention. Never hand-edit stored
@@ -141,7 +145,7 @@ located in step 1. Do not proceed without that guidance.
 
 Generate a bank of distinct behaviour-focused questions in the resolved format from current code, larger than one
 sitting when meaningful coverage supports it. The browser selects the configured or requested count
-per sitting (10 by default); for a broad system overview aim for roughly 16–24 useful questions.
+per sitting (10 by default); for a broad architecture scope aim for roughly 16–24 useful questions.
 Smaller scopes may warrant fewer. Do not pad the bank with repetitive questions,
 filename recall, or unsupported scenarios merely to meet a count. Write the
 bank JSON to an OS temporary file, not directly into the managed cache. Attach code

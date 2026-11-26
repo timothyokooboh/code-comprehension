@@ -44,7 +44,7 @@ Omit the interaction ID when there is no grounded interaction bank. The runtime
 namespaces colliding local question IDs and builds one assessment in memory. It
 spreads coverage across banks within the resolved question count; that count takes
 priority when there are more banks than slots. Tell the engineer that some areas
-may be absent in that sitting. Shared duplicate questions can cover multiple banks. General overview is launched alone rather than combined with
+may be absent in that sitting. Shared duplicate questions can cover multiple banks. General system architecture is launched alone rather than combined with
 module banks. Tell the engineer the resolved modules and any interaction coverage;
 keep answering and feedback in the existing browser and agent-chat flows.
 

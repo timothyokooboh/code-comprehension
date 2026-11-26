@@ -3,12 +3,12 @@ import { createReviewToken } from './review-token.js';
 import { join } from 'node:path';
 import { CliError, cliErrorCodes } from '../errors.js';
 import { reconcileProductSetup } from './config.js';
-import { bankIdentifier, cachedBankSchema, isProductQuiz, type ProductBank } from './bank-contract.js';
+import { architectureFocus, productScopeKinds, bankIdentifier, cachedBankSchema, isProductQuiz } from './bank-contract.js';
 import { productPaths, readOptional } from './project.js';
 import { captureSources } from './sources.js';
 
 export const cacheStatuses = { reviewRequired: 'review_required', reusable: 'reusable', generationRequired: 'generation_required' } as const;
-export const cacheReasons = { format: 'question_format', missing: 'missing', incompatible: 'incompatible', changed: 'changed', refresh: 'refresh', unavailable: 'sources_unavailable' } as const;
+export const cacheReasons = { architecture: 'architecture_focus', format: 'question_format', missing: 'missing', incompatible: 'incompatible', changed: 'changed', refresh: 'refresh', unavailable: 'sources_unavailable' } as const;
 
 export async function configuredProject(repo: string) {
   const status = await reconcileProductSetup(repo);
@@ -33,9 +33,8 @@ export async function inspectProductCache(repo: string, id: string, refresh = fa
   const mcq = bank.quiz.questions.some(question => question.type !== questionTypes.written);
   if ((format === questionFormats.written && !written) || (format === questionFormats.mcq && !mcq) ||
     (format === questionFormats.mixed && (!written || !mcq))) return required(cacheReasons.format);
-  const input: ProductBank = { ...bank, version: 1 };
   let current;
-  try { current = await captureSources(project.root, input); }
+  try { current = await captureSources(project.root, bank); }
   catch (error) {
     if (error instanceof CliError && error.code === cliErrorCodes.productSourcesUnavailable) return required(cacheReasons.unavailable);
     throw error;
@@ -43,6 +42,7 @@ export async function inspectProductCache(repo: string, id: string, refresh = fa
   const previous = new Map(bank.sources.map(({ path, hash }) => [path, hash]));
   const next = new Map(current.map(({ path, hash }) => [path, hash]));
   const changedFiles = [...new Set([...previous.keys(), ...next.keys()])].filter((path) => previous.get(path) !== next.get(path));
+  if (bank.scope.kind === productScopeKinds.general && bank.scope.focus !== architectureFocus) return { status: cacheStatuses.reviewRequired, reason: cacheReasons.architecture, requiredFocus: architectureFocus, changedFiles, reviewToken: createReviewToken(bank, current), bank, current, conflicts: project.conflicts } as const;
   if (changedFiles.length) return { status: cacheStatuses.reviewRequired, reason: cacheReasons.changed, changedFiles, reviewToken: createReviewToken(bank, current), bank, current, conflicts: project.conflicts } as const;
   return { status: cacheStatuses.reusable, bank, conflicts: project.conflicts } as const;
 }

@@ -33,7 +33,7 @@ and its documented local runtime resolution; no API key or new account is requir
 1. Build with `pnpm build`, then open this repository in Claude Code with the
    `product-quiz` and `pr-quiz` skills available. Record the Claude Code version,
    operating system, and candidate commit in #11.
-2. Ask: “Use product-quiz for a general overview with four questions, mixed: two MCQs
+2. Ask: “Use product-quiz for a general system architecture with four questions, mixed: two MCQs
    and two written responses.” For fresh-draw verification, ask for a grounded bank
    containing at least three useful questions of each type. Record the printed local
    URL and private review-session path privately; never paste credentials into #11.

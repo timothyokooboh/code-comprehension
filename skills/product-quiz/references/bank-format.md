@@ -4,7 +4,8 @@ Write one JSON object with exactly these fields:
 
 - `version`: `1` (bank format version).
 - `id`: stable letters, numbers, underscores, or hyphens, used as the bank filename.
-- `scope`: `{kind, name, description, sourcePatterns, supportingFiles}`.
+- `scope`: `{kind, name, description, sourcePatterns, supportingFiles}` plus
+  `focus: "system_architecture_v1"` for `kind: "general"` only.
   `kind` is `module` or `general`. Name and description are nonempty text.
   `sourcePatterns` is a nonempty array of repository-relative paths/globs;
   `supportingFiles` is an array of repository-relative paths, possibly empty.
@@ -26,7 +27,9 @@ and nonempty `questions`. Each MCQ contains:
 
 All identifiers accept letters, numbers, underscores, and hyphens. Objects reject
 unknown fields, including scores and attempts. Keep IDs stable during validation
-repairs. The browser uses the resolved bank scope name as its assessment scope label.
+repairs. The browser uses the resolved module name, or General system architecture for a
+validated general bank, as its assessment scope label. See
+[architecture.md](architecture.md) for the required content and legacy-bank review.
 Keep agent-generated input at version 1. On saving, the runtime writes cache version 2
 with `sources: [{path, hash}]`, using SHA-256 content fingerprints. Do not author or
 copy fingerprints yourself. Old version-1 caches must be regenerated through saving.

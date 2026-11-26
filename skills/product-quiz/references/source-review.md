@@ -3,6 +3,10 @@
 Use this only for `review_required` from `--check-product`. Explicit refresh always
 uses generation; do not reuse an earlier review token to avoid that request.
 
+For reason `architecture_focus`, first follow the semantic review and additional
+receipt requirements in [architecture.md](architecture.md), including when
+`changedFiles` is empty.
+
 1. Read the saved bank and every reported changed input. Follow their effects into
    relevant shared implementation and configuration. The fingerprints identify changed
    files, not the exact old source text: do not assume a Git diff against HEAD or main

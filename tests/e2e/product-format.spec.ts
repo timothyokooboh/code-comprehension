@@ -13,7 +13,7 @@ test('a product sitting keeps its requested mixed composition after reload and p
       ...fixture.questions[index % 2 ? 2 : 0], id: 'q' + index, prompt: 'Question ' + index, references: [{ path: 'payment.ts' }],
     }));
     repo.write('bank.json', JSON.stringify({ version: 1, id: 'overview',
-      scope: { kind: 'general', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
+      scope: { kind: 'general', focus: 'system_architecture_v1', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
       quiz: { ...fixture, type: 'product', questions } }));
     expect(runCli(['--save-product', join(repo.path, 'bank.json'), '--repo', repo.path]).status).toBe(0);
     const app = await launchCli(['--product-bank', 'overview', '--format', 'mixed', '--questions', '4', '--written-questions', '1', '--repo', repo.path]);
