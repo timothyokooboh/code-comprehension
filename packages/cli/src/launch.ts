@@ -1,5 +1,5 @@
 import open from 'open';
-import { assessmentTypes, assessmentSourceKinds, type Quiz, type AssessmentSource } from '@code-comprehension/quiz-contract';
+import { explainerRoute, type Explainer, assessmentTypes, assessmentSourceKinds, type Quiz, type AssessmentSource } from '@code-comprehension/quiz-contract';
 import { loadQuiz } from './load-quiz.js';
 import { startServer } from './server.js';
 import { messages } from './locales/en.js';
@@ -47,4 +47,13 @@ export async function launchAssessment(
   }
   console.log(messages.stopHint);
   if (options.open) await openBrowser(app.url);
+}
+
+export async function launchExplainer(options: { port: number; open: boolean; devUi?: string }, explainer: Explainer) {
+  const app = await startServer(options.port, null, undefined, undefined, options.devUi, explainer);
+  registerShutdown(app, async () => {});
+  const url = `${app.url}${explainerRoute}`;
+  console.log(messages.started(url));
+  console.log(messages.stopHint);
+  if (options.open) await openBrowser(url);
 }

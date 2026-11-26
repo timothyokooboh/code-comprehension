@@ -4,7 +4,9 @@ import { resolve } from 'node:path';
 import { projectRoot } from './product/project.js';
 import { readActiveAssessment, reviseAssessment } from './assessment/client.js';
 import { questionFormats, type QuestionFormat, assessmentSourceKinds, prSessionStatuses } from '@code-comprehension/quiz-contract';
-import { launch, launchAssessment } from './launch.js';
+import { loadExplainer } from './explainer/load.js';
+import { messages } from './locales/en.js';
+import { launchExplainer, launch, launchAssessment } from './launch.js';
 import { preparePr, discardPr } from './pr/session.js';
 import { loadPrAssessment } from './pr/assessment.js';
 import { CliError, cliErrorCodes } from './errors.js';
@@ -15,6 +17,7 @@ import { cacheStatuses, inspectProductCache } from './product/cache.js';
 import { productStatuses } from './product/contract.js';
 
 type CommandOptions = {
+  explainer?: string; validateExplainer?: string;
   resumeReview?: string; closeReview?: string; waitReview?: string; reviewFeedback?: string; reviewFailure?: string; reviewSession?: string;
   format?: QuestionFormat; writtenQuestions?: number;
   port: number; open: boolean; quiz?: string; questions?: number; devUi?: string;
@@ -30,11 +33,12 @@ function validateOptions(options: CommandOptions) {
     (options.writtenQuestions !== undefined && (!options.productBank || options.format !== questionFormats.mixed))) throw new CliError(cliErrorCodes.questionFormatInvalid);
   if (options.questions !== undefined && !options.productBank) throw new CliError(cliErrorCodes.questionCountInvalid);
   const modes = [
+    options.explainer, options.validateExplainer,
     options.resumeReview, options.closeReview, options.waitReview, options.reviewFeedback, options.reviewFailure, options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
     options.retainProduct, options.checkProduct, options.productStatus, options.configureProduct, options.validateProduct, options.saveProduct, options.productBank,
   ].filter((value) => value !== undefined && value !== false);
   const hasComparisonOptions = options.target !== undefined || options.baseline !== undefined;
-  if (options.devUi && modes.length && !options.quiz && !options.productBank && !options.prSession && !options.resumeReview) {
+  if (options.devUi && modes.length && !options.explainer && !options.quiz && !options.productBank && !options.prSession && !options.resumeReview) {
     throw new CliError(cliErrorCodes.prOptionsInvalid);
   }
   const acceptsRepo = options.retainProduct || options.checkProduct || options.preparePr || options.productStatus || options.configureProduct || options.saveProduct || options.productBank;
@@ -47,7 +51,12 @@ function validateOptions(options: CommandOptions) {
 
 export async function runCommand(options: CommandOptions) {
   validateOptions(options);
-  if (options.resumeReview) {
+  if (options.validateExplainer) {
+    await loadExplainer(options.validateExplainer);
+    console.log(messages.explainer.valid);
+  } else if (options.explainer) {
+    await launchExplainer(options, await loadExplainer(options.explainer));
+  } else if (options.resumeReview) {
     await launchAssessment(options, null);
   } else if (options.closeReview) {
     closeRecovery(options.closeReview);

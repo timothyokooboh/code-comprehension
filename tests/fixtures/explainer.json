@@ -1,0 +1,9 @@
+{
+ "schemaVersion":1,"id":"system-tour","type":"product","title":"How the system works","scope":["General system architecture"],
+ "snapshot":{"revision":"0123456789012345678901234567890123456789","capturedAt":"2026-11-26T12:00:00Z","includesUncommitted":false},
+ "scenes":[
+  {"id":"boundaries","title":"Three responsibilities","nodes":[{"id":"agent","label":"Coding agent"},{"id":"runtime","label":"Local runtime"},{"id":"browser","label":"Browser"}],"edges":[{"from":"agent","to":"runtime"},{"from":"runtime","to":"browser"}],"beats":[{"text":"The agent reads code and generates grounded learning content.","durationSeconds":3,"activeNodes":["agent"]},{"text":"The runtime validates the contract and serves the browser.","durationSeconds":3,"activeNodes":["runtime"]}],"references":[{"path":"packages/cli/src/server.ts","line":16}]},
+  {"id":"review","title":"Reasoning stays with the agent","nodes":[{"id":"agent","label":"Coding agent"},{"id":"runtime","label":"Local runtime"}],"edges":[{"from":"runtime","to":"agent"}],"beats":[{"text":"The runtime coordinates written reviews; the active agent supplies reasoning.","durationSeconds":3,"activeNodes":["agent"]}],"references":[{"path":"packages/cli/src/written-review/state.ts"}]}
+ ],
+ "companion":{"paragraphs":["The coding agent generates content grounded in current code. The local runtime validates its structure and serves the browser experience.","Written review requires an active agent. The runtime coordinates work and validates feedback without running a hidden model."],"references":[{"path":"packages/cli/src/server.ts"}],"diagram":{"format":"mermaid","source":"flowchart LR\n Agent --> Runtime --> Browser"}}
+}
