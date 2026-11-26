@@ -127,3 +127,9 @@ and service errors leave typing available. If the browser ends recording unexpec
 completed words are retained with a notice. Actual recognition accuracy depends on
 the browser, microphone, language, and connection; automated tests exercise the UI
 with simulated recognition events rather than a live speech provider.
+
+Dictation requests native automatic punctuation when the browser exposes
+`unspokenPunctuation`. Actual punctuation quality depends on the browser's speech
+engine; exposing the setting does not guarantee it is honoured. Other browsers keep
+the existing transcription behaviour. Returned punctuation is preserved, with no
+punctuation model or rule-based rewriting added.

@@ -60,6 +60,7 @@ export function useDictation(commit: (text: string) => void) {
       recognition.lang = document.documentElement.lang || navigator.language;
       recognition.continuous = true;
       recognition.interimResults = false;
+      if ('unspokenPunctuation' in recognition) recognition.unspokenPunctuation = true;
       recognition.onstart = () => {
         if (current !== generation) return;
         clearTimeout(timeout);

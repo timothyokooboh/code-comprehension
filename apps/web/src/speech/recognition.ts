@@ -9,6 +9,7 @@ export type SpeechState = typeof speechStates[keyof typeof speechStates];
 type RecognitionResult = { isFinal: boolean; 0: { transcript: string } };
 export interface Recognition {
   lang: string; continuous: boolean; interimResults: boolean;
+  unspokenPunctuation?: boolean;
   onstart: (() => void) | null;
   onend: (() => void) | null;
   onerror: ((event: { error: string }) => void) | null;

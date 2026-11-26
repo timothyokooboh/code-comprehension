@@ -5,13 +5,14 @@ import { launchCli } from '../support/cli.js';
 test.use({ launchOptions: { args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] } });
 
 type FakeRecognition = {
+  unspokenPunctuation?: boolean;
   onstart?: () => void; onend?: () => void;
   onerror?: (event: { error: string }) => void;
   onresult?: (event: { results: { isFinal: boolean; 0: { transcript: string } }[] }) => void;
 };
 type SpeechHarness = Window & { speechTest: { current?: FakeRecognition; tracks: MediaStreamTrack[] } };
-async function installSpeech(page: Page) {
-  await page.addInitScript(() => {
+async function installSpeech(page: Page, punctuationSupported = false) {
+  await page.addInitScript(punctuationSupported => {
     const browser = window as unknown as SpeechHarness;
     browser.speechTest = { tracks: [] };
     const getMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
@@ -26,8 +27,9 @@ async function installSpeech(page: Page) {
       stop() { queueMicrotask(() => this.onend?.()); }
       abort() { queueMicrotask(() => this.onend?.()); }
     }
+    if (punctuationSupported) Object.defineProperty(FakeSpeech.prototype, 'unspokenPunctuation', { value: false, writable: true });
     Object.defineProperty(window, 'SpeechRecognition', { configurable: true, value: FakeSpeech });
-  });
+  }, punctuationSupported);
 }
 async function speak(page: Page, words: string[]) {
   await page.evaluate(words => {
@@ -144,3 +146,23 @@ test('cancelling a pending permission request discards the late microphone strea
     expect(await page.evaluate(() => Boolean((window as unknown as SpeechHarness).speechTest.current))).toBe(false);
   } finally { await app.stop(); }
 });
+
+for (const supported of [true, false]) {
+  test(`native punctuation ${supported ? 'is enabled when supported' : 'falls back without altering text when unsupported'}`, async ({ page }) => {
+    await installSpeech(page, supported);
+    const app = await launchCli(['--quiz', resolve('tests/fixtures/mixed-quiz.json')]);
+    try {
+      await page.goto(app.url);
+      const answer = page.getByRole('textbox', { name: 'Your explanation' });
+      await answer.fill('Existing text.');
+      await page.getByRole('button', { name: 'Dictate your answer' }).click();
+      const stop = page.getByRole('button', { name: 'Stop and add transcript' });
+      await expect(stop).toBeEnabled();
+      expect(await page.evaluate(() => (window as unknown as SpeechHarness).speechTest.current?.unspokenPunctuation)).toBe(supported ? true : undefined);
+      const transcript = supported ? 'If it times out, reuse the key. Why? To avoid duplicates!' : 'if it times out reuse the key';
+      await speak(page, [transcript]);
+      await stop.click();
+      await expect(answer).toHaveValue(`Existing text. ${transcript}`);
+    } finally { await app.stop(); }
+  });
+}
