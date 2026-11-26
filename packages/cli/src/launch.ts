@@ -28,17 +28,17 @@ async function openBrowser(url: string) {
   }
 }
 
-export async function launch(options: { port: number; open: boolean; quiz?: string }) {
+export async function launch(options: { port: number; open: boolean; quiz?: string; devUi?: string }) {
   const quiz = options.quiz ? await loadQuiz(options.quiz) : null;
   await launchAssessment(options, quiz);
 }
 
 export async function launchAssessment(
-  options: { port: number; open: boolean; resumeReview?: string }, quiz: Quiz | null,
+  options: { port: number; open: boolean; resumeReview?: string; devUi?: string }, quiz: Quiz | null,
   cleanup: () => Promise<void> = async () => {},
   source: AssessmentSource = { kind: assessmentSourceKinds.file },
 ) {
-  const app = await startServer(options.port, quiz, source, options.resumeReview);
+  const app = await startServer(options.port, quiz, source, options.resumeReview, options.devUi);
   registerShutdown(app, cleanup);
   console.log(messages.review.session(app.reviewSession));
   console.log(messages.started(app.url));

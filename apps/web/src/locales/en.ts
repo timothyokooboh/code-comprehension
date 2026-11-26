@@ -5,10 +5,25 @@ import { runtimeErrorCodes, type RuntimeErrorCode } from '../api/runtime-errors.
 import { applicationName } from '@code-comprehension/quiz-contract';
 
 export const messages = {
+  speech: {
+    start: 'Dictate your answer', stop: 'Stop and add transcript', cancel: 'Cancel recording', recording: 'Voice input',
+    privacy: 'Dictation uses your browser’s speech service and may send audio for online processing. No API key needed.',
+    states: { idle: '', requesting: 'Allow microphone access to begin…', listening: 'Listening — stop to add your words', stopping: 'Finishing your transcript…' },
+    errors: {
+      unsupported: 'Dictation is unavailable in this browser. You can still type your answer.',
+      permission: 'Microphone or speech access was denied. Allow it in your browser settings, then try again.',
+      microphone: 'Could not access a microphone. Check your microphone connection and browser settings.',
+      network: 'The speech service could not connect. Check your connection and try again. Any completed words were added.',
+      empty: 'No speech was recognised. Try again or type your answer.',
+      interrupted: 'Recording ended before you stopped it. Any completed words were added; check the text before continuing.',
+      failed: 'Dictation could not finish. Any completed words were added. Try again or type your answer.',
+      limit: 'Your answer reached the character limit. Only the transcript that fits was added; edit your answer before continuing.',
+    },
+    finishFirst: 'Stop or cancel dictation before submitting your answers.',
+  },
   written: {
     retryLocked: 'Answers are locked while submission is unresolved. This page retries the same answers automatically when the runtime reconnects.',
     answer: 'Your explanation', placeholder: 'Explain what happens and why…',
-    speechUnavailable: 'Speech to text — coming soon',
     states: {
       [reviewStates.waiting]: { title: 'Waiting for a reviewer', detail: 'Your accepted answers are saved. A reviewer is connected and waiting for work.' },
       [reviewStates.reviewing]: { title: 'Reviewing your answer…', detail: 'Your agent is checking your reasoning against the supporting code. Feedback will appear here automatically.' },

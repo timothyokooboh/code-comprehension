@@ -44,6 +44,30 @@ See the [UI SDK evaluation](docs/ui-sdk-evaluation.md) for the native-control de
 
 ## Workspace
 
+### Live UI development
+
+```sh
+pnpm dev --quiz tests/fixtures/mixed-quiz.json
+```
+
+This builds the CLI once, then serves the Vue source through Vite on the quiz's
+own loopback address. Style/template edits update automatically; changes that need
+a page reload restore the current answers from browser storage. The quiz server,
+question selection, revision, and review attempt stay alive. Keep the same tab and
+URL, and allow browser storage for reload persistence.
+
+Use the usual launch arguments for a real assessment, for example
+`pnpm dev --product-bank general-overview --repo . --format mixed`.
+For an already-built runtime, append `--dev-ui apps/web` to a launch command or to
+`--resume-review SESSION_FILE` when resuming an interrupted session. Development
+mode must be selected when starting the runtime; refreshing a production-mode
+server does not enable it. Do not stop a quiz normally to migrate it: normal shutdown
+deletes its recovery record.
+
+Vite and the UI source are needed only in this development checkout. Normal
+`pnpm start` and packaged CLI launches still serve prebuilt assets. Server/CLI edits
+require a rebuild and restart; live updates apply to browser code only.
+
 - `apps/web`: Vue 3 UI, built with Vite and Tailwind.
 - `packages/cli`: Commander CLI and local HTTP server.
 - `packages/quiz-contract`: shared runtime/quiz contracts consumed by both applications.
@@ -86,3 +110,26 @@ Active quizzes support question challenges and scope/difficulty refinements thro
 the existing agent chat. The agent can inspect displayed question IDs and validate a
 replacement; the engineer reloads to start the revised attempt. See the
 [revision workflow](skills/pr-quiz/references/revisions.md).
+
+## Voice input
+
+Written answers support optional browser dictation without API keys. Click the mic,
+allow microphone access, and speak. The recording pill shows microphone activity;
+Stop returns to the editor and appends recognised words to the existing answer.
+Cancel (× or Escape) discards that recording. You can edit the resulting text before
+submitting. Only one question records at a time, and quiz submission waits until
+recording is stopped or cancelled.
+
+This uses the browser's Web Speech recognition service, which may send audio to its
+provider and require internet access. No audio is uploaded to our CLI or stored in
+question banks. Support varies by browser; unavailable recognition, denied permission,
+and service errors leave typing available. If the browser ends recording unexpectedly,
+completed words are retained with a notice. Actual recognition accuracy depends on
+the browser, microphone, language, and connection; automated tests exercise the UI
+with simulated recognition events rather than a live speech provider.
+
+Dictation requests native automatic punctuation when the browser exposes
+`unspokenPunctuation`. Actual punctuation quality depends on the browser's speech
+engine; exposing the setting does not guarantee it is honoured. Other browsers keep
+the existing transcription behaviour. Returned punctuation is preserved, with no
+punctuation model or rule-based rewriting added.

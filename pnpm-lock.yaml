@@ -67,6 +67,9 @@ importers:
       '@code-comprehension/quiz-contract':
         specifier: workspace:*
         version: link:../quiz-contract
+      vite:
+        specifier: 8.3.8
+        version: 8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)
 
   packages/quiz-contract:
     dependencies:
