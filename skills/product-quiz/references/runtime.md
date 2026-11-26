@@ -15,14 +15,18 @@ Quote paths and identifiers. Use one action per invocation:
 - `--configure-product git|local --repo PATH`: saves the explicit preference in
   `.comprehension/config.json`, reconciles the managed cache rule, and reports conflicts.
 - `--check-product BANK_ID --repo PATH [--refresh]`: returns `reusable` and scope
-  metadata when source content matches, or `review_required` with changed input paths and a review token. Missing/incompatible
+  metadata when source content and semantic focus match, or `review_required` with
+  a reason, changed input paths and a review token. Reason `architecture_focus`
+  requires architecture-content review even when the changed-path list is empty;
+  `requiredFocus` identifies the required declaration. Missing/incompatible
   data, unavailable inputs, or explicit refresh return `generation_required` with a reason
   (`missing`, `incompatible`, `sources_unavailable`, or `refresh`). Changed inputs
   retain their stored fingerprints pending a review decision. Explicit refresh always requests generation without deleting
   the old bank. Unknown/old cache formats require regeneration.
 - `--retain-product RECEIPT --repo PATH`: explicitly confirm a reviewed bank using
-  the JSON contract in [source-review.md](source-review.md). Updates only reference
-  line corrections and fingerprints, returning `retained`. Missing confirmation,
+  the JSON contract in [source-review.md](source-review.md). Updates reference
+  line corrections and fingerprints, plus the focus marker for an explicitly
+  confirmed architecture review, returning `retained`. Missing confirmation,
   stale tokens, unknown questions/references, and out-of-range lines fail without
   replacing the bank. `--refresh` cannot be combined with this action.
 - `--validate-product INPUT`: validates a bank without saving or launching; success
@@ -34,7 +38,7 @@ Quote paths and identifiers. Use one action per invocation:
   into one shared local assessment. Any bank requiring review or generation blocks
   launch. Each bank is checked independently with `--check-product`; a failure never
   changes the others. Repeated IDs are ignored and ID order does not change identity.
-  General overview must be launched alone. Scope labels use resolved bank names.
+  General system architecture must be launched alone. Module labels use resolved bank names; general banks display General system architecture.
   The count is the session override from `--questions`, otherwise the project's
   `questionsPerSession`, otherwise 10. It is a positive whole number and caps the
   draw even when not every bank can be represented. Smaller pools serve what is

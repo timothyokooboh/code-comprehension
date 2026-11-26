@@ -13,7 +13,7 @@ test('product defaults, project settings, and session overrides retain their sep
     const configPath = join(repo.path, '.comprehension/config.json');
     expect(JSON.parse(readFileSync(configPath, 'utf8')).questionsPerSession).toBe(10);
     repo.write('bank.json', JSON.stringify({ version: 1, id: 'overview',
-      scope: { kind: 'general', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
+      scope: { kind: 'general', focus: 'system_architecture_v1', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
       quiz: { ...fixture, type: 'product', questions: Array.from({ length: 16 }, (_, i) => ({ ...fixture.questions[0], id: `q${i}`, prompt: `Scenario ${i}`, references: [{ path: 'payment.ts' }] })) },
     }));
     expect(runCli(['--save-product', join(repo.path, 'bank.json'), '--repo', repo.path]).status).toBe(0);

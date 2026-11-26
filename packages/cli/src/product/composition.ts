@@ -1,9 +1,9 @@
 import { writtenQuizSchemaVersion, questionTypes, type Question, type Quiz } from '@code-comprehension/quiz-contract';
 import { messages } from '../locales/en.js';
 import { CliError, cliErrorCodes } from '../errors.js';
-import { productScopeKinds, type ProductBank } from './bank-contract.js';
+import { productScopeKinds, type CachedProductBank } from './bank-contract.js';
 
-type AssessmentBank = Pick<ProductBank, 'id' | 'scope' | 'quiz'>;
+type AssessmentBank = Pick<CachedProductBank, 'id' | 'scope' | 'quiz'>;
 
 // Length prefixes keep identities unambiguous even when identifiers contain separators.
 function identity(parts: string[]) {
@@ -23,7 +23,7 @@ export function composeProductBanks(banks: AssessmentBank[], selectionSize: numb
   if (!first || (banks.length > 1 && banks.some(({ scope }) => scope.kind === productScopeKinds.general))) {
     throw new CliError(cliErrorCodes.productScopesInvalid);
   }
-  if (banks.length === 1) return { ...first.quiz, selectionSize, scope: [first.scope.name] };
+  if (banks.length === 1) return { ...first.quiz, selectionSize, scope: [first.scope.kind === productScopeKinds.general ? messages.product.architectureScope : first.scope.name] };
   const questions: Question[] = [];
   const byContent = new Map<string, Question>();
   const selectionGroups = banks.map((bank) => {

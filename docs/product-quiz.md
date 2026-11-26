@@ -1,13 +1,13 @@
 # Product quiz workflow
 
 The [product-quiz skill](../skills/product-quiz/SKILL.md) asks the existing coding agent
-to generate a quiz about one or more product areas or a general system overview. A module is
+to generate a quiz about one or more product areas or a general system architecture. A module is
 coherent behaviour and can span directories. Discovery and selection happen in chat;
 the shared browser handles answers, feedback, and retakes.
 
 Every fresh request without an explicit scope asks the engineer to select one or
-more modules, or General overview. Prefer the agent's interactive multi-select UI
-when supported; otherwise accept multiple names or numbers in chat. General overview
+more modules, or General system architecture. Prefer the agent's interactive multi-select UI
+when supported; otherwise accept multiple names or numbers in chat. General system architecture
 is chosen on its own. “Quiz me on this codebase” is unscoped; neither
 a previous choice nor an available cached bank chooses the scope for a new request.
 Explicit scopes proceed directly when clear. Replies to a pending selection and
@@ -53,7 +53,7 @@ refresh always takes the generation path. See the
 [source review workflow](../skills/product-quiz/references/source-review.md).
 
 Multiple module banks are checked and maintained independently, then composed with
-`--product-bank payments cart`. General overview is an alternative launched alone.
+`--product-bank payments cart`. General system architecture is an alternative launched alone.
 Sampling spreads coverage across selected banks within the question limit. The limit
 is never increased to cover additional banks; some areas may be absent in a small sitting. Stable namespaced question IDs prevent collisions, and exact
 prompt/option/answer duplicates appear once, contributing to both scopes' coverage.
@@ -92,3 +92,21 @@ retain it; a product revision may explicitly set `input.questionsPerSession` to 
 it for the revised session. Neither override updates project configuration. The count
 is capped by available questions, with no padding, and takes priority over covering
 every selected module. PR quizzes remain proportional to the changes.
+
+## General system architecture
+
+This is a dedicated assessment of responsibilities, module boundaries, integration,
+data/control flow, actual architectural patterns and meaningful failures. It is
+authored from current evidence, not random samples drawn from module banks.
+Question count and format still follow the current request; a short sitting need
+not cover every architectural concern.
+
+The wire kind remains `general`. Newly authored general banks declare
+`scope.focus: "system_architecture_v1"`; module banks do not. Existing version-2
+general caches without that declaration receive `review_required` /
+`architecture_focus`, including when source hashes match. The agent reviews all
+content against the [architecture guidance](../skills/product-quiz/references/architecture.md),
+then either explicitly retains it with `reviewedFocus: "system_architecture_v1"`
+or generates a replacement. Ordinary source-review confirmation cannot upgrade
+the bank, and unrelated module caches remain intact. Semantic review does not
+replace normal source freshness checks or prove factual accuracy automatically.

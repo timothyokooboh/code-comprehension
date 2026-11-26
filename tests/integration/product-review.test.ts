@@ -8,7 +8,7 @@ function setup() {
   const repo = createRepository();
   const quiz = JSON.parse(readFileSync(new URL('../fixtures/quiz.json', import.meta.url), 'utf8'));
   for (const question of quiz.questions) question.references = [{ path: 'payment.ts', line: 1 }];
-  const bank = { version: 1, id: 'payments', scope: { kind: 'general', name: 'System overview', description: 'Payment behaviour', sourcePatterns: ['*.ts'], supportingFiles: [] }, quiz: { ...quiz, type: 'product' } };
+  const bank = { version: 1, id: 'payments', scope: { kind: 'general', focus: 'system_architecture_v1', name: 'System overview', description: 'Payment behaviour', sourcePatterns: ['*.ts'], supportingFiles: [] }, quiz: { ...quiz, type: 'product' } };
   repo.write('generated.json', JSON.stringify(bank));
   expect(runCli(['--configure-product', 'local', '--repo', repo.path]).status).toBe(0);
   expect(runCli(['--save-product', join(repo.path, 'generated.json'), '--repo', repo.path]).status).toBe(0);

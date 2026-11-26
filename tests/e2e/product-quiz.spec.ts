@@ -13,7 +13,7 @@ for (const kind of ['module', 'general'] as const) {
     try {
       repo.write('generated.json', JSON.stringify({
         version: 1, id: kind,
-        scope: { kind, name, description: 'Payment behaviour', sourcePatterns: ['payment.ts'], supportingFiles: [] },
+        scope: { kind, ...(kind === 'general' ? { focus: 'system_architecture_v1' } : {}), name, description: 'Payment behaviour', sourcePatterns: ['payment.ts'], supportingFiles: [] },
         quiz: { ...quiz, type: 'product', title: name },
       }));
       expect(runCli(['--configure-product', 'local', '--repo', repo.path]).status).toBe(0);
@@ -22,7 +22,7 @@ for (const kind of ['module', 'general'] as const) {
       try {
         await page.goto(app.url);
         await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
-        await expect(page.getByText(`Scope: ${name}`, { exact: true })).toBeVisible();
+        await expect(page.getByText(`Scope: ${kind === 'general' ? 'General system architecture' : name}`, { exact: true })).toBeVisible();
         await expect(page.getByRole('region', { name: 'PR comparison' })).toHaveCount(0);
         await page.getByRole('radio').first().check();
         await page.getByRole('checkbox', { name: 'Reuse the idempotency key' }).check();

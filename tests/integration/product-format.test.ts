@@ -11,7 +11,7 @@ test('cache checks distinguish valid content from requested question-format avai
   try {
     runCli(['--configure-product', 'local', '--repo', repo.path]);
     repo.write('bank.json', JSON.stringify({ version: 1, id: 'overview',
-      scope: { kind: 'general', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
+      scope: { kind: 'general', focus: 'system_architecture_v1', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
       quiz: { ...fixture, type: 'product', questions: fixture.questions.filter((q: { type: string }) => q.type !== 'written').map((q: object) => ({ ...q, references: [{ path: 'payment.ts' }] })) } }));
     expect(runCli(['--save-product', join(repo.path, 'bank.json'), '--repo', repo.path]).status).toBe(0);
     const check = (format: string) => runCli(['--check-product', 'overview', '--format', format, '--repo', repo.path]);
@@ -26,7 +26,7 @@ test('product launches honour default MCQs, written-only and exact mixed composi
   try {
     runCli(['--configure-product', 'local', '--repo', repo.path]);
     repo.write('bank.json', JSON.stringify({ version: 1, id: 'overview',
-      scope: { kind: 'general', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
+      scope: { kind: 'general', focus: 'system_architecture_v1', name: 'Overview', description: 'Overview', sourcePatterns: ['payment.ts'], supportingFiles: [] },
       quiz: { ...fixture, type: 'product', questions: Array.from({ length: 8 }, (_, index) => ({
         ...fixture.questions[index % 2 ? 2 : 0], id: 'q' + index, prompt: 'Scenario ' + index, references: [{ path: 'payment.ts' }],
       })) } }));

@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { z } from 'zod';
 import { CliError, cliErrorCodes } from '../errors.js';
 import { readQuizData } from '../load-quiz.js';
-import { bankIdentifier } from './bank-contract.js';
-import { cacheStatuses, configuredProject, inspectProductCache } from './cache.js';
+import { architectureFocus, bankIdentifier } from './bank-contract.js';
+import { cacheReasons, cacheStatuses, configuredProject, inspectProductCache } from './cache.js';
 import { productPaths, writeAtomic } from './project.js';
 
 export const reviewStatuses = { retained: 'retained' } as const;
@@ -13,6 +13,7 @@ const reviewSchema = z.strictObject({
   bankId: bankIdentifier,
   reviewToken: z.string().regex(/^[a-f0-9]{64}$/),
   confirmed: z.literal(true),
+  reviewedFocus: z.literal(architectureFocus).optional(),
   references: z.array(z.strictObject({ questionId: z.string().min(1), referenceIndex: z.number().int().nonnegative(), line: z.number().int().positive() })),
 });
 
@@ -53,6 +54,9 @@ export async function retainProductBank(repo: string, input: string) {
   if (result.status !== cacheStatuses.reviewRequired || result.reviewToken !== review.reviewToken) {
     throw new CliError(cliErrorCodes.productReviewChanged);
   }
+  if (result.reason === cacheReasons.architecture && review.reviewedFocus !== architectureFocus) {
+    throw new CliError(cliErrorCodes.productReviewInvalid);
+  }
   if (!result.current.length || result.current.some(({ hash }) => hash === null)) throw new CliError(cliErrorCodes.productSourcesUnavailable);
   const project = await configuredProject(repo);
   const quiz = correctReferences(result.bank.quiz, review.references);
@@ -61,7 +65,8 @@ export async function retainProductBank(repo: string, input: string) {
   if (verified.status !== cacheStatuses.reviewRequired || verified.reviewToken !== review.reviewToken) {
     throw new CliError(cliErrorCodes.productReviewChanged);
   }
-  const retained = { ...result.bank, quiz, sources: verified.current };
+  const scope = result.reason === cacheReasons.architecture ? { ...result.bank.scope, focus: architectureFocus } : result.bank.scope;
+  const retained = { ...result.bank, scope, quiz, sources: verified.current };
   await writeAtomic(join(project.root, productPaths.cache, `${review.bankId}.json`), `${JSON.stringify(retained, null, 2)}\n`);
   return { status: reviewStatuses.retained, conflicts: project.conflicts };
 }

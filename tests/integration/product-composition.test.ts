@@ -91,13 +91,13 @@ test('general overview remains an alternative to combining module banks', () => 
     expect(runCli(['--configure-product', 'local', '--repo', repo.path]).status).toBe(0);
     for (const kind of ['general', 'module']) {
       repo.write('bank.json', JSON.stringify({ version: 1, id: kind,
-        scope: { kind, name: kind, description: kind, sourcePatterns: ['payment.ts'], supportingFiles: [] },
+        scope: { kind, ...(kind === 'general' ? { focus: 'system_architecture_v1' } : {}), name: kind, description: kind, sourcePatterns: ['payment.ts'], supportingFiles: [] },
         quiz: { ...fixture, type: 'product', questions: fixture.questions.map((question) => ({ ...question, references: [{ path: 'payment.ts' }] })) },
       }));
       expect(runCli(['--save-product', join(repo.path, 'bank.json'), '--repo', repo.path]).status).toBe(0);
     }
     const rejected = runCli(['--product-bank', 'general', 'module', '--repo', repo.path]);
     expect(rejected.status).toBe(1);
-    expect(rejected.stderr).toContain('general overview bank on its own');
+    expect(rejected.stderr).toContain('General system architecture bank on its own');
   } finally { repo.dispose(); }
 });

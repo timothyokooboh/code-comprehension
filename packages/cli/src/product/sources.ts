@@ -2,7 +2,7 @@ import { readFile, lstat, realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join, matchesGlob, relative, isAbsolute, sep } from 'node:path';
 import { projectGit } from './project.js';
-import type { ProductBank } from './bank-contract.js';
+import type { ProductSourceScope } from './bank-contract.js';
 import { CliError, cliErrorCodes } from '../errors.js';
 
 const excludedDirectories = new Set(['.git', '.comprehension', 'node_modules', 'dist', 'build', 'coverage', '.next', '.nuxt']);
@@ -21,7 +21,7 @@ async function fingerprint(root: string, path: string) {
   }
 }
 
-export async function captureSources(root: string, bank: ProductBank) {
+export async function captureSources(root: string, bank: ProductSourceScope) {
   const paths = (await projectGit(root, ['ls-files', '--cached', '--others', '--exclude-standard', '-z'])).split('\0').filter(Boolean);
   const patterns = bank.scope.sourcePatterns.map(normalise);
   const selected = paths.filter((path) => !isExcluded(path) && patterns.some((pattern) =>
