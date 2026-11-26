@@ -49,8 +49,8 @@ export async function launchAssessment(
   if (options.open) await openBrowser(app.url);
 }
 
-export async function launchExplainer(options: { port: number; open: boolean; devUi?: string }, explainer: Explainer) {
-  const app = await startServer(options.port, null, undefined, undefined, options.devUi, explainer);
+export async function launchExplainer(options: { port: number; open: boolean; devUi?: string }, explainer: Explainer, cleanup: () => Promise<void> = async () => {}) {
+  const app = await startServer(options.port, null, undefined, undefined, options.devUi, explainer, cleanup);
   registerShutdown(app, async () => {});
   const url = `${app.url}${explainerRoute}`;
   console.log(messages.started(url));

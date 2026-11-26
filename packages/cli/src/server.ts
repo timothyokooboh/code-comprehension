@@ -14,7 +14,7 @@ import { messages } from './locales/en.js';
 
 import { handleAssessmentRequest, sendJson } from './assessment/http.js';
 
-export async function startServer(port: number, quiz: Quiz | null = null, source: AssessmentSource = { kind: assessmentSourceKinds.file }, resumeFile?: string, devUi?: string, explainer: Explainer | null = null) {
+export async function startServer(port: number, quiz: Quiz | null = null, source: AssessmentSource = { kind: assessmentSourceKinds.file }, resumeFile?: string, devUi?: string, explainer: Explainer | null = null, onClose: () => Promise<void> = async () => {}) {
   const assets = devUi ? null : await loadAssets(fileURLToPath(new URL('./web/', import.meta.url)));
   let developmentUi: Awaited<ReturnType<typeof startDevelopmentUi>> | undefined;
   const status: RuntimeStatus = { name: applicationName, status: runtimeReadyStatus };
@@ -115,7 +115,7 @@ export async function startServer(port: number, quiz: Quiz | null = null, source
           server.closeAllConnections();
         });
       }
-    })();
+    })().finally(onClose);
     return closing;
   }
   return { reviewSession: session.path, url, close };

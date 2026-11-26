@@ -11,7 +11,7 @@ bootstrap/distribution is still tracked in ticket #11. Skill installation alone 
 not supply a runtime in this milestone.
 
 - `--prepare-pr --repo PATH --target REF [--baseline REF]`: outputs JSON with
-  `status: "prepared"`, `directory`, `diffPath`, `quizPath`, and `comparison`, or
+  `status: "prepared"`, `directory`, `diffPath`, `quizPath`, `explainerPath`, `snapshot`, and `comparison`, or
   `status: "no_changes"` and `comparison`. Requires an existing Git commit and refs.
 - `--validate-pr DIRECTORY`: validates generated `quiz.json` and confirms scope has
   not changed. Outputs `{"status":"valid"}` on success; nonzero exit and actionable

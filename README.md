@@ -133,3 +133,9 @@ Dictation requests native automatic punctuation when the browser exposes
 engine; exposing the setting does not guarantee it is honoured. Other browsers keep
 the existing transcription behaviour. Returned punctuation is preserved, with no
 punctuation model or rule-based rewriting added.
+
+## PR explainers
+
+Use `/pr-explainer` for a silent, code-grounded walkthrough before or independently
+of `/pr-quiz`. See the [PR explainer workflow](docs/pr-explainer.md) for runtime
+availability, preparation, validation, and temporary-session cleanup.

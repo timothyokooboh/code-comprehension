@@ -34,21 +34,10 @@ Read [runtime.md](references/runtime.md) for the runtime commands and pre-releas
 availability. Resolve the executable before creating any session. Do not install
 frontend dependencies into the consuming project or invent a published npm version.
 
-Identify the repository root and intended PR target from the engineer's request,
-existing PR metadata, or repository conventions. A remote default branch is a
-candidate, not proof of the intended target. Ask only when the target is ambiguous.
-Use locally available refs; if stale or missing, fetch the relevant remote ref when
-authorized before preparing. Do not switch branches, stage files, or change code.
+Read and follow [pr-evidence.md](references/pr-evidence.md) for consuming-repository
+resolution, target/baseline clarification, preparation, and evidence grounding.
+Retain the returned session directory and quiz output path for validation and cleanup.
 
-Run `RUNTIME --prepare-pr --repo REPOSITORY --target TARGET` (quote every path/ref).
-The JSON result names the temporary session directory, diff path, quiz output path,
-and exact baseline. The diff combines feature commits, staged edits, unstaged edits,
-and non-ignored untracked files. Read that diff rather than only `git diff HEAD`.
-If the CLI requests `--baseline`, ask which earlier commit/range the engineer means;
-never guess `HEAD~1`. Retry preparation with the confirmed explicit baseline.
-
-If status is `no_changes`, explain that there is no comparison to assess and stop.
-Otherwise retain the session directory for validation, launch, and cleanup.
 
 ## 2. Generate a proportionate assessment
 
