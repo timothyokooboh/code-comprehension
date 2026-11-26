@@ -3,6 +3,7 @@ import { reviewErrors } from '@code-comprehension/quiz-contract';
 import { CommanderError, type Command, type Help } from 'commander';
 import { CliError, cliErrorCodes } from './errors.js';
 import { messages } from './locales/en.js';
+import { ExplainerValidationError } from './explainer/load.js';
 import { QuizValidationError } from './load-quiz.js';
 import { formatQuizIssues } from './quiz-diagnostics.js';
 import { maximumPort } from './options.js';
@@ -46,6 +47,6 @@ export function reportFailure(error: unknown) {
     ? commandErrorMessage(error)
     : messages.errors[error instanceof CliError ? error.code : cliErrorCodes.startupFailed];
   console.error(message);
-  if (error instanceof QuizValidationError) console.error(formatQuizIssues(error.issues));
+  if (error instanceof QuizValidationError || error instanceof ExplainerValidationError) console.error(formatQuizIssues(error.issues));
   process.exitCode = 1;
 }

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { explainerRoute } from '@code-comprehension/quiz-contract';
+import ExplainerSession from './components/ExplainerSession.vue';
+const isExplainer = window.location.pathname === explainerRoute;
 import QuizSession from './components/QuizSession.vue';
 import RuntimeConnection from './components/RuntimeConnection.vue';
 import { messages } from './locales/en';
@@ -21,7 +24,8 @@ import { messages } from './locales/en';
       </div>
       <RuntimeConnection />
     </header>
-    <QuizSession />
+    <ExplainerSession v-if="isExplainer" />
+    <QuizSession v-else />
   </main>
 </template>
 

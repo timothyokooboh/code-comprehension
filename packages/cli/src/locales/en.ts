@@ -2,6 +2,7 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 import { cliErrorCodes, type CliErrorCode } from '../errors.js';
 
 export const messages = {
+  explainer: { duration: 'Total scene duration must be at most 180 seconds, including transitions.', words: 'Companion prose must be at most 500 words across all paragraphs.', reference: 'Use unique scene/node identifiers and connections/highlights that refer to existing nodes.', comparison: 'PR explainers require comparison metadata matching the snapshot; product explainers must omit comparison.', validate: 'validate structured explainer data without launching', start: 'launch a silent explainer from validated JSON', valid: 'Explainer data is valid.' },
   developmentUi: 'Serve a local Vite UI workspace with live updates (development only).',
   questionFormat: 'Question format for product checks/launch: mcq (default), written, or mixed.',
   writtenCount: 'Number of written questions in a mixed product sitting.',
@@ -47,6 +48,7 @@ export const messages = {
     unknownAnswer: 'Every correct answer must reference an option in this question.',
     answerCount: 'Single-answer questions need exactly one correct option; multiple-answer questions need at least two.',
     expectedType: (type: string) => `Provide a value of type ${type}.`,
+    tooBig: (maximum: string) => `Provide at most ${maximum} characters or entries (or meet this numeric maximum).`,
     tooSmall: (minimum: string) => `Provide at least ${minimum} characters or entries (or meet this numeric minimum).`,
     allowedValues: (values: string) => `Use one of these supported values: ${values}.`,
     unknownFields: (keys: string) => `Remove unrecognised fields: ${keys}.`,
@@ -87,6 +89,8 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.explainerInvalid]: 'Explainer validation failed. Fix the reported fields before launching.',
+    [cliErrorCodes.explainerUnreadable]: 'Unable to read explainer JSON. Check its path, size, permissions and JSON syntax.',
     [cliErrorCodes.developmentUiUnavailable]: 'Could not start the development UI. Provide the apps/web directory from a checkout with dependencies installed (pnpm install), then retry.',
     [cliErrorCodes.questionFormatInvalid]: 'Use --format mcq, written, or mixed with --check-product or --product-bank. --written-questions requires a mixed product launch and must leave at least one MCQ.',
     [cliErrorCodes.questionFormatUnavailable]: 'The bank cannot supply the requested question composition. Generate enough questions of each requested type or clarify the count before launching.',
