@@ -2,7 +2,7 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 import { cliErrorCodes, type CliErrorCode } from '../errors.js';
 
 export const messages = {
-  explainer: { duration: 'Total scene duration must be at most 180 seconds, including transitions.', words: 'Companion prose must be at most 500 words across all paragraphs.', reference: 'Use unique scene/node identifiers and connections/highlights that refer to existing nodes.', comparison: 'PR explainers require comparison metadata matching the snapshot; product explainers must omit comparison.', validate: 'validate structured explainer data without launching', start: 'launch a silent explainer from validated JSON', valid: 'Explainer data is valid.' },
+  explainer: { prStart: 'Launch a prepared PR explainer and check its source snapshot.', prValidate: 'Validate a prepared PR explainer against current code.', duration: 'Total scene duration must be at most 180 seconds, including transitions.', words: 'Companion prose must be at most 500 words across all paragraphs.', reference: 'Use unique scene/node identifiers and connections/highlights that refer to existing nodes.', comparison: 'For a prepared PR, copy comparison and snapshot (including capturedAt) from preparation. Revision and uncommitted state must match. Product explainers must omit comparison.', validate: 'validate structured explainer data without launching', start: 'launch a silent explainer from validated JSON', valid: 'Explainer data is valid.' },
   developmentUi: 'Serve a local Vite UI workspace with live updates (development only).',
   questionFormat: 'Question format for product checks/launch: mcq (default), written, or mixed.',
   writtenCount: 'Number of written questions in a mixed product sitting.',
@@ -82,7 +82,7 @@ export const messages = {
   pr: {
     validate: 'validate generated questions and check the prepared code has not changed',
     start: 'launch a validated temporary PR session',
-    prepare: 'prepare a temporary PR comparison for quiz generation',
+    prepare: 'prepare a temporary PR comparison for a quiz or explainer',
     target: 'intended PR target branch or commit',
     baseline: 'explicit comparison commit when the baseline is ambiguous',
     repo: 'repository to assess (defaults to current directory)',
@@ -113,12 +113,12 @@ export const messages = {
     [cliErrorCodes.productConfigInvalid]: 'Invalid product configuration. Use bankTracking git or local, configuration version 1, and an optional positive whole-number questionsPerSession. Repair .comprehension/config.json before continuing.',
     [cliErrorCodes.sessionWriteFailed]: 'Unable to create or write the temporary PR session. Check temporary-directory permissions and available disk space, then retry.',
     [cliErrorCodes.sessionCleanupFailed]: 'Unable to remove the temporary PR session. Check its directory permissions and retry --discard-pr with the recorded session path.',
-    [cliErrorCodes.prChanged]: 'The code or comparison changed since preparation. Prepare a new PR session and regenerate questions before launching.',
+    [cliErrorCodes.prChanged]: 'The code or comparison changed since preparation. Prepare a new PR session and regenerate learning content before launching.',
     [cliErrorCodes.prQuizRequired]: 'This PR session requires quiz type pr. Correct the generated quiz and validate again.',
     [cliErrorCodes.gitFailed]: 'Unable to read the Git comparison. Check the repository and refs, fetch missing refs, and resolve conflicts before retrying.',
     [cliErrorCodes.baselineRequired]: 'The checkout is on the target branch or target commit. Ask the engineer which earlier baseline to assess, then supply --baseline. Do not guess HEAD~1.',
     [cliErrorCodes.sessionInvalid]: 'Invalid or unavailable PR session. Prepare a new session with --prepare-pr.',
-    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product. Use --questions only with --product-bank. Use --runtime only with --revise-assessment, which requires it.',
+    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, explainer, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product. Use --questions only with --product-bank. Use --runtime only with --revise-assessment, which requires it.',
 
     [cliErrorCodes.quizInvalid]: 'Quiz validation failed. Fix the following fields before launching:',
     [cliErrorCodes.quizUnreadable]: 'Unable to read the quiz file. Check the path and file permissions.',

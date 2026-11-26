@@ -29,7 +29,7 @@ test('silent explainer supports playback, chapters and a readable companion', as
       page.getByRole('button', { name: 'Pause', exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByText('Read the walkthrough', { exact: true }),
+      page.getByText('The essentials', { exact: true }),
     ).toBeVisible();
     await expect(
       page.getByText('0123456789012345678901234567890123456789', {
@@ -60,15 +60,12 @@ test('explainer request failures recover and the text equivalent works on mobile
     await expect(
       page.getByRole('button', { name: 'Play', exact: true }),
     ).toBeEnabled();
-    await expect(
-      page.getByRole('heading', { name: 'Scene-by-scene explanation' }),
-    ).toBeVisible();
-    await expect(
-      page.getByText(
-        'The runtime validates the contract and serves the browser.',
-        { exact: true },
-      ),
-    ).toBeVisible();
+    const transcript = page.getByRole('heading', { name: 'Scene-by-scene explanation' });
+    await expect(transcript).toBeAttached();
+    const bounds = await transcript.locator('..').boundingBox();
+    expect(bounds!.width).toBe(1);
+    expect(bounds!.height).toBe(1);
+    await expect(page.getByRole('heading', { name: 'The essentials' })).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(390);
@@ -88,7 +85,7 @@ test('renderer load failure leaves the readable walkthrough available and can be
       'The animation could not be displayed',
     );
     await expect(
-      page.getByRole('heading', { name: 'Read the walkthrough' }),
+      page.getByRole('heading', { name: 'The essentials' }),
     ).toBeVisible();
     await page.unroute('**/assets/player-*.js');
     await page.getByRole('button', { name: 'Retry', exact: true }).click();

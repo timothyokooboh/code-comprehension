@@ -11,7 +11,7 @@ export const explainerMessages = {
   position: 'Playback position',
   chapters: 'Chapters',
   canvas: 'Animated walkthrough; a text equivalent follows below.',
-  companion: 'Read the walkthrough',
+  companion: 'The essentials',
   transcript: 'Scene-by-scene explanation',
   reference: (path: string, line?: number) => (line ? `${path}:${line}` : path),
   connection: (from: string, to: string) => `${from} → ${to}`,
