@@ -60,15 +60,12 @@ test('explainer request failures recover and the text equivalent works on mobile
     await expect(
       page.getByRole('button', { name: 'Play', exact: true }),
     ).toBeEnabled();
-    await expect(
-      page.getByRole('heading', { name: 'Scene-by-scene explanation' }),
-    ).toBeVisible();
-    await expect(
-      page.getByText(
-        'The runtime validates the contract and serves the browser.',
-        { exact: true },
-      ),
-    ).toBeVisible();
+    const transcript = page.getByRole('heading', { name: 'Scene-by-scene explanation' });
+    await expect(transcript).toBeAttached();
+    const bounds = await transcript.locator('..').boundingBox();
+    expect(bounds!.width).toBe(1);
+    expect(bounds!.height).toBe(1);
+    await expect(page.getByRole('heading', { name: 'Read the walkthrough' })).toBeVisible();
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(390);

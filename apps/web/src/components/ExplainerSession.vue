@@ -45,29 +45,35 @@ const { data, status, load } = useExplainer();
         <p>{{ data.snapshot.capturedAt }}</p>
         <p v-if="data.snapshot.includesUncommitted">{{ copy.uncommitted }}</p>
         <PrComparison v-if="data.comparison" :comparison="data.comparison" />
-        <h2>{{ copy.transcript }}</h2>
-        <section v-for="scene in data.scenes" :key="scene.id">
-          <h3>{{ scene.title }}</h3>
-          <ul>
-            <li v-for="node in scene.nodes" :key="node.id">{{ node.label }}</li>
-          </ul>
-          <ul>
-            <li v-for="edge in scene.edges" :key="`${edge.from}-${edge.to}`">
-              {{
-                copy.connection(
-                  scene.nodes.find((node) => node.id === edge.from)!.label,
-                  scene.nodes.find((node) => node.id === edge.to)!.label,
-                )
-              }}
-            </li>
-          </ul>
-          <p v-for="beat in scene.beats" :key="beat.text">{{ beat.text }}</p>
-          <ul>
-            <li v-for="reference in scene.references" :key="reference.path">
-              <code>{{ copy.reference(reference.path, reference.line) }}</code>
-            </li>
-          </ul>
-        </section>
+        <div class="sr-only">
+          <h2>{{ copy.transcript }}</h2>
+          <section v-for="scene in data.scenes" :key="scene.id">
+            <h3>{{ scene.title }}</h3>
+            <ul>
+              <li v-for="node in scene.nodes" :key="node.id">
+                {{ node.label }}
+              </li>
+            </ul>
+            <ul>
+              <li v-for="edge in scene.edges" :key="`${edge.from}-${edge.to}`">
+                {{
+                  copy.connection(
+                    scene.nodes.find((node) => node.id === edge.from)!.label,
+                    scene.nodes.find((node) => node.id === edge.to)!.label,
+                  )
+                }}
+              </li>
+            </ul>
+            <p v-for="beat in scene.beats" :key="beat.text">{{ beat.text }}</p>
+            <ul>
+              <li v-for="reference in scene.references" :key="reference.path">
+                <code>{{
+                  copy.reference(reference.path, reference.line)
+                }}</code>
+              </li>
+            </ul>
+          </section>
+        </div>
       </section>
     </template>
   </article>
