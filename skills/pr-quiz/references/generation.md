@@ -10,6 +10,28 @@ Every correct option must be supported by the evidence. For multiple-answer ques
 use at least two correct options; missing any correct option or selecting an incorrect
 one earns no credit. Do not make questions ambiguous to manufacture difficulty.
 
+## Distractors that test codebase knowledge
+
+Where the code supports it, make incorrect options plausible alternative behaviours
+an experienced engineer could reasonably expect. Vary the relevant mechanism: which
+state owns a value, when validation occurs, what persists, which fallback wins, or
+what happens on failure. Establish why each distractor is wrong from the actual code.
+
+Before accepting a question, try answering it without consulting the code. If general
+engineering judgement alone eliminates every distractor, revise the scenario or
+options so the answer depends on this implementation. Keep options comparable in
+length, specificity, and tone; avoid making only the correct answer carefully qualified
+while the others describe obviously reckless or unrelated behaviour.
+
+For example, when asking what count a revised quiz uses, plausible alternatives might
+be the running session's count, the latest project default, or a fresh runtime default.
+Use these only when the question makes the conditions clear and code establishes the
+answer. Review multiple-answer options independently under the same standard.
+
+Preserve fairness: do not invent supported-looking features, add trick wording, or
+make options overlap ambiguously to increase difficulty. If a small change cannot
+support useful distractors, use a simpler honest question or omit it rather than pad.
+
 ## Explanations
 
 - `concise`: the answer and its key reason.
