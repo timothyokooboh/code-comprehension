@@ -132,6 +132,19 @@ export const messages = {
   assessment: {
     label: 'Quiz session',
     emptyTitle: 'No assessment loaded',
-    emptyDescription: 'Your quiz will appear here when an assessment is available.',
+    emptyDescription: 'Ask your agent to launch a PR quiz or product quiz. Your assessment will open in this workspace.',
+    recovery: {
+      eyebrow: 'Back to understanding',
+      title: 'Let’s reconnect your quiz.',
+      invalidTitle: 'This quiz needs a quick fix.',
+      description: 'We couldn’t load this assessment from your local quiz server.',
+      restartTitle: 'Restart your quiz',
+      restartDescription: 'Return to your agent or terminal and restart the quiz. If it opens a new address, use that tab instead.',
+      reloadTitle: 'Come back here',
+      reloadDescription: 'If the server is running at this same address, reload this page to try again.',
+      invalidDescription: 'Ask your agent to validate the assessment data and restart the quiz, then open the address it provides.',
+      reload: 'Reload page',
+      footer: 'Your next insight is just a connection away.',
+    },
   },
 } as const;
