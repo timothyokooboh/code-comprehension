@@ -15,8 +15,6 @@ export const explainerMessages = {
   transcript: 'Scene-by-scene explanation',
   reference: (path: string, line?: number) => (line ? `${path}:${line}` : path),
   connection: (from: string, to: string) => `${from} → ${to}`,
-  snapshot: 'Source snapshot',
-  uncommitted: 'Includes uncommitted changes',
   silent: 'Silent walkthrough',
   time: (current: number, total: number) =>
     `${formatTime(current)} / ${formatTime(total)}`,

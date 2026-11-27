@@ -31,11 +31,7 @@ test('silent explainer supports playback, chapters and a readable companion', as
     await expect(
       page.getByText('The essentials', { exact: true }),
     ).toBeVisible();
-    await expect(
-      page.getByText('0123456789012345678901234567890123456789', {
-        exact: true,
-      }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Source snapshot' })).toHaveCount(0);
   } finally {
     await app.stop();
   }
