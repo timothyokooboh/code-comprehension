@@ -53,39 +53,12 @@ any conflicts.
 
 ## 2. Resolve product scopes
 
-Resolve scope from the **current quiz request**, not a previous assessment. Every
-fresh request without an explicit scope must present module choices and wait for the
-engineer's selection before checking banks, generating questions, or launching.
-“Use product-quiz to assess my understanding of this codebase/system” and a bare
-`/product-quiz` are unscoped requests, not selections of General system architecture. A previous
-selection, reusable cache, or running quiz does not supply the new request's scope.
-This applies even within the same conversation; scope selection is per invocation,
-while the saved tracking preference remains per project.
-
-For an unscoped request, infer candidate modules from domain docs, workspace structure,
-routes, services, tests, and code relationships. Prefer the agent's interactive
-question UI when its available tool supports genuine multi-select. Present short
-module descriptions and allow one or more modules, with General system architecture as an
-alternative taken on its own. Check the tool's actual capabilities; multiple listed
-options do not necessarily mean multiple selections are supported.
-
-If interactive multi-select is unavailable, present a numbered list in chat and
-accept multiple names or numbers in one reply. Preserve multi-selection rather than
-forcing a single-choice widget. Wait for an explicit answer; a preselected option
-is not a submitted choice. A module is coherent product behaviour, not necessarily
-a directory: payment retries might span a handler, worker, and adapter.
-
-A reply choosing modules completes the pending selection; it does not restart this
-step. An explicit request to resume/retake an existing quiz, or challenge/refine it,
-continues that assessment rather than starting a fresh scope-selection flow.
-
-Resolve explicit arguments and natural language against repository evidence. For
-example, “payment integration & cart” and “assess my understanding of payment
-integration and cart” select both areas when they exist. Preserve compound names:
-“identity and access management” can be one module, not three. Clarify only genuine
-ambiguity; state the resolved scopes and proceed when clear. General system architecture assesses
-how the system fits together; it is an alternative to a module
-selection, not an extra bank mixed into that selection.
+Read and follow [product-scopes.md](references/product-scopes.md) for every fresh
+scope selection, including interactive multi-select, explicit/natural-language
+requests, compound names, ambiguity, and architecture-only selection. Preserve any
+explicit format/count while asking. Scope comes from this invocation, not an earlier
+quiz or explainer. Replies complete the pending selection; retakes/reconnects continue
+the existing assessment.
 
 For multiple modules, read [multi-scope.md](references/multi-scope.md) before checking
 banks. It covers independent reuse, grounded interactions, and combined launch.

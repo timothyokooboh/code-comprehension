@@ -21,12 +21,12 @@ async function fingerprint(root: string, path: string) {
   }
 }
 
-export async function captureSources(root: string, bank: ProductSourceScope) {
+export async function captureSourceInventory(root: string, scope: ProductSourceScope['scope'], references: string[] = []) {
   const paths = (await projectGit(root, ['ls-files', '--cached', '--others', '--exclude-standard', '-z'])).split('\0').filter(Boolean);
-  const patterns = bank.scope.sourcePatterns.map(normalise);
+  const patterns = scope.sourcePatterns.map(normalise);
   const selected = paths.filter((path) => !isExcluded(path) && patterns.some((pattern) =>
     pattern === '.' || matchesGlob(path, pattern) || path.startsWith(`${pattern}/`)));
-  const supporting = [...bank.scope.supportingFiles, ...bank.quiz.questions.flatMap((question) => question.references.map(({ path }) => path))].map(normalise);
+  const supporting = [...scope.supportingFiles, ...references].map(normalise);
   if (supporting.some(isExcluded)) throw new CliError(cliErrorCodes.productSourcesUnavailable);
   const inventory = [...new Set([...selected, ...supporting])].sort();
   const sources = [];
@@ -35,4 +35,8 @@ export async function captureSources(root: string, bank: ProductSourceScope) {
     if (hash !== null || supporting.includes(path)) sources.push({ path, hash });
   }
   return sources;
+}
+
+export async function captureSources(root: string, bank: ProductSourceScope) {
+  return captureSourceInventory(root, bank.scope, bank.quiz.questions.flatMap(question => question.references.map(reference => reference.path)));
 }

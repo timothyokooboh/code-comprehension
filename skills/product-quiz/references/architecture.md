@@ -1,6 +1,8 @@
 # General system architecture
 
 Read this when generating or semantically reviewing a `general` product bank.
+First follow [architecture-evidence.md](architecture-evidence.md) for the shared
+architecture meaning used by both product quizzes and explainers.
 Author a dedicated assessment of how the system fits together. Read current code
 and relevant tests; map responsibilities and boundaries, then trace a representative
 end-to-end flow through the participating modules and external dependencies.

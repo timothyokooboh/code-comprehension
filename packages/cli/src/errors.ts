@@ -1,4 +1,8 @@
 export const cliErrorCodes = {
+  productExplainerSessionInvalid: 'product_explainer_session_invalid',
+  productExplainerStorageFailed: 'product_explainer_storage_failed',
+  productExplainerCleanupFailed: 'product_explainer_cleanup_failed',
+  productExplainerChanged: 'product_explainer_changed',
   explainerInvalid: 'explainer_invalid', explainerUnreadable: 'explainer_unreadable',
   developmentUiUnavailable: 'development_ui_unavailable',
   questionFormatInvalid: 'question_format_invalid',

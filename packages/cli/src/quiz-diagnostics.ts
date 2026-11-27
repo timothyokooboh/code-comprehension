@@ -1,9 +1,13 @@
+import { productExplainerIssues } from './explainer/product/contract.js';
 import { explainerIssueCodes, quizIssueCodes, type QuizValidationIssue } from '@code-comprehension/quiz-contract';
 import { messages } from './locales/en.js';
 
 function describeIssue(issue: QuizValidationIssue) {
   if (issue.code === 'custom') {
     switch (issue.params?.reason) {
+      case productExplainerIssues.scope: return messages.explainer.productScope;
+      case productExplainerIssues.context: return messages.explainer.productContext;
+      case productExplainerIssues.reference: return messages.explainer.productReference;
       case explainerIssueCodes.duration: return messages.explainer.duration;
       case explainerIssueCodes.words: return messages.explainer.words;
       case explainerIssueCodes.reference: return messages.explainer.reference;

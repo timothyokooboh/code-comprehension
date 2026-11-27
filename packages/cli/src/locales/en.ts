@@ -2,7 +2,15 @@ import { applicationName } from '@code-comprehension/quiz-contract';
 import { cliErrorCodes, type CliErrorCode } from '../errors.js';
 
 export const messages = {
-  explainer: { prStart: 'Launch a prepared PR explainer and check its source snapshot.', prValidate: 'Validate a prepared PR explainer against current code.', duration: 'Total scene duration must be at most 180 seconds, including transitions.', words: 'Companion prose must be at most 500 words across all paragraphs.', reference: 'Use unique scene/node identifiers and connections/highlights that refer to existing nodes.', comparison: 'For a prepared PR, copy comparison and snapshot (including capturedAt) from preparation. Revision and uncommitted state must match. Product explainers must omit comparison.', validate: 'validate structured explainer data without launching', start: 'launch a silent explainer from validated JSON', valid: 'Explainer data is valid.' },
+  explainer: {
+    productPrepare: 'Capture current source evidence for selected product explainer scopes.',
+    productValidate: 'Validate a prepared product explainer and its current evidence.',
+    productStart: 'Launch a prepared product explainer without question-bank setup.',
+    productDiscard: 'Remove an abandoned product explainer session.',
+    productScope: 'Choose distinct modules, or General system architecture on its own. Copy the prepared scope labels into a product presentation.',
+    productContext: 'Copy snapshot metadata from product explainer preparation. Regenerate if evidence changed.',
+    productReference: 'Cite a file in the prepared source inventory. Add missing supporting files to the plan and prepare again.',
+ prStart: 'Launch a prepared PR explainer and check its source snapshot.', prValidate: 'Validate a prepared PR explainer against current code.', duration: 'Total scene duration must be at most 180 seconds, including transitions.', words: 'Companion prose must be at most 500 words across all paragraphs.', reference: 'Use unique scene/node identifiers and connections/highlights that refer to existing nodes.', comparison: 'For a prepared PR, copy comparison and snapshot (including capturedAt) from preparation. Revision and uncommitted state must match. Product explainers must omit comparison.', validate: 'validate structured explainer data without launching', start: 'launch a silent explainer from validated JSON', valid: 'Explainer data is valid.' },
   developmentUi: 'Serve a local Vite UI workspace with live updates (development only).',
   questionFormat: 'Question format for product checks/launch: mcq (default), written, or mixed.',
   writtenCount: 'Number of written questions in a mixed product sitting.',
@@ -89,6 +97,10 @@ export const messages = {
     discard: 'delete a prepared PR session directory',
   },
   errors: {
+    [cliErrorCodes.productExplainerSessionInvalid]: 'Invalid or unavailable product explainer session. Prepare again with --prepare-product-explainer.',
+    [cliErrorCodes.productExplainerStorageFailed]: 'Unable to store the product explainer preparation. Narrow an oversized source inventory or check temporary-directory permissions and disk space.',
+    [cliErrorCodes.productExplainerCleanupFailed]: 'Unable to remove the temporary product explainer. Check permissions and retry --discard-product-explainer with its recorded directory.',
+    [cliErrorCodes.productExplainerChanged]: 'Source evidence changed since preparation. Prepare a new product explainer session and regenerate the explanation.',
     [cliErrorCodes.explainerInvalid]: 'Explainer validation failed. Fix the reported fields before launching.',
     [cliErrorCodes.explainerUnreadable]: 'Unable to read explainer JSON. Check its path, size, permissions and JSON syntax.',
     [cliErrorCodes.developmentUiUnavailable]: 'Could not start the development UI. Provide the apps/web directory from a checkout with dependencies installed (pnpm install), then retry.',
@@ -118,7 +130,7 @@ export const messages = {
     [cliErrorCodes.gitFailed]: 'Unable to read the Git comparison. Check the repository and refs, fetch missing refs, and resolve conflicts before retrying.',
     [cliErrorCodes.baselineRequired]: 'The checkout is on the target branch or target commit. Ask the engineer which earlier baseline to assess, then supply --baseline. Do not guess HEAD~1.',
     [cliErrorCodes.sessionInvalid]: 'Invalid or unavailable PR session. Prepare a new session with --prepare-pr.',
-    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, explainer, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR preparation or project product actions. Use --refresh only with --check-product. Use --questions only with --product-bank. Use --runtime only with --revise-assessment, which requires it.',
+    [cliErrorCodes.prOptionsInvalid]: 'Choose one quiz, explainer, PR, or product action. Target and baseline only apply to --prepare-pr, which requires --target. Use --repo only with PR/product explainer preparation or project product actions. Use --refresh only with --check-product. Use --questions only with --product-bank. Use --runtime only with --revise-assessment, which requires it.',
 
     [cliErrorCodes.quizInvalid]: 'Quiz validation failed. Fix the following fields before launching:',
     [cliErrorCodes.quizUnreadable]: 'Unable to read the quiz file. Check the path and file permissions.',
