@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="brand" aria-hidden="true">{ }</span>
+        <div>
+          <h1 id="heading"></h1>
+          <p id="introduction"></p>
+        </div>
+      </header>
+      <section class="player">
+        <div id="canvas"></div>
+        <div class="settings">
+          <label
+            ><input id="narration" type="checkbox" disabled /><span
+              id="narration-label"
+            ></span></label
+          ><label
+            ><span id="voice-label"></span
+            ><select id="voice" disabled></select
+          ></label>
+        </div>
+        <div class="controls">
+          <button id="play" disabled></button
+          ><button id="replay" disabled></button
+          ><input
+            id="position"
+            type="range"
+            min="0"
+            value="0"
+            step="1"
+            disabled
+          /><output id="progress"></output>
+        </div>
+      </section>
+      <p id="status" role="status"></p>
+      <p id="note"></p>
+    </main>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
