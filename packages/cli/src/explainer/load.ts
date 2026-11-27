@@ -10,7 +10,7 @@ export class ExplainerValidationError extends CliError {
     super(cliErrorCodes.explainerInvalid);
   }
 }
-export async function loadExplainer(path: string) {
+export async function readExplainerJson(path: string) {
   let input: unknown;
   try {
     const file = await open(path, 'r');
@@ -34,7 +34,11 @@ export async function loadExplainer(path: string) {
   } catch (cause) {
     throw new CliError(cliErrorCodes.explainerUnreadable, { cause });
   }
-  const parsed = explainerSchema.safeParse(input);
+  return input;
+}
+
+export async function loadExplainer(path: string) {
+  const parsed = explainerSchema.safeParse(await readExplainerJson(path));
   if (!parsed.success) throw new ExplainerValidationError(parsed.error.issues);
   return parsed.data;
 }

@@ -1,3 +1,5 @@
+import { prepareProductExplainer, discardProductExplainer } from './explainer/product/session.js';
+import { loadProductExplainer } from './explainer/product/load.js';
 import { closeRecovery } from './written-review/recovery.js';
 import { requestReview } from './written-review/client.js';
 import { resolve } from 'node:path';
@@ -18,6 +20,7 @@ import { cacheStatuses, inspectProductCache } from './product/cache.js';
 import { productStatuses } from './product/contract.js';
 
 type CommandOptions = {
+  prepareProductExplainer?: string; validateProductExplainer?: string; productExplainer?: string; discardProductExplainer?: string;
   prExplainer?: string; validatePrExplainer?: string;
   explainer?: string; validateExplainer?: string;
   resumeReview?: string; closeReview?: string; waitReview?: string; reviewFeedback?: string; reviewFailure?: string; reviewSession?: string;
@@ -35,15 +38,16 @@ function validateOptions(options: CommandOptions) {
     (options.writtenQuestions !== undefined && (!options.productBank || options.format !== questionFormats.mixed))) throw new CliError(cliErrorCodes.questionFormatInvalid);
   if (options.questions !== undefined && !options.productBank) throw new CliError(cliErrorCodes.questionCountInvalid);
   const modes = [
+    options.prepareProductExplainer, options.validateProductExplainer, options.productExplainer, options.discardProductExplainer,
     options.prExplainer, options.validatePrExplainer, options.explainer, options.validateExplainer,
     options.resumeReview, options.closeReview, options.waitReview, options.reviewFeedback, options.reviewFailure, options.activeAssessment, options.reviseAssessment, options.preparePr, options.discardPr, options.validatePr, options.prSession, options.quiz,
     options.retainProduct, options.checkProduct, options.productStatus, options.configureProduct, options.validateProduct, options.saveProduct, options.productBank,
   ].filter((value) => value !== undefined && value !== false);
   const hasComparisonOptions = options.target !== undefined || options.baseline !== undefined;
-  if (options.devUi && modes.length && !options.explainer && !options.prExplainer && !options.quiz && !options.productBank && !options.prSession && !options.resumeReview) {
+  if (options.devUi && modes.length && !options.explainer && !options.productExplainer && !options.prExplainer && !options.quiz && !options.productBank && !options.prSession && !options.resumeReview) {
     throw new CliError(cliErrorCodes.prOptionsInvalid);
   }
-  const acceptsRepo = options.retainProduct || options.checkProduct || options.preparePr || options.productStatus || options.configureProduct || options.saveProduct || options.productBank;
+  const acceptsRepo = options.prepareProductExplainer || options.retainProduct || options.checkProduct || options.preparePr || options.productStatus || options.configureProduct || options.saveProduct || options.productBank;
   if (Boolean(options.reviewFeedback || options.reviewFailure) !== Boolean(options.reviewSession)) throw new CliError(cliErrorCodes.prOptionsInvalid);
   if ((Boolean(options.runtime) !== Boolean(options.reviseAssessment)) || (options.refresh && !options.checkProduct) || modes.length > 1 || (hasComparisonOptions && !options.preparePr) ||
     (options.preparePr && !options.target) || (options.repo !== undefined && !acceptsRepo)) {
@@ -53,7 +57,17 @@ function validateOptions(options: CommandOptions) {
 
 export async function runCommand(options: CommandOptions) {
   validateOptions(options);
-  if (options.validatePrExplainer) {
+  if (options.prepareProductExplainer) {
+    console.log(JSON.stringify(await prepareProductExplainer(options.repo ?? process.cwd(), options.prepareProductExplainer)));
+  } else if (options.validateProductExplainer) {
+    await loadProductExplainer(options.validateProductExplainer);
+    console.log(messages.explainer.valid);
+  } else if (options.discardProductExplainer) {
+    await discardProductExplainer(options.discardProductExplainer);
+  } else if (options.productExplainer) {
+    const directory = resolve(options.productExplainer);
+    await launchExplainer(options, await loadProductExplainer(directory), () => discardProductExplainer(directory));
+  } else if (options.validatePrExplainer) {
     await loadPrExplainer(options.validatePrExplainer);
     console.log(messages.explainer.valid);
   } else if (options.prExplainer) {

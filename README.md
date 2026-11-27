@@ -139,3 +139,7 @@ punctuation model or rule-based rewriting added.
 Use `/pr-explainer` for a silent, code-grounded walkthrough before or independently
 of `/pr-quiz`. See the [PR explainer workflow](docs/pr-explainer.md) for runtime
 availability, preparation, validation, and temporary-session cleanup.
+
+Use `/product-explainer` to learn one or more modules or **General system architecture**
+without first taking a quiz or configuring question-bank storage. See the
+[product explainer workflow](docs/product-explainer.md).

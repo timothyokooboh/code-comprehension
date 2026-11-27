@@ -1,3 +1,5 @@
+<!-- Generated from docs/agents/explainer-presentation.md by scripts/sync-skill-references.mjs. -->
+
 # Presentation contract
 
 Write one JSON object, with no extra fields or executable code:
@@ -6,11 +8,10 @@ Write one JSON object, with no extra fields or executable code:
 {
   "schemaVersion": 1,
   "id": "pr-walkthrough",
-  "type": "pr",
+  "type": "product",
   "title": "A brief description of the actual change",
   "scope": ["Affected module"],
   "snapshot": { "revision": "COPY_PREPARATION_HEAD", "capturedAt": "COPY_PREPARATION_TIMESTAMP", "includesUncommitted": false },
-  "comparison": { "target": "COPY_PREPARATION_TARGET", "baseline": "COPY_PREPARATION_BASELINE", "head": "COPY_PREPARATION_HEAD", "includesUncommitted": false, "files": ["COPY_PREPARATION_FILES"] },
   "scenes": [{
     "id": "changed-behaviour",
     "title": "What happens now",
@@ -27,8 +28,11 @@ Write one JSON object, with no extra fields or executable code:
 }
 ```
 
-The example is a shape, not content to copy. Replace all placeholders and copy the
-complete `comparison` and `snapshot` objects from preparation, including booleans.
+The example is a shape, not content to copy. Replace placeholders and copy the
+complete `snapshot` from preparation. Product scope labels also come from preparation;
+PR scope labels describe the actual affected areas. For a PR explainer use
+`type: "pr"` and add the complete prepared `comparison` object. Product explainers
+use `type: "product"` and omit comparison. Preserve prepared booleans and timestamps.
 Choose real, repository-relative references. Never represent an inferred intent or
 unexecuted test as a verified fact.
 
