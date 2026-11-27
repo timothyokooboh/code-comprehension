@@ -40,3 +40,19 @@ test('a malformed runtime response shows recovery guidance instead of a connecti
     await app.stop();
   }
 });
+
+test('assessment recovery fits a phone and reloads after the server recovers', async ({ page }) => {
+  const app = await launchCli();
+  try {
+    await page.route('**/api/quiz', (route) => route.fulfill({ status: 503 }));
+    await page.goto(app.url);
+    await expect(page.getByRole('heading', { name: 'Let’s reconnect your quiz.' })).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.unroute('**/api/quiz');
+    await page.getByRole('button', { name: 'Reload page' }).click();
+    await expect(page.getByRole('heading', { name: 'No assessment loaded' })).toBeVisible();
+  } finally {
+    await app.stop();
+  }
+});
