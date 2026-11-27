@@ -40,10 +40,6 @@ const { data, status, load } = useExplainer();
             <code>{{ copy.reference(reference.path, reference.line) }}</code>
           </li>
         </ul>
-        <h3>{{ copy.snapshot }}</h3>
-        <code>{{ data.snapshot.revision }}</code>
-        <p>{{ data.snapshot.capturedAt }}</p>
-        <p v-if="data.snapshot.includesUncommitted">{{ copy.uncommitted }}</p>
         <PrComparison v-if="data.comparison" :comparison="data.comparison" />
         <div class="sr-only">
           <h2>{{ copy.transcript }}</h2>

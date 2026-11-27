@@ -64,7 +64,7 @@ test('a small PR opens a grounded explainer with the actual baseline and uncommi
         page.getByRole('button', { name: 'Play', exact: true }),
       ).toBeEnabled();
       await expect(
-        page.getByText('Includes uncommitted changes', { exact: true }),
+        page.getByText('Included (staged, unstaged, and untracked files)', { exact: true }),
       ).toBeVisible();
       await expect(
         page.getByText(repo.baseline, { exact: false }).first(),
