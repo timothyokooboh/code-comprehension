@@ -18,7 +18,9 @@ Write a temporary scope-plan JSON file:
 
 Replace paths/names with actual code boundaries. A compound name is one object, not
 several. For architecture use exactly one scope with `kind: "general"`,
-`focus: "system_architecture_v1"`, a description, sourcePatterns and supportingFiles.
+`focus: "system_architecture_v1"`, `name: "General system architecture"`, a description,
+sourcePatterns and supportingFiles. The name field is required even though the runtime
+uses the canonical architecture display label.
 Its displayed name is canonical General system architecture. At most 12 distinct
 scopes are accepted. Every scope must resolve to existing source evidence.
 

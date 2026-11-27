@@ -17,11 +17,9 @@ of the global/local skill installation directory. Do not run product-status,
 configure-product, or question-bank commands. This skill works before product-quiz
 has ever run and creates no `.comprehension` setup, cache, or history.
 
-Read and follow [product-scopes.md](references/product-scopes.md). Every fresh unscoped
-invocation asks for modules and waits for an explicit choice. Prefer genuine interactive
-multi-select; otherwise use a numbered chat list. Explicit single/multiple-module
-requests skip redundant selection. Preserve compound names and clarify real ambiguity.
-General system architecture is selected alone. Earlier sessions supply no default.
+Read and follow [product-scopes.md](references/product-scopes.md) for fresh prompts,
+explicit and compound-module requests, multi-selection, and genuine ambiguity.
+Complete that scope-resolution workflow before preparing evidence.
 
 For architecture, read [architecture-evidence.md](references/architecture-evidence.md)
 before preparing: explain the actual system's boundaries, integrations, representative
